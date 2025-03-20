@@ -1,4 +1,4 @@
-﻿namespace UserService.API.Services;
+﻿namespace NotificationService.API.Services;
 
 using ReservationSystem.Shared.Models.EmailTemplates;
 using ReservationSystem.Shared.Services;
