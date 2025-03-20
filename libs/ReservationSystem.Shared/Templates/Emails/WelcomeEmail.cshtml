@@ -1,0 +1,10 @@
+﻿@model WelcomeEmailModel
+
+<html lang="cs">
+<body>
+    <h1>Vítejte, @Model.Name!</h1>
+    <p>Děkujeme za registraci v našem systému.</p>
+    <p>Pro aktivaci účtu klikněte na následující odkaz:</p>
+    <a href="@Model.ActivationLink">Aktivovat účet</a>
+</body>
+</html>
