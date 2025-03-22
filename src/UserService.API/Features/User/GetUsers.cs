@@ -3,7 +3,7 @@ using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Features;
 
-public record GetUsersResponse(IEnumerable<User> Users);
+public record GetUsersResponse(IEnumerable<User> Users, int TotalCount);
 
 public class GetUsersHandler
 {
@@ -14,15 +14,15 @@ public class GetUsersHandler
         _userService = userService;
     }
     
-    public async Task<ApiResult<GetUsersResponse>> HandleAsync(CancellationToken cancellationToken)
+    public async Task<ApiResult<GetUsersResponse>> HandleAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         
-        var users = await _userService.GetAllUsersAsync(cancellationToken);
+        var (users, totalCount) = await _userService.GetAllUsersAsync(page, pageSize, cancellationToken);
 
         return users.Any() is false
             ? new ApiResult<GetUsersResponse>(null, false, "Users not found")
-            : new ApiResult<GetUsersResponse>(new GetUsersResponse(users));
+            : new ApiResult<GetUsersResponse>(new GetUsersResponse(users, totalCount));
     }
 }
 
@@ -32,9 +32,11 @@ public static class GetUsersEndpoint
     {
         app.MapGet("/api/users",
             async (GetUsersHandler handler,
-                CancellationToken cancellationToken) =>
+                CancellationToken cancellationToken,
+                int page = 1,
+                int pageSize = 10) =>
             {
-                var result = await handler.HandleAsync(cancellationToken);
+                var result = await handler.HandleAsync(page, pageSize, cancellationToken);
                 
                 return result.Success
                     ? Results.Ok(result)

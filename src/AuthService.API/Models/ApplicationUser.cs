@@ -6,10 +6,6 @@ namespace AuthService.API.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        
-        [EmailAddress]
-        public required string Email { get; set; }
-        
         [Required]
         public required int UserId { get; set; }
         public ICollection<TokenBlackList> TokenBlackLists { get; set; } = new List<TokenBlackList>();

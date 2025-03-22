@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using ReservationSystem.Shared.Clients;
 using UserService.API.Features;
 using UserService.API.Features.Roles;

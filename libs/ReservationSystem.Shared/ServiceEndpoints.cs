@@ -25,6 +25,8 @@ public static class ServiceEndpoints
         private const string BaseUrl = "http://auth-service:8005";
         public static string Login => $"{BaseUrl}/api/auth/login";
         public static string Register => $"{BaseUrl}/api/auth/register";
+        public static string ResetPassword => $"{BaseUrl}/api/auth/reset-password";
+
     }
     
 }

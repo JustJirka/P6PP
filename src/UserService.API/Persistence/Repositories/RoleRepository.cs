@@ -12,7 +12,7 @@ public class RoleRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Role>> GetAllAsync(CancellationToken cancellationToken) // TODO: Pagination
+    public async Task<IEnumerable<Role>> GetAllAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         

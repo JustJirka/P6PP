@@ -15,7 +15,7 @@ public class RoleService
         _cache = cache;
     }
     
-    public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken) // TODO: Pagination
+    public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken)
     {
         return await _roleRepository.GetAllAsync(cancellationToken);
     }
