@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using AuthService.API.Controllers;
 using AuthService.API.Data;

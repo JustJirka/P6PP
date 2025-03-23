@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\libs\ReservationSystem.Shared\ReservationSystem.Shared.csproj" />
-    <ProjectReference Include="..\src\AuthService.API\AuthService.API.csproj" />
+    <ProjectReference Include="..\..\libs\ReservationSystem.Shared\ReservationSystem.Shared.csproj" />
+    <ProjectReference Include="..\..\src\AuthService.API\AuthService.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>
