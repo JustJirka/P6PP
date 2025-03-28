@@ -6,6 +6,7 @@ using AuthService.API.DTO;
 using AuthService.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ReservationSystem.Shared;
@@ -69,6 +70,13 @@ public class AuthController : Controller
         if (!result.Succeeded)
             return BadRequest(new ApiResult<object>(result.Errors, false, result.Errors.ToString()));
 
+        var verifyToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(verifyToken));
+
+        // TODO: Send email with the token to the user using notification service
+        Console.WriteLine($"Email verification token for user {user.Email}:");
+        Console.WriteLine(encodedToken);
+        
         return Ok(new ApiResult<object>(new { Id = user.UserId }));
     }
 
@@ -143,4 +151,46 @@ public class AuthController : Controller
         return Ok(new ApiResult<object>(new { UserId = user.UserId, Email = user.Email }, true,
             "Password reset successfully."));
     }
+    
+    [HttpGet("isVerified/{userId}")]
+    public async Task<IActionResult> IsVerified(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return BadRequest(new ApiResult<object>(null, false, "User not found."));
+
+        var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+        if (!isEmailConfirmed)
+            return Ok(new ApiResult<object>(new {verified = false }, false, "Email not verified."));
+
+        return Ok(new ApiResult<object>(new { verified = true }, true, "User is verified."));
+    }
+    
+    [HttpPost("verify-email/{userId}/{token}")]
+    public async Task<IActionResult> VerifyEmail(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound(new ApiResult<object>(null, false, "User not found."));
+
+        try
+        {
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            if (result.Succeeded)
+                return Ok(new ApiResult<object>(null, true, "Email verified successfully."));
+
+            return BadRequest(new ApiResult<object>(null, false, "Invalid or expired token."));
+        }
+        catch (FormatException)
+        {
+            return BadRequest(new ApiResult<object>(null, false, "Token format is invalid."));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResult<object>(null, false, "An unexpected error occurred."));
+        }
+    }
+
 }
