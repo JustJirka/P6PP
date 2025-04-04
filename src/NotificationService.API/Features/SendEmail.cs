@@ -1,32 +1,36 @@
 //using NotificationService.API.Persistence;
 using NotificationService.API.Services;
 using FluentValidation;
-using System.Net;
 using ReservationSystem.Shared.Results;
 using NotificationService.API.Persistence;
+using NotificationService.API.Persistence.Entities.DB;
+using ReservationSystem.Shared;
+using ReservationSystem.Shared.Clients;
 
 namespace NotificationService.API.Features;
 
-public record SendEmailRequest(IList<string> address, string subject, string body);
+public record SendEmailRequest(IList<string> Address, string Subject, string Body);
 public record SendEmailResponse(int? Id=null);
 
 public class SendEmailRequestValidator : AbstractValidator<SendEmailRequest>
 {
     public SendEmailRequestValidator()
     {
-        RuleFor(x => x.address).NotEmpty();
-        RuleForEach(x => x.address).EmailAddress();
-        RuleFor(x => x.subject).NotEmpty().MaximumLength(75);
-        RuleFor(x => x.body).NotEmpty().MaximumLength(1500);
+        RuleFor(x => x.Address).NotEmpty();
+        RuleForEach(x => x.Address).EmailAddress();
+        RuleFor(x => x.Subject).NotEmpty().MaximumLength(75);
+        RuleFor(x => x.Body).NotEmpty().MaximumLength(1500);
     }
 }
 
 public class SendEmailHandler
 {
     private readonly MailAppService _mailAppService;
-
-    public SendEmailHandler(MailAppService mailAppService)
+    private readonly NetworkHttpClient _httpClient;
+    public SendEmailHandler(MailAppService mailAppService,
+        NetworkHttpClient httpClient)
     {
+        _httpClient = httpClient;
         _mailAppService = mailAppService;
     }
 
@@ -36,9 +40,9 @@ public class SendEmailHandler
 
         var emailArgs = new EmailArgs
         {
-            Address = request.address,
-            Subject = request.subject,
-            Body = request.body
+            Address = request.Address,
+            Subject = request.Subject,
+            Body = request.Body
         };
         try
         {

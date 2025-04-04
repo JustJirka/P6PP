@@ -1,5 +1,6 @@
 using NotificationService.API.Services;
 using NotificationService.API.Features;
+using ReservationSystem.Shared.Clients;
 
 namespace NotificationService.API.Extensions;
 
@@ -9,6 +10,7 @@ public static class ServiceExtensions
     {
         // Register MailAppService
         services.AddSingleton<MailAppService>();
+        services.AddSingleton<UserAppService>();
 
         // Register SendEmail Services
         services.AddSingleton<SendEmailRequestValidator>();
@@ -20,6 +22,17 @@ public static class ServiceExtensions
         // Register RegisterEmail Services
         services.AddSingleton<SendRegistrationEmailValidator>();
         services.AddScoped<SendRegistrationEmailHandler>();
+
+        // Register VerificationEmail Services
+        services.AddSingleton<SendVerificationEmailValidator>();
+        services.AddScoped<SendVerificationEmailHandler>();
+
+        // Register PasswordResetEmail Services
+        services.AddSingleton<SendPasswordResetEmailValidator>();
+        services.AddScoped<SendPasswordResetEmailHandler>();
+
+        // Register NetworkHttpClient
+        services.AddHttpClient<NetworkHttpClient>();
     }
 }
 

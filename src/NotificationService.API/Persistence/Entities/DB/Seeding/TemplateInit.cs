@@ -11,168 +11,7 @@ public class TemplateInit
         {
             Id = 1,
             Name = "Registration",
-            Subject = "Potvrzení registrace",
-            Text = @"
-                    <html>
-                        <head>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    font-size: 16px;
-                                    color: #333;
-                                }
-                                p {
-                                    margin: 0 0 8px 0;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <p style=""padding-bottom: 16px;"">Dobrý den <strong>{name}</strong>,</p>
-
-                            <p>Vítejte v našem sportcentru! Máme velkou radost, že jste se rozhodli stát se součástí naší komunity.</p>
-                            <p>Abyste mohli naplno využívat všech možností, doporučujeme se přihlásit a prozkoumat svůj nový účet.</p>
-                            <p>Pokud budete mít jakékoli otázky nebo budete potřebovat pomoc, neváhejte nás kontaktovat.</p>
-                            <p>Děkujeme za registraci a přejeme mnoho skvělých zážitků!</p>
-
-                            <p style=""padding-top: 16px;"">S pozdravem,<br/>
-                            <em>Tým podpory zákazníků</em></p>
-                        </body>
-                    </html>"
-        });
-        templates.Add(new Template
-        {
-            Id = 2,
-            Name = "Verification",
-            Subject = "Ověření e-mailu",
-            Text = @"
-                    <html>
-                        <head>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    font-size: 16px;
-                                    color: #333;
-                                }
-                                p {
-                                    margin: 0 0 8px 0;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <p style=""padding-bottom: 16px;"">Dobrý den <strong>{name}</strong>,</p>
-
-                            <p>Prosíme o ověření vaší e-mailové adresy kliknutím na následující odkaz:</p>
-                            <p><a href=""{link}"" style=""color: #1a73e8;"">{link}</a></p>
-                            <p>Pokud jste tuto žádost neodeslali, můžete tento e-mail klidně ignorovat.</p>
-
-                            <p>Děkujeme,</p>
-                            <p style=""padding-top: 16px;"">S pozdravem,<br/>
-                            <em>Tým podpory zákazníků</em></p>
-                        </body>
-                    </html>"
-
-        });
-        templates.Add(new Template
-        {
-            Id = 3,
-            Name = "PasswordReset",
-            Subject = "Obnovení hesla",
-            Text = @"
-                    <html>
-                        <head>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    font-size: 16px;
-                                    color: #333;
-                                }
-                                p {
-                                    margin: 0 0 8px 0;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <p style=""padding-bottom: 16px;"">Dobrý den <strong>{name}</strong>,</p>
-
-                            <p>Pro obnovení hesla klikněte na následující odkaz:</p>
-                            <p><a href=""{link}"" style=""color: #1a73e8;"">{link}</a></p>
-                            <p>Pokud jste tuto žádost neodeslali, ignorujte tento e-mail.</p>
-
-                            <p>Děkujeme,</p>
-                            <p style=""padding-top: 16px;"">S pozdravem,<br/>
-                            <em>Tým podpory zákazníků</em></p>
-                        </body>
-                    </html>"
-        });
-        templates.Add(new Template
-        {
-            Id = 4,
-            Name = "ReservationConfirmation",
-            Subject = "Potvrzení rezervace",
-            Text = @"
-                    <html>
-                        <head>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    font-size: 16px;
-                                    color: #333;
-                                }
-                                p {
-                                    margin: 0 0 8px 0;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <p style=""padding-bottom: 16px;"">Dobrý den <strong>{name}</strong>,</p>
-
-                            <p>Vaše rezervace byla úspěšně vytvořena.</p>
-                            <p><strong>Datum a čas:</strong> {datetime}</p>
-                            <p>Pokud máte jakékoli dotazy nebo potřebujete změnit rezervaci, neváhejte nás kontaktovat.</p>
-
-                            <p>Děkujeme,</p>
-                            <p style=""padding-top: 16px;"">S pozdravem,<br/>
-                            <em>Tým podpory zákazníků</em></p>
-                        </body>
-                    </html>"
-        });
-        templates.Add(new Template
-        {
-            Id = 5,
-            Name = "ReservationCancellation",
-            Subject = "Zrušení rezervace",
-            Text = @"
-                    <html>
-                        <head>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    font-size: 16px;
-                                    color: #333;
-                                }
-                                p {
-                                    margin: 0 0 8px 0;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <p style=""padding-bottom: 16px;"">Dobrý den <strong>{name}</strong>,</p>
-
-                            <p>Vaše rezervace byla zrušena.</p>
-                            <p><strong>Datum a čas:</strong> {datetime}</p>
-                            <p>Pokud jste tuto žádost neodeslali, ignorujte tento e-mail.</p>
-
-                            <p>Děkujeme,</p>
-                            <p style=""padding-top: 16px;"">S pozdravem,<br/>
-                            <em>Tým podpory zákazníků</em></p>
-                        </body>
-                    </html>"
-        });
-        templates.Add(new Template
-        {
-            Id = 6,
-            Name = "Registration",
-            Subject = "Registration Confirmation",
+            Subject = "Registration confirmation",
             Text = @"
                     <html>
                         <head>
@@ -199,8 +38,136 @@ public class TemplateInit
                             <p style=""padding-top: 16px;"">Best regards,<br/>
                             <em>Customer Support Team</em></p>
                         </body>
-                    </html>",
-            Language = "en"
+                    </html>"
+        });
+        templates.Add(new Template
+        {
+            Id = 2,
+            Name = "Verification",
+            Subject = "Account verification",
+            Text = @"
+                    <html>
+                        <head>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    font-size: 16px;
+                                    color: #333;
+                                }
+                                p {
+                                    margin: 0 0 8px 0;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <p style=""padding-bottom: 16px;"">Hello <strong>{name}</strong>,</p>
+
+                            <p>Please verify your email address by clicking the following link:</p>
+                            <p><a href=""{link}"" style=""color: #1a73e8;"">{link}</a></p>
+                            <p>If you did not make this request, you can safely ignore this email.</p>
+
+                            <p>Thank you,</p>
+                            <p style=""padding-top: 16px;"">Best regards,<br/>
+                            <em>Customer Support Team</em></p>
+                        </body>
+                    </html>"
+
+        });
+        templates.Add(new Template
+        {
+            Id = 3,
+            Name = "PasswordReset",
+            Subject = "Password reset",
+            Text = @"
+                    <html>
+                        <head>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    font-size: 16px;
+                                    color: #333;
+                                }
+                                p {
+                                    margin: 0 0 8px 0;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <p style=""padding-bottom: 16px;"">Hello <strong>{name}</strong>,</p>
+
+                            <p>To reset your password, click the following link:</p>
+                            <p><a href=""{link}"" style=""color: #1a73e8;"">{link}</a></p>
+                            <p>If you did not make this request, please ignore this email.</p>
+
+                            <p>Thank you,</p>
+                            <p style=""padding-top: 16px;"">Best regards,<br/>
+                            <em>Customer Support Team</em></p>
+                        </body>
+                    </html>"
+        });
+        templates.Add(new Template
+        {
+            Id = 4,
+            Name = "ReservationConfirmation",
+            Subject = "Reservation confirmation",
+            Text = @"
+                    <html>
+                        <head>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    font-size: 16px;
+                                    color: #333;
+                                }
+                                p {
+                                    margin: 0 0 8px 0;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <p style=""padding-bottom: 16px;"">Hello <strong>{name}</strong>,</p>
+
+                            <p>Your reservation has been successfully created.</p>
+                            <p><strong>Date and time:</strong> {datetime}</p>
+                            <p>If you have any questions or need to modify your reservation, feel free to contact us.</p>
+
+                            <p>Thank you,</p>
+                            <p style=""padding-top: 16px;"">Best regards,<br/>
+                            <em>Customer Support Team</em></p>
+                        </body>
+                    </html>"
+        });
+        templates.Add(new Template
+        {
+            Id = 5,
+            Name = "ReservationCancellation",
+            Subject = "Reservation cancelation",
+            Text = @"
+                    <html>
+                        <head>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    font-size: 16px;
+                                    color: #333;
+                                }
+                                p {
+                                    margin: 0 0 8px 0;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <p style=""padding-bottom: 16px;"">Hello <strong>{name}</strong>,</p>
+
+                            <p>Your reservation has been canceled.</p>
+                            <p><strong>Date and time:</strong> {datetime}</p>
+                            <p>If you did not submit this request, please ignore this email.</p>
+
+                            <p>Thank you,</p>
+                            <p style=""padding-top: 16px;"">Best regards,<br/>
+                            <em>Customer Support Team</em></p>
+                        </body>
+                    </html>"
         });
 
         return templates;
