@@ -167,9 +167,9 @@ public class AuthController : Controller
 
     
     [HttpGet("isVerified/{userId}")]
-    public async Task<IActionResult> IsVerified(string userId)
+    public async Task<IActionResult> IsVerified(int userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
         if (user == null)
             return BadRequest(new ApiResult<object>(null, false, "User not found."));
 
