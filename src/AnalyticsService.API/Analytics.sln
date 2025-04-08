@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics", "backend\Analytics.csproj", "{BF553C46-A88C-4D62-8A18-BA828A07408B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics", "Analytics\Analytics.csproj", "{BF553C46-A88C-4D62-8A18-BA828A07408B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics.Application", "Analytics.Application\Analytics.Application.csproj", "{5EAB20EB-0528-4C25-9ED6-F26888BEEB13}"
 EndProject
