@@ -14,13 +14,13 @@ namespace PaymentService.API.Persistence.Entities.DB.Models
         [Required]
         public long RoleId { get; set; }
 
-        [Required]
-        [MaxLength(20)]
-        public string ReceiverBankNumber { get; set; } = string.Empty;
+        //[Required]
+        //[MaxLength(20)]
+       // public string ReceiverBankNumber { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(20)]
-        public string GiverBankNumber { get; set; } = string.Empty;
+        //[Required]
+        //[MaxLength(20)]
+        //public string GiverBankNumber { get; set; } = string.Empty;
 
         [Required]
         public long Price { get; set; }
@@ -29,10 +29,13 @@ namespace PaymentService.API.Persistence.Entities.DB.Models
         public long CreditAmount { get; set; }
 
         [Required]
-        public bool IsValid { get; set; }
+        public string Status { get; set; } = "pending"; // "pending", "completed", "failed"
 
         [Required]
         public string TransactionType { get; set; } = "credit"; // "credit" nebo "reservation"
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         /*
         [ForeignKey("Id")]
         public UserMod? User { get; set; }

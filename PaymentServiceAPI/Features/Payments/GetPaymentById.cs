@@ -18,22 +18,22 @@ public class GetRoleByIdValidator : AbstractValidator<GetRoleByIdRequest>
 
 public class GetRoleByIdHandler
 {
-    private readonly PaymentService _PaymentService;
+    private readonly PaymentService.API.Services.PaymentService _PaymentService;
 
-    public GetRoleByIdHandler(PaymentService PaymentService)
+    public GetRoleByIdHandler(PaymentService.API.Services.PaymentService PaymentService)
     {
         _PaymentService = PaymentService;
     }
 
-    public async Task<ApiResult<Role>> HandleAsync(GetRoleByIdRequest request, CancellationToken cancellationToken)
+    public async Task<ApiResult<Payment>> HandleAsync(GetRoleByIdRequest request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var role = await _PaymentService.GetRoleByIdAsync(request.Id, cancellationToken);
+        var payment = await _PaymentService.GetPaymentByIdAsync(request.Id, cancellationToken);
 
-        return role is null
-            ? new ApiResult<Role>(null, false, "Role not found")
-            : new ApiResult<Role>(role);
+        return payment is null
+            ? new ApiResult<Payment>(null, false, "Role not found")
+            : new ApiResult<Payment>(payment);
     }
 }
 

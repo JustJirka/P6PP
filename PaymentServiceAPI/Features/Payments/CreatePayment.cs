@@ -1,26 +1,39 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
-
+using PaymentService.API.Persistence.Entities.DB.Models;
+using PaymentService.API.Services;
 
 
 namespace PaymentService.API.Features.Payments;
 
-public record CreatePaymentRequest(string UserId, string Price);
+public record CreatePaymentRequest(int UserId, int RoleId, string TransactionType, int Amount);
 
 public class CreatePaymentValidator : AbstractValidator<CreatePaymentRequest>
 {
     public CreatePaymentValidator()
     {
-        RuleFor(x => x.UserId).NotEmpty();
-        RuleFor(x => x.Price).NotEmpty();
+        RuleFor(x => x.UserId)
+            .GreaterThan(0).WithMessage("Neplatné ID uživatele.");
+
+        RuleFor(x => x.RoleId)
+            .GreaterThan(0).WithMessage("Neplatné ID role.");
+
+        RuleFor(x => x.TransactionType)
+            .Must(type => type == "credit" || type == "reservation")
+            .WithMessage("TransactionType musí být 'credit' nebo 'reservation'.");
+
+        RuleFor(x => x.Amount)
+            .GreaterThan(0).WithMessage("Èástka musí být vìtší než 0.");
+
+        
     }
 }
 
 public class CreatePaymentHandler
 {
-    private readonly PaymentService _paymentService;
+    private readonly PaymentService.API.Services.PaymentService _paymentService;
 
-    public CreatePaymentHandler(PaymentService paymentService)
+    public CreatePaymentHandler(PaymentService.API.Services.PaymentService paymentService)
     {
         _paymentService = paymentService;
     }
@@ -29,17 +42,40 @@ public class CreatePaymentHandler
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var role = new Payment;
-        {
-            Name = request.UserId,                            
-            Description = request.Price
-        };
+      
 
-        var id = await _paymentService.AddRoleAsync(role, cancellationToken);
+        if (request.TransactionType == "credit") {
 
-        return id.HasValue
+            var payment = new Payment
+            {
+                UserId = request.UserId,
+                CreditAmount = request.Amount,
+                Status = "pending",
+                CreatedAt = DateTime.UtcNow
+            };
+            var id = await _paymentService.CreatePaymentCredits(payment, cancellationToken);
+            return id.HasValue
             ? new ApiResult<int>(id.Value)
-            : new ApiResult<int>(0, false, "Role not created");
+            : new ApiResult<int>(0, false, "payment not created");
+        }
+        else
+        {
+            var payment = new Payment
+            {
+                UserId = request.UserId,
+                Price = request.Amount,
+                Status = "pending",
+                CreatedAt = DateTime.UtcNow
+                
+            };
+            var id = await _paymentService.CreatePayment(payment, cancellationToken);
+
+            return id.HasValue
+            ? new ApiResult<int>(id.Value)
+            : new ApiResult<int>(0, false, "payment not created");
+
+        }
+
     }
 }
 

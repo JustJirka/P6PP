@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using PaymentService.API.Persistence.Entities.DB.Models;
 using PaymentService.API.Persistence.Repositories;
+using System.Text.RegularExpressions;
 
 namespace PaymentService.API.Services;
 
@@ -27,15 +28,31 @@ public class PaymentService
 
         return payment;
     }
-    
+
     public async Task<int?> CreatePayment(Payment payment, CancellationToken cancellationToken)
     {
         string cacheKey = $"payment:{payment.Id}";
 
-        //platba
+        var newPayment = await _paymentRepository.AddAsync(payment, cancellationToken);
+
+        return newPayment;
+    }
+
+    public async Task<int?> CreatePaymentCredits(Payment payment, CancellationToken cancellationToken)
+    {
+        string cacheKey = $"payment:{payment.Id}";
+
+        var newPayment = await _paymentRepository.AddAsyncCredits(payment, cancellationToken);
+
+        return newPayment;
+    }
+
+    public async Task<int?> CangeStatus(Payment payment, CancellationToken cancellationToken)
+    {
+        string cacheKey = $"role:{payment.Id}";
 
         var newRole = await _paymentRepository.AddAsync(payment, cancellationToken);
-        
+
         return newRole;
     }
 }
