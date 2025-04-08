@@ -13,7 +13,7 @@ services:
         condition: service_healthy
     networks:
       - backend
-  
+
   user-service:
     build:
       context: .
@@ -23,6 +23,21 @@ services:
       - "5189:5189"
     environment:
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=user_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: src/AnalyticsService.API/Anaytics/Dockerfile
+    container_name: analytics-service
+    ports:
+      - "8006:8006"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=analytics_db;User=root;Password=password123;
     depends_on:
       mysql:
         condition: service_healthy
@@ -42,7 +57,16 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword123"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-ppassword123",
+        ]
       interval: 10s
       retries: 5
       timeout: 5s

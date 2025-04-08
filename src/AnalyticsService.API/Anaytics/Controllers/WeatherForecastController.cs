@@ -1,6 +1,7 @@
+using backend;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Controllers
+namespace Analytics.Controllers
 {
     [ApiController]
     [Route("[controller]")]
