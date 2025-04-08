@@ -10,9 +10,9 @@ namespace Analytics.Domain.Interface
     public interface IUserRepository
     {
         Task<List<User>> GetAll();
-        Task<User?> GetById(string id);
+        Task<User?> GetById(int id);
         Task Create(User user);
-        Task<User?> Delete(string id);
+        Task<User?> Delete(int id);
         Task SaveChanges();
     }
 }

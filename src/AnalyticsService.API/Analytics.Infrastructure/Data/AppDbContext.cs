@@ -2,9 +2,9 @@
 using MySqlConnector;
 using Polly;
 using Polly.Retry;
+using Microsoft.Extensions.Configuration;
 
-namespace UserService.API.Persistence;
-
+namespace Analytics.Infrastructure.Data;
 public class DapperContext
 {
     private readonly string _connectionString;
