@@ -181,9 +181,9 @@ public class AuthController : Controller
     }
     
     [HttpPost("verify-email/{userId}/{token}")]
-    public async Task<IActionResult> VerifyEmail(string userId, string token)
+    public async Task<IActionResult> VerifyEmail(int userId, string token)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
         if (user == null)
             return NotFound(new ApiResult<object>(null, false, "User not found."));
 
