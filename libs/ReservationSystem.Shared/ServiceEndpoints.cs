@@ -28,5 +28,10 @@ public static class ServiceEndpoints
         public static string ResetPassword => $"{BaseUrl}/api/auth/reset-password";
 
     }
-    
+
+    public static class AnalyticsService
+    {
+        // ANALYTICS
+        private const string BaseUrl = "http://analytics-service:8006";
+    }
 }
