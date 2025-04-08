@@ -1,11 +1,26 @@
+using Microsoft.EntityFrameworkCore;
+using Analytics.Infrastructure.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8006);
+});
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(
+        connectionString,
+        new MySqlServerVersion(new Version(8, 0, 32)) // Or the version you're running
+    )
+);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 

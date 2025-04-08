@@ -5,15 +5,25 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E4B02A74-09EF-44B9-ACAD-C05E6F9A0949}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleService.API", "src\ExampleService.API\ExampleService.API.csproj", "{E732E9A2-7BBF-4A54-9333-35276ABB1E16}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleService.API", "src\ExampleService.API\ExampleService.API.csproj", "{E732E9A2-7BBF-4A54-9333-35276ABB1E16}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{39C3A90E-F58F-43A2-A09E-40F65572F828}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReservationSystem.Shared", "libs\ReservationSystem.Shared\ReservationSystem.Shared.csproj", "{CAB56059-5B44-4C64-B187-68586EA8667F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReservationSystem.Shared", "libs\ReservationSystem.Shared\ReservationSystem.Shared.csproj", "{CAB56059-5B44-4C64-B187-68586EA8667F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.API", "src\UserService.API\UserService.API.csproj", "{6EDAD038-CF26-47DB-B592-405A95D0C449}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.API", "src\UserService.API\UserService.API.csproj", "{6EDAD038-CF26-47DB-B592-405A95D0C449}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService.API", "src\AuthService.API\AuthService.API.csproj", "{0DDD7049-0238-4DD5-B309-CC6E1C0C8DAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthService.API", "src\AuthService.API\AuthService.API.csproj", "{0DDD7049-0238-4DD5-B309-CC6E1C0C8DAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AnalyticsService.API", "AnalyticsService.API", "{09010C3A-AD14-4275-A12A-3D4531AF9952}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analytics", "src\AnalyticsService.API\Analytics\Analytics.csproj", "{6BD13362-DA88-4C68-A178-1F67684BA1A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analytics.Application", "src\AnalyticsService.API\Analytics.Application\Analytics.Application.csproj", "{86EC6840-0E99-4A1F-940C-F84D7BAD3096}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analytics.Domain", "src\AnalyticsService.API\Analytics.Domain\Analytics.Domain.csproj", "{1168EADF-59D9-4E56-B7EB-F5871FD26C72}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analytics.Infrastructure", "src\AnalyticsService.API\Analytics.Infrastructure\Analytics.Infrastructure.csproj", "{62D25469-310B-440C-803E-DBD849A2D17A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +47,22 @@ Global
 		{0DDD7049-0238-4DD5-B309-CC6E1C0C8DAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DDD7049-0238-4DD5-B309-CC6E1C0C8DAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DDD7049-0238-4DD5-B309-CC6E1C0C8DAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BD13362-DA88-4C68-A178-1F67684BA1A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD13362-DA88-4C68-A178-1F67684BA1A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD13362-DA88-4C68-A178-1F67684BA1A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD13362-DA88-4C68-A178-1F67684BA1A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86EC6840-0E99-4A1F-940C-F84D7BAD3096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86EC6840-0E99-4A1F-940C-F84D7BAD3096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86EC6840-0E99-4A1F-940C-F84D7BAD3096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86EC6840-0E99-4A1F-940C-F84D7BAD3096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1168EADF-59D9-4E56-B7EB-F5871FD26C72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1168EADF-59D9-4E56-B7EB-F5871FD26C72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1168EADF-59D9-4E56-B7EB-F5871FD26C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1168EADF-59D9-4E56-B7EB-F5871FD26C72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62D25469-310B-440C-803E-DBD849A2D17A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62D25469-310B-440C-803E-DBD849A2D17A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62D25469-310B-440C-803E-DBD849A2D17A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62D25469-310B-440C-803E-DBD849A2D17A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,5 +72,13 @@ Global
 		{CAB56059-5B44-4C64-B187-68586EA8667F} = {39C3A90E-F58F-43A2-A09E-40F65572F828}
 		{6EDAD038-CF26-47DB-B592-405A95D0C449} = {E4B02A74-09EF-44B9-ACAD-C05E6F9A0949}
 		{0DDD7049-0238-4DD5-B309-CC6E1C0C8DAB} = {E4B02A74-09EF-44B9-ACAD-C05E6F9A0949}
+		{09010C3A-AD14-4275-A12A-3D4531AF9952} = {E4B02A74-09EF-44B9-ACAD-C05E6F9A0949}
+		{6BD13362-DA88-4C68-A178-1F67684BA1A4} = {09010C3A-AD14-4275-A12A-3D4531AF9952}
+		{86EC6840-0E99-4A1F-940C-F84D7BAD3096} = {09010C3A-AD14-4275-A12A-3D4531AF9952}
+		{1168EADF-59D9-4E56-B7EB-F5871FD26C72} = {09010C3A-AD14-4275-A12A-3D4531AF9952}
+		{62D25469-310B-440C-803E-DBD849A2D17A} = {09010C3A-AD14-4275-A12A-3D4531AF9952}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {406C1F07-AB75-4F08-828B-1034A7138A52}
 	EndGlobalSection
 EndGlobal

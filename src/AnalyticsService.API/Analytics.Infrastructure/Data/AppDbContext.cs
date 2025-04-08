@@ -1,21 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using MySqlConnector;
+using Polly;
+using Polly.Retry;
 
-namespace Analytics.Infrastructure.Data
+namespace UserService.API.Persistence;
+
+public class DapperContext
 {
-    public class AppDbContext: DbContext
+    private readonly string _connectionString;
+    private readonly AsyncRetryPolicy _retryPolicy;
+
+    public DapperContext(IConfiguration configuration)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            :base(options)
-        {
-        }
+        _connectionString = configuration.GetConnectionString("DefaultConnection")!;
 
-        // Define DbSets for your entities here
-        // public DbSet<YourEntity> YourEntities { get; set; }
+        _retryPolicy = Policy
+            .Handle<MySqlException>()
+            .WaitAndRetryAsync(3, attempt => TimeSpan.FromMilliseconds(100 * Math.Pow(2, attempt)));
+    }
 
-        // Example method to save changes
-        public void SaveChanges()
-        {
-            // Logic to save changes to the database
-        }
+    public async Task<MySqlConnection> CreateConnectionAsync()
+    {
+        var connection = new MySqlConnection(_connectionString);
+        await _retryPolicy.ExecuteAsync(() => connection.OpenAsync());
+        return connection;
     }
 }
