@@ -71,28 +71,74 @@ namespace PaymentService.API.Persistence.Repositories
 
             using var connection = await _context.CreateConnectionAsync();
             const string query = @"
-        SELECT PaymentID, UserId,RoleId,ReceiverBankNumber,GiverBankNumber,Price,CreditAmount,IsValid,TransactionType
+        SELECT PaymentID, UserId,RoleId,Price,CreditAmount,Status,TransactionType
         FROM Payment
         WHERE UserId = @Id;";
 
             return await connection.QueryFirstOrDefaultAsync<Payment>(query, new { Id = id });
         }
 
-        internal async Task<int> UpdateStatusByPaymentIdAsync(ulong paymentId, string status, CancellationToken cancellationToken)
+        internal async Task<UserCredit?> GetBalanceByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var connection = await _context.CreateConnectionAsync();
+            const string query = @"
+        SELECT CreditBalance
+        FROM UserCredit
+        WHERE UserId = @Id;";
+
+            return await connection.QueryFirstOrDefaultAsync<UserCredit>(query, new { Id = id });
+        }
+
+        internal async Task UpdateCredits(UserCredit userCredit, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _context.CreateConnectionAsync();
             const string query = @"  
-               UPDATE Payment  
-               SET Status = @Status  
-               WHERE PaymentID = @PaymentID;";
+               UPDATE UserCredit  
+               SET CreditBalance = @CreditBalance  
+               WHERE UserId = @UserId;";
 
-            return await connection.ExecuteAsync(query, new
+            await connection.ExecuteAsync(query, new
             {
-                PaymentID = paymentId,
-                Status = status
+                UserId = userCredit.UserId,
+                CreditBalance = userCredit.CreditBalance
             });
         }
+
+        internal async Task<int?> AddBalanceAsync(UserCredit balance, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            using var connection = await _context.CreateConnectionAsync();
+            const string query = @"
+                INSERT INTO UserCredit (UserId, RoleId, CreditBalance)
+                VALUES (@UserId, @RoleId, @CreditBalance);
+                SELECT LAST_INSERT_ID();";
+
+            return await connection.ExecuteScalarAsync<int?>(query, new
+            {
+                balance.UserId,
+                balance.RoleId,
+                balance.CreditBalance
+                
+            });
+        }
+
+
+        //internal async Task<string?> FindTransactionTypeAsync(int paymentId, CancellationToken cancellationToken)
+        //{
+        //    cancellationToken.ThrowIfCancellationRequested();
+        //    using var connection = await _context.CreateConnectionAsync();
+        //    const string query = @"
+        //        SELECT TransactionType
+        //        FROM Payment
+        //        WHERE PaymentID = @PaymentID;";
+
+        //    return await connection.QueryFirstOrDefaultAsync<string?>(query, new { PaymentID = paymentId });
+        //}
+
 
 
     }

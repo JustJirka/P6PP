@@ -2,10 +2,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ReservationSystem.Shared.Clients;
 using PaymentService.API.Features;
-using PaymentService.API.Features.Roles;
+using PaymentService.API.Features.Payments;
 using PaymentService.API.Persistence;
 using PaymentService.API.Persistence.Repositories;
 using PaymentService.API.Services;
+using ExampleService.API.Persistence;
+using DatabaseInitializer = PaymentService.API.Persistence.DatabaseInitializer;
 
 namespace PaymentService.API.Extensions;
 
@@ -16,41 +18,29 @@ public static class ServiceExtensions
         // Register Db Context 
         services.AddSingleton<DapperContext>();
         services.AddSingleton<DatabaseInitializer>();
-        services.AddSingleton<DatabaseSeeder>();
         
         // Register Repositories
-        services.AddScoped<RoleRepository>();
-        services.AddScoped<UserRepository>();
+        services.AddScoped<PaymentRepository>();
         
         // Register Services
         services.AddScoped<Services.PaymentService>();
-        services.AddScoped<Services.CreditService>();
+       
         
         // Register Endpoints injections
-        services.AddScoped<GetUserByIdHandler>();
-        services.AddSingleton<GetUserByIdValidator>();
-        
-        services.AddScoped<DeleteUserHandler>();
-        services.AddSingleton<DeleteUserValidator>();
+        services.AddScoped<CreateBalanceHandler>();
+        services.AddSingleton<CreateBalanceValidator>();
 
-        services.AddScoped<UpdateUserHandler>();
-        services.AddSingleton<UpdateUserValidator>();
+        services.AddScoped<UpdatePaymentHandler>();
+        services.AddSingleton<UpdatePaymentValidator>();
 
-        services.AddScoped<CreateUserHandler>();
-        services.AddSingleton<CreateUserValidator>();
-        
-        services.AddScoped<GetUsersHandler>();
+        services.AddScoped<GetBalanceByIdHandler>();
+        services.AddSingleton<GetBalanceByIdValidator>();
 
-        services.AddScoped<GetRolesHandler>();
-        
-        services.AddScoped<GetRoleByIdHandler>();
-        services.AddSingleton<GetRoleByIdValidator>();
-        
+        services.AddScoped<GetPaymentByIdHandler>();
+        services.AddSingleton<GetPaymentByIdValidator>();
+
         services.AddScoped<CreatePaymentHandler>();
         services.AddSingleton<CreatePaymentValidator>();
-
-        services.AddScoped<AssignUserRoleHandler>();
-        services.AddSingleton<AssignUserRoleValidator>();
 
         // HttpClient
         services.AddHttpClient<NetworkHttpClient>();

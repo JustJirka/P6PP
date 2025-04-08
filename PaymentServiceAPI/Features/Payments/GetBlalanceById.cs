@@ -1,53 +1,53 @@
-using FluentValidation;
+﻿using FluentValidation;
 using ReservationSystem.Shared.Results;
 using PaymentService.API.Persistence.Entities.DB.Models;
 using PaymentService.API.Services;
 
 namespace PaymentService.API.Features.Payments;
 
-public record GetPaymentByIdRequest(int Id);
+public record GetBalanceByIdRequest(int UserId);
 
-public class GetPaymentByIdValidator : AbstractValidator<GetPaymentByIdRequest>
+public class GetBalanceByIdValidator : AbstractValidator<GetBalanceByIdRequest>
 {
-    public GetPaymentByIdValidator()
+    public GetBalanceByIdValidator()
     {
-        RuleFor(x => x.Id).NotEmpty()
+        RuleFor(x => x.UserId).NotEmpty()
             .GreaterThan(0).WithMessage("Invalid Id");
     }
 }
 
-public class GetPaymentByIdHandler
+public class GetBalanceByIdHandler
 {
     private readonly PaymentService.API.Services.PaymentService _PaymentService;
 
-    public GetPaymentByIdHandler(PaymentService.API.Services.PaymentService PaymentService)
+    public GetBalanceByIdHandler(PaymentService.API.Services.PaymentService PaymentService)
     {
         _PaymentService = PaymentService;
     }
 
-    public async Task<ApiResult<Payment>> HandleAsync(GetPaymentByIdRequest request, CancellationToken cancellationToken)
+    public async Task<ApiResult<UserCredit>> HandleAsync(GetBalanceByIdRequest request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var payment = await _PaymentService.GetPaymentByIdAsync(request.Id, cancellationToken);
+        var payment = await _PaymentService.GetBalanceByIdAsync(request.UserId, cancellationToken);
 
         return payment is null
-            ? new ApiResult<Payment>(null, false, "Role not found")
-            : new ApiResult<Payment>(payment);
+            ? new ApiResult<UserCredit>(null, false, "balance not found")
+            : new ApiResult<UserCredit>(payment);
     }
 }
 
-public static class GetPaymentByIdEndpoint
+public static class GetBalanceByIdEndpoint
 {
     public static void Register(IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/payment/{id:int}",
-            async (int id,
-                GetPaymentByIdHandler handler,
-                GetPaymentByIdValidator validator,
+        app.MapGet("/api/credit/{UserId:int}",
+            async (int UserId,
+                GetBalanceByIdHandler handler,
+                GetBalanceByIdValidator validator,
                 CancellationToken cancellationToken) =>
             {
-                var request = new GetPaymentByIdRequest(id);
+                var request = new GetBalanceByIdRequest(UserId);
                 var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
                 if (!validationResult.IsValid)

@@ -25,7 +25,7 @@ public class CreatePaymentValidator : AbstractValidator<CreatePaymentRequest>
         RuleFor(x => x.Amount)
             .GreaterThan(0).WithMessage("Èástka musí být vìtší než 0.");
 
-        
+
     }
 }
 
@@ -42,9 +42,10 @@ public class CreatePaymentHandler
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-      
 
-        if (request.TransactionType == "credit") {
+
+        if (request.TransactionType == "credit")
+        {
 
             var payment = new Payment
             {
@@ -66,7 +67,7 @@ public class CreatePaymentHandler
                 Price = request.Amount,
                 Status = "pending",
                 CreatedAt = DateTime.UtcNow
-                
+
             };
             var id = await _paymentService.CreatePayment(payment, cancellationToken);
 
@@ -84,14 +85,14 @@ public static class CreatePaymentEndpoint
 {
     public static void Register(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/role",
+        app.MapPost("/api/payment",
             async (CreatePaymentRequest request,
                 CreatePaymentHandler handler,
                 CreatePaymentValidator validator,
                 CancellationToken cancellationToken) =>
             {
                 var validationResult = await validator.ValidateAsync(request, cancellationToken);
-                
+
                 if (!validationResult.IsValid)
                 {
                     var errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
@@ -99,7 +100,7 @@ public static class CreatePaymentEndpoint
                 }
 
                 var result = await handler.HandleAsync(request, cancellationToken);
-                
+
                 return result.Success
                     ? Results.Ok(result)
                     : Results.BadRequest(result);

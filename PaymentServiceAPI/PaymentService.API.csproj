@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\libs\ReservationSystem.Shared\ReservationSystem.Shared.csproj" />
+    <ProjectReference Include="..\src\ExampleService.API\ExampleService.API.csproj" />
   </ItemGroup>
 
 </Project>

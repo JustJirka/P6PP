@@ -28,5 +28,13 @@ public static class ServiceEndpoints
         public static string ResetPassword => $"{BaseUrl}/api/auth/reset-password";
 
     }
-    
+
+    public static class PaymentService
+    {
+        private const string BaseUrl = "http://payment-service:8006";
+        public static string CreatePayment => $"{BaseUrl}/api/payment";
+        public static string GetPaymentById(int id) => $"{BaseUrl}/api/payments/{id}";
+        public static string UpdatePayment(int id) => $"{BaseUrl}/api/payment/{id}";
+    }
+
 }
