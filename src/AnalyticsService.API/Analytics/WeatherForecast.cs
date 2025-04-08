@@ -1,4 +1,4 @@
-namespace backend
+namespace Analytics
 {
     public class WeatherForecast
     {

@@ -32,7 +32,7 @@ services:
   analytics-service:
     build:
       context: .
-      dockerfile: src/AnalyticsService.API/Anaytics/Dockerfile
+      dockerfile: src/AnalyticsService.API/Analytics/Dockerfile
     container_name: analytics-service
     ports:
       - "8006:8006"

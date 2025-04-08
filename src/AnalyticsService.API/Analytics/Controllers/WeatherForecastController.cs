@@ -1,4 +1,3 @@
-using backend;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Analytics.Controllers
