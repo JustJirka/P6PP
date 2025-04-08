@@ -1,7 +1,7 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
 using PaymentService.API.Persistence.Entities.DB.Models;
-using PaymentService.API.;
+using PaymentService.API.Services;
 
 namespace PaymentService.API.Features.Payments;
 
@@ -18,18 +18,18 @@ public class GetRoleByIdValidator : AbstractValidator<GetRoleByIdRequest>
 
 public class GetRoleByIdHandler
 {
-    private readonly PaymentService _roleService;
+    private readonly PaymentService _PaymentService;
 
-    public GetRoleByIdHandler(RoleService roleService)
+    public GetRoleByIdHandler(PaymentService PaymentService)
     {
-        _roleService = roleService;
+        _PaymentService = PaymentService;
     }
 
     public async Task<ApiResult<Role>> HandleAsync(GetRoleByIdRequest request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var role = await _roleService.GetRoleByIdAsync(request.Id, cancellationToken);
+        var role = await _PaymentService.GetRoleByIdAsync(request.Id, cancellationToken);
 
         return role is null
             ? new ApiResult<Role>(null, false, "Role not found")

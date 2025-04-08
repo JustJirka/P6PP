@@ -1,18 +1,18 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
-using PaymentService.API.Persistence.Entities.DB.Models;
-using PaymentService.API.; // using UserService.API.Services;
 
-namespace UserService.API.Features.Roles;
 
-public record CreatePaymentRequest(string Name, string Description);
+
+namespace PaymentService.API.Features.Payments;
+
+public record CreatePaymentRequest(string UserId, string Price);
 
 public class CreatePaymentValidator : AbstractValidator<CreatePaymentRequest>
 {
     public CreatePaymentValidator()
     {
-        RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.Description).NotEmpty();
+        RuleFor(x => x.UserId).NotEmpty();
+        RuleFor(x => x.Price).NotEmpty();
     }
 }
 
@@ -20,9 +20,9 @@ public class CreatePaymentHandler
 {
     private readonly PaymentService _paymentService;
 
-    public CreatePaymentHandler(PaymentService roleService)
+    public CreatePaymentHandler(PaymentService paymentService)
     {
-        _paymentService = roleService;
+        _paymentService = paymentService;
     }
 
     public async Task<ApiResult<int>> HandleAsync(CreatePaymentRequest request, CancellationToken cancellationToken)
@@ -31,8 +31,8 @@ public class CreatePaymentHandler
 
         var role = new Payment;
         {
-            Name = request.Name,                            
-            Description = request.Description
+            Name = request.UserId,                            
+            Description = request.Price
         };
 
         var id = await _paymentService.AddRoleAsync(role, cancellationToken);

@@ -1,7 +1,7 @@
 using Dapper;
 using MySqlConnector;
 
-namespace UserService.API.Persistence;
+namespace PaymentService.API.Persistence;
 
 public class DatabaseInitializer
 {

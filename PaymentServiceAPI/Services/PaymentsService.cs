@@ -2,7 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using PaymentService.API.Persistence.Entities.DB.Models;
 using PaymentService.API.Persistence.Repositories;
 
-namespace UserService.API.Services;
+namespace PaymentService.API.Services;
 
 public class PaymentService
 {

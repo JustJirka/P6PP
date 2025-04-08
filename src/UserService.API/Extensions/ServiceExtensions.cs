@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ReservationSystem.Shared.Clients;
-using UserService.API.Features;
-using UserService.API.Features.Roles;
-using UserService.API.Persistence;
-using UserService.API.Persistence.Repositories;
-using UserService.API.Services;
+using RoleService.API.Features;
+using RoleService.API.Features.Roles;
+using RoleService.API.Persistence;
+using RoleService.API.Persistence.Repositories;
+using RoleService.API.Services;
 
-namespace UserService.API.Extensions;
+namespace RoleService.API.Extensions;
 
 public static class ServiceExtensions
 {

@@ -1,4 +1,4 @@
-namespace UserService.API.Exceptions;
+namespace RoleService.API.Exceptions;
 
 public class DuplicateEntryException : Exception
 {

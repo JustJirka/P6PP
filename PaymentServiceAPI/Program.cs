@@ -1,8 +1,8 @@
 using PaymentService.API.Data;
 using Stripe;
-using UserService.API.Extensions;
-using UserService.API.Features;
-using UserService.API.Features.Roles;
+using PaymentService.API.Extensions;
+using PaymentService.API.Features;
+using PaymentService.API.Features.Roles;
 // Ensure the correct namespace is used for the DatabaseInitializer and DatabaseSeeder
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ReservationSystem.Shared.Clients;
-using UserService.API.Features;
-using UserService.API.Features.Roles;
-using UserService.API.Persistence;
-using UserService.API.Persistence.Repositories;
-using UserService.API.Services;
+using PaymentService.API.Features;
+using PaymentService.API.Features.Roles;
+using PaymentService.API.Persistence;
+using PaymentService.API.Persistence.Repositories;
+using PaymentService.API.Services;
 
-namespace UserService.API.Extensions;
+namespace PaymentService.API.Extensions;
 
 public static class ServiceExtensions
 {
@@ -24,7 +24,7 @@ public static class ServiceExtensions
         
         // Register Services
         services.AddScoped<Services.PaymentService>();
-        services.AddScoped<Services.UserService>();
+        services.AddScoped<Services.CreditService>();
         
         // Register Endpoints injections
         services.AddScoped<GetUserByIdHandler>();
