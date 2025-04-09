@@ -13,6 +13,7 @@ namespace Analytics.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IDatabaseSyncService _databaseSyncService;
         private readonly ILogger<UsersController> _logger;
 
         public UsersController(IUserService userService)
@@ -66,6 +67,14 @@ namespace Analytics.Controllers
                 return NotFound();
             }
             return Ok(deletedUser);
+        }
+
+        [HttpGet("triggerSync")]
+        public async Task<IActionResult> TriggerSync()
+        {
+            _logger.LogInformation("Sync triggered.");
+            await _databaseSyncService.SyncDatabase();
+            return Ok("Sync triggered successfully.");
         }
     }
 }
