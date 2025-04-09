@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     networks:
       - backend
-  
+
   booking-service:
     build:
       context: .
@@ -79,21 +79,6 @@ services:
     networks:
       - backend
 
-  analytics-service:
-    build:
-      context: .
-      dockerfile: src/AnalyticsService.API/Analytics/Dockerfile
-    container_name: analytics-service
-    ports:
-      - "8006:8006"
-    environment:
-      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=analytics_db;User=root;Password=password123;
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - backend
-
   mysql:
     image: mysql:latest
     container_name: mysql_local
@@ -109,14 +94,14 @@ services:
     healthcheck:
       test:
         [
-           "CMD",
+          "CMD",
           "mysqladmin",
           "ping",
           "-h",
           "localhost",
           "-uroot",
           "-ppassword123",
-         ]
+        ]
       interval: 10s
       retries: 5
       timeout: 5s
