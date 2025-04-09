@@ -8,7 +8,7 @@ namespace Analytics.Domain.Entities
         public int Id { get; set; }
         public int RoleId { get; set; }
         public string State { get; set; } // e.g. "active", "inactive", "banned"
-        public Sex Sex { get; set; }
+        public Sex? Sex { get; set; } = null;
         public int Weight { get; set; } // in grams
         public int Height { get; set; } // in mm
 

@@ -23,7 +23,7 @@ namespace Analytics.Application.Jobs
         public async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("DatabaseSyncJob triggered at {Time}", DateTime.UtcNow);
-            await _syncService.SyncData();
+            await _syncService.SyncDatabase();
         }
     }
 }

@@ -1,0 +1,43 @@
+{
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "roleId": 2,
+        "username": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "email": "string@asd.cz",
+        "state": "Active",
+        "phoneNumber": "",
+        "sex": "",
+        "weight": null,
+        "height": null,
+        "dateOfBirth": null,
+        "createdOn": "2025-04-08T08:40:33",
+        "updatedOn": "2025-04-08T08:40:33",
+        "role": { "id": 2, "name": "User", "description": "Standard User Role" }
+      },
+      {
+        "id": 2,
+        "roleId": 2,
+        "username": "strejda",
+        "firstName": "jarda",
+        "lastName": "ferda",
+        "email": "stringos@asd.com",
+        "state": "Active",
+        "phoneNumber": "",
+        "sex": "",
+        "weight": null,
+        "height": null,
+        "dateOfBirth": null,
+        "createdOn": "2025-04-08T09:22:56",
+        "updatedOn": "2025-04-08T09:22:56",
+        "role": { "id": 2, "name": "User", "description": "Standard User Role" }
+      }
+    ],
+    "totalCount": 2
+  },
+  "success": true,
+  "message": null
+}

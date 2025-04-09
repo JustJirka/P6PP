@@ -5,6 +5,7 @@ using Analytics.Application.Services.Interface;
 using Analytics.Domain.Entities;
 using Analytics.Domain.Interface;
 using Analytics.Application.DTOs;
+using Analytics.Domain.Enums;
 
 namespace Analytics.Application.Services
 {
@@ -30,17 +31,22 @@ namespace Analytics.Application.Services
 
         public async Task<User> CreateUser(UserDto user)
         {
-            // Ideally, the repository should return the created user (e.g., with the generated ID);
-            // otherwise, return the provided user.
+            //if (string.IsNullOrEmpty(user.birthDate))
+            //    throw new ArgumentNullException(nameof(user.birthDate), "Birth date cannot be null or empty.");
+            if (string.IsNullOrEmpty(user.createdAt))
+                throw new ArgumentNullException(nameof(user.createdAt), "Created at date cannot be null or empty.");
+            if (string.IsNullOrEmpty(user.lastUpdated))
+                throw new ArgumentNullException(nameof(user.lastUpdated), "Last updated date cannot be null or empty.");
+
             var newUser = new User()
             {
                 Id = user.id,
                 RoleId = user.roleId,
                 State = user.state,
-                Sex = (Domain.Enums.Sex)user.sex,
-                Weight = user.weight,
-                Height = user.height,
-                BirthDate = DateTime.Parse(user.birthDate),
+                Sex = string.IsNullOrEmpty(user.sex) ? (Sex?)null : (user.sex == "male" ? Sex.male : Sex.female),
+                Weight = user.weight ?? 0,
+                Height = user.height ?? 0,
+                BirthDate = !string.IsNullOrEmpty(user.birthDate) ? DateTime.Parse(user.birthDate) : default(DateTime),
                 CreatedAt = DateTime.Parse(user.createdAt),
                 LastUpdated = DateTime.Parse(user.lastUpdated)
             };

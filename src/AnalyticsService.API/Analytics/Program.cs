@@ -27,7 +27,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddSingleton<DatabaseSyncService>();
+builder.Services.AddScoped<IDatabaseSyncService, DatabaseSyncService>();  
 
 // Register Quartz.NET
 builder.Services.AddQuartz(q =>
@@ -52,6 +52,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<DatabaseInit>();
 builder.Services.AddSingleton<DapperContext>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

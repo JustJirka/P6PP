@@ -16,9 +16,10 @@ namespace Analytics.Controllers
         private readonly IDatabaseSyncService _databaseSyncService;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IDatabaseSyncService databaseSyncService)
         {
             _userService = userService;
+            _databaseSyncService = databaseSyncService;
             _logger = new LoggerFactory().CreateLogger<UsersController>();
         }
 

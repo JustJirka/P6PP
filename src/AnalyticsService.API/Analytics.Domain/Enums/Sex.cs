@@ -8,7 +8,7 @@ namespace Analytics.Domain.Enums
 {
     public enum Sex
     {
-        Male,
-        Female
+        male,
+        female
     }
 }
