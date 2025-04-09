@@ -10,7 +10,9 @@ namespace AuthService.API.Models
 
         [ForeignKey("ApplicationUser")]
         public required string UserId { get; set; }
-
+        
+        public int UserNumericId { get; set; } 
+        
         [MaxLength(500)]
         public required string Token { get; set; }
 

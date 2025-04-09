@@ -4,8 +4,10 @@ using System.Text;
 using AuthService.API.Data;
 using AuthService.API.DTO;
 using AuthService.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ReservationSystem.Shared;
@@ -69,6 +71,13 @@ public class AuthController : Controller
         if (!result.Succeeded)
             return BadRequest(new ApiResult<object>(result.Errors, false, result.Errors.ToString()));
 
+        var verifyToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(verifyToken));
+
+        // TODO: Send email with the token to the user using notification service
+        Console.WriteLine($"Email verification token for user {user.Email}:");
+        Console.WriteLine(encodedToken);
+        
         return Ok(new ApiResult<object>(new { Id = user.UserId }));
     }
 
@@ -88,11 +97,11 @@ public class AuthController : Controller
         }
 
         if (user == null)
-            return Unauthorized(new ApiResult<object>(null, false, "Invalid username/email or password."));
+            return BadRequest(new ApiResult<object>(null, false, "Invalid username/email or password."));
 
         var result = await _userManager.CheckPasswordAsync(user, model.Password);
         if (!result)
-            return Unauthorized(new ApiResult<object>(null, false, "Invalid username/email or password."));
+            return BadRequest(new ApiResult<object>(null, false, "Invalid username/email or password."));
 
         var token = GenerateJwtToken(user);
         return Ok(new ApiResult<string>(token));
@@ -100,47 +109,164 @@ public class AuthController : Controller
 
     private string GenerateJwtToken(ApplicationUser user)
     {
+        var secretKey = _configuration["JWT_SECRET_KEY"];
+        var issuer = _configuration["JWT_ISSUER"];
+        var audience = _configuration["JWT_AUDIENCE"];
+
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim("userid", user.UserId.ToString()), //Změněno na UserId a ToString()
+            new Claim("username", user.UserName!)
         };
 
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(5),
             signingCredentials: creds
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    [Authorize]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.UserId == model.UserId);
+        var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "userid");
+
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            return Unauthorized(new ApiResult<object>(null, false, "Token does not contain valid user ID."));
+
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user == null)
-            return BadRequest(new ApiResult<object>(null, false, "User with this ID does not exist."));
+            return BadRequest(new ApiResult<object>(null, false, "User not found."));
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
         var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
 
         if (!result.Succeeded)
-            return BadRequest(new ApiResult<object>(result.Errors, false, result.Errors.ToString()));
+            return BadRequest(new ApiResult<object>(result.Errors, false, "Password reset failed."));
 
-        return Ok(new ApiResult<object>(new { UserId = user.UserId, Email = user.Email }, true,
+        return Ok(new ApiResult<object>(
+            new { UserId = user.UserId, Email = user.Email },
+            true,
             "Password reset successfully."));
     }
+
+    
+    [HttpGet("isVerified/{userId}")]
+    public async Task<IActionResult> IsVerified(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return BadRequest(new ApiResult<object>(null, false, "User not found."));
+
+        var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+        if (!isEmailConfirmed)
+            return Ok(new ApiResult<object>(new {verified = false }, false, "Email not verified."));
+
+        return Ok(new ApiResult<object>(new { verified = true }, true, "User is verified."));
+    }
+    
+    [HttpPost("verify-email/{userId}/{token}")]
+    public async Task<IActionResult> VerifyEmail(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound(new ApiResult<object>(null, false, "User not found."));
+
+        try
+        {
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            if (result.Succeeded)
+                return Ok(new ApiResult<object>(null, true, "Email verified successfully."));
+
+            return BadRequest(new ApiResult<object>(null, false, "Invalid or expired token."));
+        }
+        catch (FormatException)
+        {
+            return BadRequest(new ApiResult<object>(null, false, "Token format is invalid."));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResult<object>(null, false, "An unexpected error occurred."));
+        }
+    }
+
+
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim();
+
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "userid");
+            var usernameClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "username");
+
+            if (userIdClaim == null || usernameClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized(new
+                {
+                    message = "Token is invalid or claims are missing",
+                    claims = HttpContext.User.Claims.Select(c => new { c.Type, c.Value })
+                });
+            }
+
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return Unauthorized(new { message = "User not found in database." });
+            }
+
+            var expClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "exp");
+
+            if (expClaim == null || !long.TryParse(expClaim.Value, out var expUnix))
+            {
+                return Unauthorized(new { message = "Missing or invalid exp claim" });
+            }
+
+            var expirationDateUtc = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
+
+            var tokenBlackList = new TokenBlackList
+            {
+                UserId = user.Id, // string (Identity GUID)
+                UserNumericId = user.UserId, //int (Vlastní ID)
+                Token = token,
+                ExpirationDate = expirationDateUtc
+            };
+
+            _dbContext.TokenBlackLists.Add(tokenBlackList);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "User logged out successfully.",
+                userid = user.UserId,
+                identityId = user.Id,
+                username = user.UserName,
+                claims = HttpContext.User.Claims.Select(c => new { c.Type, c.Value })
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in Logout: {ex.Message}");
+            return StatusCode(500, new { message = "An error occurred.", exception = ex.Message });
+        }
+    }
+
 }

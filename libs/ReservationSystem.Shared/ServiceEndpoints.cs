@@ -34,4 +34,13 @@ public static class ServiceEndpoints
         // ANALYTICS
         private const string BaseUrl = "http://analytics-service:8006";
     }
+    public static class NotificationService
+    {
+        private const string BaseUrl = "http://notification-service:5181";
+        public static string SendEmail => $"{BaseUrl}/api/notification/sendemail";
+        public static string SendVerificationEmail => $"{BaseUrl}/api/notification/user/sendverificationemail";
+        public static string SendPasswordResetEmail => $"{BaseUrl}/api/notification/user/sendpasswordresetemail";
+        public static string SendRegistrationEmail(int id) => $"{BaseUrl}/api/notification/user/sendregistrationemail/{id}";
+    }
+    
 }

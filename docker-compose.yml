@@ -7,6 +7,9 @@ services:
     ports:
       - "8005:8005"
     environment:
+      - JWT_SECRET_KEY=e1ec5a67c31e5e3d36b59c7f00478432c998c5f524bf3c9ad75e221c48a729d0fea2704fdcc8571390945d05843cec8e7a5303b766a06e92c88f34330890d9ee82db2d2e48b61d3d645aa270cf45fdf2fd22080fd1d3b7603bc0a3d4b77f6eb3bac50d5abe4897a093fa821b5561cdf65fd1f872b0165f283390d8ad0201bc02e69b569b3a2ede792e3310e3d6d967d87a0e00954f01cc1391e3466d03144489a12bbc119f73acef92fb5da06880522b9582a3a08c797aeab1a008e2c1d6a423768966028f7c40c0d07faf7f9b3c57e5abc28582f87de2b7760219a7380d8992669f7c6be0a4ab1eb26018fa9653a9c198d3abec9fdbebbfe18559933e9fbdf5
+      - JWT_ISSUER=local
+      - JWT_AUDIENCE=local
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=auth_db;User=root;Password=password123;
     depends_on:
       mysql:
@@ -22,7 +25,54 @@ services:
     ports:
       - "5189:5189"
     environment:
+      - Jwt__SecretKey=e1ec5a67c31e5e3d36b59c7f00478432c998c5f524bf3c9ad75e221c48a729d0fea2704fdcc8571390945d05843cec8e7a5303b766a06e92c88f34330890d9ee82db2d2e48b61d3d645aa270cf45fdf2fd22080fd1d3b7603bc0a3d4b77f6eb3bac50d5abe4897a093fa821b5561cdf65fd1f872b0165f283390d8ad0201bc02e69b569b3a2ede792e3310e3d6d967d87a0e00954f01cc1391e3466d03144489a12bbc119f73acef92fb5da06880522b9582a3a08c797aeab1a008e2c1d6a423768966028f7c40c0d07faf7f9b3c57e5abc28582f87de2b7760219a7380d8992669f7c6be0a4ab1eb26018fa9653a9c198d3abec9fdbebbfe18559933e9fbdf5
+      - Jwt__Issuer=http://localhost:8005
+      - Jwt__Audience=http://localhost:8005
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=user_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+  
+  booking-service:
+    build:
+      context: .
+      dockerfile: src/BookingService.API/Dockerfile
+    container_name: booking-service
+    ports:
+      - "8080:8081"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=booking_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+  notification-service:
+    build:
+      context: .
+      dockerfile: src/NotificationService.API/Dockerfile
+    container_name: notification-service
+    ports:
+      - "5181:5181"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=notification_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: src/AnalyticsService.API/Analytics/Dockerfile
+    container_name: analytics-service
+    ports:
+      - "8006:8006"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=analytics_db;User=root;Password=password123;
     depends_on:
       mysql:
         condition: service_healthy
@@ -59,14 +109,14 @@ services:
     healthcheck:
       test:
         [
-          "CMD",
+           "CMD",
           "mysqladmin",
           "ping",
           "-h",
           "localhost",
           "-uroot",
           "-ppassword123",
-        ]
+         ]
       interval: 10s
       retries: 5
       timeout: 5s
