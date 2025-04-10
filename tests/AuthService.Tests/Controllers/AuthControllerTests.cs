@@ -507,7 +507,7 @@ public class AuthControllerTests
         var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
         var apiResult = Assert.IsType<ApiResult<object>>(unauthorizedResult.Value);
         Assert.False(apiResult.Success);
-        Assert.Equal("Token does not contain valid user ID.", apiResult.Message);
+        Assert.Equal("Token does not contain user ID.", apiResult.Message);
     }
 
     /// <summary>
@@ -609,7 +609,7 @@ public class AuthControllerTests
         var validToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes("valid-token"));
 
         // Act
-        var result = await authController.VerifyEmail(userId, validToken);
+        var result = await authController.VerifyEmail(user.UserId, validToken);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -655,7 +655,7 @@ public class AuthControllerTests
         var invalidToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes("invalid-token"));
 
         // Act
-        var result = await authController.VerifyEmail(userId, invalidToken);
+        var result = await authController.VerifyEmail(user.UserId, invalidToken);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -674,15 +674,15 @@ public class AuthControllerTests
     public async Task IsVerified_UserNotFound_ReturnsBadRequest()
     {
         // Arrange
-        var userId = "nonexistent-user-id";
-
-        _mockUserManager.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync((ApplicationUser)null);
+        var userId = 13;
 
         var authController = new AuthController(
             _mockUserManager.Object,
             _mockHttpClient.Object,
             _configuration,
             _dbContext);
+
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
         // Act
         var result = await authController.IsVerified(userId);
@@ -693,8 +693,7 @@ public class AuthControllerTests
         Assert.False(apiResult.Success);
         Assert.Equal("User not found.", apiResult.Message);
 
-        // Verify that the FindByIdAsync was called once
-        _mockUserManager.Verify(x => x.FindByIdAsync(userId), Times.Once);
+        Assert.Null(user);
     }
 
     /// <summary>
@@ -723,7 +722,7 @@ public class AuthControllerTests
         var authController = new AuthController(_mockUserManager.Object, _mockHttpClient.Object, _configuration, _dbContext);
 
         // Act
-        var result = await authController.IsVerified(userId);
+        var result = await authController.IsVerified(user.UserId);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -761,7 +760,7 @@ public class AuthControllerTests
         var authController = new AuthController(_mockUserManager.Object, _mockHttpClient.Object, _configuration, _dbContext);
 
         // Act
-        var result = await authController.IsVerified(userId);
+        var result = await authController.IsVerified(user.UserId);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -771,27 +770,6 @@ public class AuthControllerTests
 
         // Verify that the IsEmailConfirmedAsync was called once
         _mockUserManager.Verify(x => x.IsEmailConfirmedAsync(user), Times.Once);
-    }
-
-    /// <summary>
-    /// Tests that the IsVerified method returns BadRequest when the userId is invalid or empty.
-    /// </summary>
-    [Fact]
-    public async Task IsVerified_InvalidUserId_ReturnsBadRequest()
-    {
-        // Arrange
-        var invalidUserId = ""; // Empty or invalid userId
-
-        var authController = new AuthController(_mockUserManager.Object, _mockHttpClient.Object, _configuration, _dbContext);
-
-        // Act
-        var result = await authController.IsVerified(invalidUserId);
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        var apiResult = Assert.IsType<ApiResult<object>>(badRequestResult.Value);
-        Assert.False(apiResult.Success);
-        Assert.Equal("User not found.", apiResult.Message);
     }
 
     /// <summary>

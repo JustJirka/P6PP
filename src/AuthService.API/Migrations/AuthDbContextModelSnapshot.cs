@@ -35,6 +35,7 @@ namespace AuthService.API.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
@@ -140,9 +141,6 @@ namespace AuthService.API.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
-
-                    b.Property<int>("UserNumericId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
