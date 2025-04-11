@@ -1,4 +1,21 @@
 services:
+  admin-settings:
+    build:
+      context: .
+      dockerfile: src/AdminSettings.API/Dockerfile
+    container_name: admin-settings
+    ports:
+      - "9090:9090"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=admin_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+    volumes:
+      - ./backups:/backups
+  
   auth-service:
     build:
       context: .
@@ -16,7 +33,7 @@ services:
         condition: service_healthy
     networks:
       - backend
-  
+     
   user-service:
     build:
       context: .
@@ -74,6 +91,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./backups:/backups
     networks:
       - backend
     healthcheck:

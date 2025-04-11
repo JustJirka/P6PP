@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <RootNamespace>AdminSettings</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.66" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.13" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.14" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.14">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.14">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Polly" Version="8.5.2" />
+        <PackageReference Include="Polly.Core" Version="8.5.2" />
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+</Project>
