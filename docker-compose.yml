@@ -13,7 +13,7 @@ services:
         condition: service_healthy
     networks:
       - backend
-  
+
   user-service:
     build:
       context: .
@@ -21,6 +21,21 @@ services:
     container_name: user-service
     ports:
       - "5189:5189"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=user_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: src/PaymentService.API/Dockerfile
+    container_name: payment-service
+    ports:
+      - "5185:5185"
     environment:
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=user_db;User=root;Password=password123;
     depends_on:
@@ -43,7 +58,7 @@ services:
         condition: service_healthy
     networks:
       - backend
-      
+
   mysql:
     image: mysql:latest
     container_name: mysql_local
@@ -57,7 +72,16 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword123"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-ppassword123",
+        ]
       interval: 10s
       retries: 5
       timeout: 5s

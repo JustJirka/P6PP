@@ -12,7 +12,7 @@ public class DatabaseInitializer
 
     public DatabaseInitializer(IConfiguration configuration, ILogger<DatabaseInitializer> logger)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection") 
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new Exception("Database connection string is missing in appsettings.json.");
         _logger = logger;
 
@@ -45,39 +45,35 @@ public class DatabaseInitializer
             {
                 _logger.LogInformation("Database '{Database}' already exists.", _databaseName);
             }
-            
+
             // Now connect to the actual microservice database and ensure tables exist
             await using var connection = new MySqlConnection(_connectionString);
             await connection.OpenAsync();
-            
-            const string createRoleTableQuery = @"
-                CREATE TABLE IF NOT EXISTS Payments (
-                    PaymentID INT AUTO_INCREMENT PRIMARY KEY,
-                    Name VARCHAR(20) NOT NULL,
-                    Description VARCHAR(50) NOT NULL
+
+            const string createUserCreditTableQuery = @"
+                CREATE TABLE IF NOT EXISTS UserCredit (
+                    UserId  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    RoleId BIGINT NOT NULL,
+                    CreditBalance BIGINT NOT NULL
                 );";
-            
-            const string createTableQuery = @"
+
+            const string createPaymentTableQuery = @"
                 CREATE TABLE IF NOT EXISTS Payment (
-    PaymentID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    UserId BIGINT NOT NULL,
-    RoleId BIGINT NOT NULL,
-    ReceiverBankNumber VARCHAR(20) NOT NULL,
-    GiverBankNumber VARCHAR(20) NOT NULL,
-    Price BIGINT NOT NULL,
-    CreditAmount BIGINT NOT NULL,
-    IsValid BOOLEAN NOT NULL,
-    TransactionType VARCHAR(20) NOT NULL DEFAULT credit,
-);";
+                    PaymentID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    UserId BIGINT NOT NULL,
+                    RoleId BIGINT NOT NULL,
+                    CreatedAt DATE NOT NULL,
+                    Price BIGINT NOT NULL,
+                    CreditAmount BIGINT NOT NULL,
+                    Status VARCHAR(30) NOT NULL,
+                    TransactionType VARCHAR(30) NOT NULL
+                );";
 
-            
-            /*await connection.ExecuteAsync(createRoleTableQuery);
+            await connection.ExecuteAsync(createUserCreditTableQuery);
             _logger.LogInformation("'Roles' table checked/created successfully.");
-            
-            await connection.ExecuteAsync(createTableQuery);
-            _logger.LogInformation("'Users' table checked/created successfully.");
-            */
 
+            await connection.ExecuteAsync(createPaymentTableQuery);
+            _logger.LogInformation("'Users' table checked/created successfully.");
         }
         catch (Exception ex)
         {

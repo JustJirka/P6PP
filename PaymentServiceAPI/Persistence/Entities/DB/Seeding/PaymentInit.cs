@@ -21,7 +21,7 @@ public class PaymentInit
         Payments.Add(new Payment
         {
             PaymentID = 2,
-            //UserId = 2,
+            UserId = 2,
             //RoleId = 2, student
             //ReceiverBankNumber = "3214569033",
             //GiverBankNumber = "834234213",

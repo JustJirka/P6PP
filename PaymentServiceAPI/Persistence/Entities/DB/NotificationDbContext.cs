@@ -14,8 +14,10 @@ public class NotificationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var paymentInit = new PaymentInit();
+        var userCreditInit = new UserCreditInit();
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Payment>().HasData(paymentInit.GetPayments());
+        modelBuilder.Entity<Payment>().HasData(userCreditInit.GetUserCredit());
     }
 }
