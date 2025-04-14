@@ -75,6 +75,39 @@
         }
       }
     }
+
+    // Styles for user filtering
+    .user-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        label {
+          font-size: 14px;
+          color: #555;
+        }
+
+        select {
+          padding: 8px 12px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          background-color: white;
+          font-size: 14px;
+          min-width: 150px;
+          cursor: pointer;
+
+          &:focus {
+            outline: none;
+            border-color: #0066cc;
+          }
+        }
+      }
+    }
   }
 
   button {
@@ -337,6 +370,26 @@
   }
 }
 
+// Loading indicator
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  color: #555;
+  font-style: italic;
+}
+
+// Error message
+.error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  color: #d9534f;
+  font-style: italic;
+}
+
 // Responsive Design - for better mobile experience
 @media (max-width: 768px) {
   .dashboard-header {
@@ -358,6 +411,24 @@
 
       button {
         width: 100%;
+      }
+
+      .user-filters {
+        width: 100%;
+        flex-direction: column;
+
+        .filter-group {
+          width: 100%;
+
+          .filter-buttons {
+            width: 100%;
+            justify-content: space-between;
+
+            button {
+              flex: 1;
+            }
+          }
+        }
       }
     }
   }

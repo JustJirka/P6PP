@@ -57,6 +57,27 @@
         </select>
       </div>
 
+      <!-- Filters for Users -->
+      <div class="user-filters" *ngIf="activeTab === 'users'">
+        <!-- Filter by state -->
+        <div class="filter-group">
+          <select id="userStateSelect" (change)="onUserStateFilterChange($event)">
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Filter by sex -->
+        <div class="filter-group">
+          <select id="userSexSelect" (change)="onUserSexFilterChange($event)">
+            <option value="all">All</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+      </div>
+
       <!-- View toggle button - Don't show for overview tab -->
       <button *ngIf="activeTab !== 'overview'" (click)="toggleView()">
         Switch to {{ viewMode === "chart" ? "Table" : "Chart" }} View
@@ -132,14 +153,29 @@
         </div>
       </div>
 
-      <!-- Future Sections (Currently Empty) -->
-      <div class="summary-card future-card">
+      <!-- Users Card -->
+      <div class="summary-card">
         <div class="card-header">
-          <h3>Users & Trainers</h3>
+          <h3>Users and Trainers</h3>
           <span class="card-icon">👥</span>
         </div>
         <div class="card-content">
-          <p class="coming-soon">Data coming soon</p>
+          <div *ngIf="isUsersLoading" class="loading-indicator">
+            <p>Loading data...</p>
+          </div>
+          <div *ngIf="usersError" class="error-message">
+            <p>{{ usersError }}</p>
+          </div>
+          <div *ngIf="!isUsersLoading && !usersError">
+            <div class="metric">
+              <span class="metric-value">{{ getTotalUsersCount() }}</span>
+              <span class="metric-label">Total Users</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ getActiveUsersCount() }}</span>
+              <span class="metric-label">Active Users</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -150,8 +186,23 @@
       class="chart-view"
     >
       <div class="chart-placeholder">
+        <!-- Loading indicator for users tab -->
+        <div *ngIf="activeTab === 'users' && isUsersLoading" class="loading-indicator">
+          <p>Loading data...</p>
+        </div>
+        
+        <!-- Error message for users tab -->
+        <div *ngIf="activeTab === 'users' && usersError" class="error-message">
+          <p>{{ usersError }}</p>
+        </div>
+
+        <!-- Information about empty data for users tab with no error -->
+        <div *ngIf="activeTab === 'users' && !isUsersLoading && !usersError && activeData.length === 0" class="empty-data-message">
+          <p>No data found for the selected filters.</p>
+        </div>
+
         <!-- Information about empty data for future implementation -->
-        <div *ngIf="activeData.length === 0" class="empty-data-message">
+        <div *ngIf="activeTab !== 'users' && activeData.length === 0" class="empty-data-message">
           <p>Data for {{ activeTab }} will be implemented soon.</p>
         </div>
 
@@ -192,8 +243,23 @@
       *ngIf="viewMode === 'table' && activeTab !== 'overview'"
       class="table-view"
     >
+      <!-- Loading indicator for users tab -->
+      <div *ngIf="activeTab === 'users' && isUsersLoading" class="loading-indicator">
+        <p>Loading data...</p>
+      </div>
+      
+      <!-- Error message for users tab -->
+      <div *ngIf="activeTab === 'users' && usersError" class="error-message">
+        <p>{{ usersError }}</p>
+      </div>
+
+      <!-- Information about empty data for users tab with no error -->
+      <div *ngIf="activeTab === 'users' && !isUsersLoading && !usersError && activeData.length === 0" class="empty-data-message">
+        <p>No data found for the selected filters.</p>
+      </div>
+
       <!-- Information about empty data for future implementation -->
-      <div *ngIf="activeData.length === 0" class="empty-data-message">
+      <div *ngIf="activeTab !== 'users' && activeData.length === 0" class="empty-data-message">
         <p>Data for {{ activeTab }} will be implemented soon.</p>
       </div>
 

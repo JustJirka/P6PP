@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 // Definice typů dat
 interface DataItem {
@@ -11,6 +12,18 @@ interface RoomData {
   roomId: string;
   roomName: string;
   occupancy: DataItem[];
+}
+
+interface User {
+  id: number;
+  roleId: number;
+  state: string;
+  sex: number; // 0 for men, 1 for women
+  weight: number;
+  height: number;
+  birthDate: string;
+  createdAt: string;
+  lastUpdated: string;
 }
 
 // Data pro finance
@@ -67,12 +80,6 @@ const ROOMS_DATA: RoomData[] = [
     ],
   },
 ];
-
-// Prázdné pole pro uživatele - bude implementováno později
-const USERS_DATA: DataItem[] = [];
-
-// Prázdné pole pro trenéry - bude implementováno později
-const TRAINERS_DATA: DataItem[] = [];
 
 // Funkce pro generování přehledových dat
 const generateOverviewData = (): DataItem[] => {
@@ -132,16 +139,112 @@ export class DashboardComponent implements OnInit {
     | 'trainers' = 'overview';
   viewMode: 'chart' | 'table' = 'chart';
   selectedRoom: string | null = null;
+  
+  // User filters
+  userStateFilter: 'all' | 'active' | 'inactive' = 'all';
+  userSexFilter: 'all' | 'male' | 'female' = 'all';
 
   // Data pro jednotlivé záložky
   overviewData = OVERVIEW_DATA;
   financesData = FINANCES_DATA;
   reservationsData = RESERVATIONS_DATA;
   roomsData = ROOMS_DATA;
-  usersData = USERS_DATA;
-  trainersData = TRAINERS_DATA;
+  usersData: DataItem[] = [];
+  trainersData: DataItem[] = [];
+  
+  // Data from API
+  users: User[] = [];
+  isUsersLoading = false;
+  usersError: string | null = null;
 
   yAxisValues: number[] = [];
+
+  constructor(private http: HttpClient) {}
+
+  // Method to load users from API
+  loadUsers() {
+    this.isUsersLoading = true;
+    this.usersError = null;
+    
+    this.http.get<User[]>('http://localhost:8006/api/Users', { withCredentials: false })
+      .subscribe({
+        next: (data) => {
+          this.users = data;
+          this.processUserData();
+          this.isUsersLoading = false;
+        },
+        error: (error) => {
+          console.error('Chyba při načítání uživatelů:', error);
+          this.usersError = 'Nepodařilo se načíst data z API.';
+          this.isUsersLoading = false;
+        }
+      });
+  }
+
+  // Method to process user data based on filters
+  processUserData() {
+    if (!this.users || this.users.length === 0) {
+      this.usersData = [];
+      return;
+    }
+
+    // Filtering users based on state
+    let filteredUsers = this.users;
+    
+    if (this.userStateFilter !== 'all') {
+      const stateToFilter = this.userStateFilter === 'active' ? 'active' : 'inactive';
+      filteredUsers = filteredUsers.filter(user => user.state === stateToFilter);
+    }
+    
+    if (this.userSexFilter !== 'all') {
+      const sexToFilter = this.userSexFilter === 'male' ? 0 : 1;
+      filteredUsers = filteredUsers.filter(user => user.sex === sexToFilter);
+    }
+    
+    // Getting months from createdAt and grouping users by months
+    const usersByMonth = filteredUsers.reduce((acc, user) => {
+      const date = new Date(user.createdAt);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = 0;
+      }
+      
+      acc[monthKey]++;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    // Convert to DataItem array and sort by date
+    this.usersData = Object.entries(usersByMonth)
+      .map(([date, value]) => ({ date, value }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    
+    this.updateYAxisValues();
+  }
+
+  // Switching user state filter
+  setUserStateFilter(filter: 'all' | 'active' | 'inactive') {
+    this.userStateFilter = filter;
+    this.processUserData();
+  }
+  
+  // Switching user sex filter
+  setUserSexFilter(filter: 'all' | 'male' | 'female') {
+    this.userSexFilter = filter;
+    this.processUserData();
+  }
+  
+  // Event handler for state filter change in select
+  onUserStateFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.setUserStateFilter(select.value as 'all' | 'active' | 'inactive');
+  }
+  
+  // Event handler for sex filter change in select
+  onUserSexFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.setUserSexFilter(select.value as 'all' | 'male' | 'female');
+  }
 
   get activeData(): DataItem[] {
     switch (this.activeTab) {
@@ -205,7 +308,7 @@ export class DashboardComponent implements OnInit {
       case 'rooms':
         return 'Occupancy (%)';
       case 'users':
-        return 'Active Users';
+        return 'Number of Users';
       case 'trainers':
         return 'Trainer Sessions';
       default:
@@ -232,6 +335,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadUsers();
     this.updateYAxisValues();
   }
 
@@ -248,6 +352,12 @@ export class DashboardComponent implements OnInit {
     // Reset selected room when changing tabs
     if (tab !== 'rooms') {
       this.selectedRoom = null;
+    }
+    // Reset filters when tab is users
+    if (tab === 'users') {
+      this.userStateFilter = 'all';
+      this.userSexFilter = 'all';
+      this.processUserData();
     }
     this.updateYAxisValues();
   }
@@ -359,5 +469,15 @@ export class DashboardComponent implements OnInit {
       (highest, current) => (current.value > highest.value ? current : highest),
       { name: 'None', value: 0 }
     );
+  }
+  
+  // Get total number of users
+  getTotalUsersCount(): number {
+    return this.users.length;
+  }
+  
+  // Get number of active users
+  getActiveUsersCount(): number {
+    return this.users.filter(user => user.state === 'active').length;
   }
 }
