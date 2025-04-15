@@ -72,6 +72,7 @@ services:
     ports:
       - "8006:8006"
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=analytics_db;User=root;Password=password123;
     depends_on:
       mysql:

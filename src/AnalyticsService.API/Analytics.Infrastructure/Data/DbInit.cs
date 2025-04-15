@@ -66,6 +66,18 @@ public class DatabaseInit
             await connection.ExecuteAsync(createTableQuery);
             _logger.LogInformation("'Users' table checked/created successfully.");
 
+            const string createBookingsTableQuery = @"
+                CREATE TABLE IF NOT EXISTS Bookings (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    BookingDate DATETIME NOT NULL,
+                    Status INT NOT NULL,
+                    UserId INT NOT NULL,
+                    ServiceId INT NOT NULL
+                );";
+
+            await connection.ExecuteAsync(createBookingsTableQuery);
+            _logger.LogInformation("'Bookings' table checked/created successfully.");
+
         }
         catch (Exception ex)
         {
