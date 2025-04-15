@@ -99,9 +99,7 @@
                 <option value="65+">65+</option>
               </select>
             </div>
-          </div>
 
-          <div class="filter-row">
             <!-- Filter by registration date -->
             <div class="filter-group">
               <label for="userRegistrationTimeSelect">Registration Date:</label>
@@ -122,6 +120,13 @@
                 <option value="month">This Month</option>
                 <option value="year">This Year</option>
               </select>
+            </div>
+            
+            <!-- Reset filters button -->
+            <div class="filter-group reset-button-container">
+              <button class="reset-filters-button" (click)="resetUserFilters()">
+                <span class="reset-icon">✕</span> Reset Filters
+              </button>
             </div>
           </div>
         </div>
@@ -255,8 +260,126 @@
           <p>Data for {{ activeTab }} will be implemented soon.</p>
         </div>
 
-        <!-- Chart Grid - only shown when there's data -->
-        <div class="chart-grid" *ngIf="activeData.length > 0">
+        <!-- Multiple charts for users tab -->
+        <div *ngIf="activeTab === 'users' && !isUsersLoading && !usersError" class="charts-container">
+          <!-- Chart for user roles distribution -->
+          <div class="chart-section">
+            <h3 class="chart-title">Role Distribution</h3>
+            <div class="chart-grid">
+              <div class="y-axis">
+                <div class="y-label" *ngFor="let value of roleChartYAxis">
+                  {{ value }}
+                </div>
+              </div>
+              <div class="mock-chart">
+                <div
+                  *ngFor="let item of roleChartData"
+                  class="chart-bar"
+                  [style.height.px]="getBarHeight(item.value, roleChartYAxis[0])"
+                >
+                  <span class="bar-value">{{ item.value }}</span>
+                  <span class="tooltip">{{ item.label }}: {{ item.value }}</span>
+                  <span class="bar-label">{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart for user status distribution -->
+          <div class="chart-section">
+            <h3 class="chart-title">Status Distribution</h3>
+            <div class="chart-grid">
+              <div class="y-axis">
+                <div class="y-label" *ngFor="let value of statusChartYAxis">
+                  {{ value }}
+                </div>
+              </div>
+              <div class="mock-chart">
+                <div
+                  *ngFor="let item of statusChartData"
+                  class="chart-bar"
+                  [style.height.px]="getBarHeight(item.value, statusChartYAxis[0])"
+                >
+                  <span class="bar-value">{{ item.value }}</span>
+                  <span class="tooltip">{{ item.label }}: {{ item.value }}</span>
+                  <span class="bar-label">{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart for gender distribution -->
+          <div class="chart-section">
+            <h3 class="chart-title">Gender Distribution</h3>
+            <div class="chart-grid">
+              <div class="y-axis">
+                <div class="y-label" *ngFor="let value of genderChartYAxis">
+                  {{ value }}
+                </div>
+              </div>
+              <div class="mock-chart">
+                <div
+                  *ngFor="let item of genderChartData"
+                  class="chart-bar"
+                  [style.height.px]="getBarHeight(item.value, genderChartYAxis[0])"
+                >
+                  <span class="bar-value">{{ item.value }}</span>
+                  <span class="tooltip">{{ item.label }}: {{ item.value }}</span>
+                  <span class="bar-label">{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart for age group distribution -->
+          <div class="chart-section">
+            <h3 class="chart-title">Age Group Distribution</h3>
+            <div class="chart-grid">
+              <div class="y-axis">
+                <div class="y-label" *ngFor="let value of ageGroupChartYAxis">
+                  {{ value }}
+                </div>
+              </div>
+              <div class="mock-chart">
+                <div
+                  *ngFor="let item of ageGroupChartData"
+                  class="chart-bar"
+                  [style.height.px]="getBarHeight(item.value, ageGroupChartYAxis[0])"
+                >
+                  <span class="bar-value">{{ item.value }}</span>
+                  <span class="tooltip">{{ item.label }}: {{ item.value }}</span>
+                  <span class="bar-label">{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart for registration month distribution -->
+          <div class="chart-section">
+            <h3 class="chart-title">Registration by Month</h3>
+            <div class="chart-grid">
+              <div class="y-axis">
+                <div class="y-label" *ngFor="let value of registrationChartYAxis">
+                  {{ value }}
+                </div>
+              </div>
+              <div class="mock-chart">
+                <div
+                  *ngFor="let item of registrationChartData"
+                  class="chart-bar"
+                  [style.height.px]="getBarHeight(item.value, registrationChartYAxis[0])"
+                >
+                  <span class="bar-value">{{ item.value }}</span>
+                  <span class="tooltip">{{ item.label }}: {{ item.value }}</span>
+                  <span class="bar-label">{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Original chart grid - only shown when there's data for non-users tab -->
+        <div class="chart-grid" *ngIf="activeTab !== 'users' && activeData.length > 0">
           <!-- Y-osa s hodnotami -->
           <div class="y-axis">
             <div class="y-label" *ngFor="let value of yAxisValues">
