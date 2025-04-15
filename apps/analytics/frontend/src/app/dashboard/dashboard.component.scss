@@ -1,377 +1,662 @@
+// Modern Dashboard Variables
+:root {
+  --primary-color: #3f51b5;
+  --primary-light: #757de8;
+  --primary-dark: #002984;
+  --secondary-color: #ea2839;
+  --text-color: #333333;
+  --text-light: #757575;
+  --bg-color: #f5f7fa;
+  --card-bg: #ffffff;
+  --sidebar-bg: #202635;
+  --sidebar-text: #a0a8bd;
+  --sidebar-active: #ffffff;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: var(--secondary-color);
+  --border-radius: 8px;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --transition: all 0.3s ease;
+  --header-height: 70px;
+}
+
+// Import Google Material Icons
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+// Global styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+// Dashboard Layout
 .dashboard {
-  font-family: Arial, sans-serif;
-  background-color: #f5f7fa;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-// Tabs
-.tabs {
   display: flex;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #ddd;
-  flex-wrap: wrap; // Pro lepší zobrazení na mobilních zařízeních
-
-  button {
-    background: none;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    color: #555;
-
-    &.active {
-      color: #0066cc;
-      border-bottom: 3px solid #0066cc;
-      font-weight: bold;
-    }
-
-    &:hover:not(.active) {
-      background-color: #eee;
-    }
-  }
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
 }
 
-// Dashboard Header
+// Top Navigation
 .dashboard-header {
+  height: var(--header-height);
+  background-color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 10px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-family: Arial;
+}
 
-  h2 {
-    margin: 0;
-    color: #333;
-  }
-
-  .dashboard-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-
-    .room-selector {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      label {
-        font-size: 14px;
-        color: #555;
-      }
-
-      select {
-        padding: 6px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background-color: white;
-        font-size: 14px;
-
-        &:focus {
-          outline: none;
-          border-color: #0066cc;
-        }
-      }
-    }
-  }
-
-  button {
-    background-color: #0066cc;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-
-    &:hover {
-      background-color: #0055aa;
+.brand {
+  display: flex;
+  align-items: center;
+  
+  .logo {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    
+    .plus {
+      color: var(--secondary-color);
+      font-weight: 900;
     }
   }
 }
 
-// Empty data message
-.empty-data-message {
+.main-nav {
+  flex: 1;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 250px;
-  background-color: white;
-  border-radius: 8px;
-  color: #888;
-  font-style: italic;
+  
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 8px;
+    
+    li {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: Arial;
+      
+      i {
+        margin-right: 8px;
+        font-size: 20px;
+      }
+      
+      &:hover {
+        background-color: rgba(234, 40, 56, 0.511);
+      }
+      
+      &.active {
+        background-color: rgb(234, 40, 56);
+        color: var(--secondary-color);
+        font-weight: 500;
+      }
+    }
+  }
+}
 
+.user-profile {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  font-family: Arial;
+  
+  &:hover {
+    background-color: rgba(234, 40, 56, 0.511);
+  }
+  
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(0, 0, 0);
+    font-weight: 500;
+    margin-right: 12px;
+  }
+  
+  .user-info {
+    .name {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .role {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+  }
+}
+
+// Main Content Area
+.dashboard-content {
+  flex: 1;
+  padding: 24px;
+  background-color: var(--bg-color);
+  font-family: Arial;
+}
+
+// Content Header
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+  
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .room-selector {
+      .select-wrapper {
+        position: relative;
+        
+        select {
+          appearance: none;
+          padding: 8px 36px 8px 16px;
+          border: 2px solid rgb(234, 40, 56);
+          border-radius: var(--border-radius);
+          background-color: rgb(255, 255, 255);
+          font-size: 14px;
+          width: 220px;
+          
+          &:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+          }
+
+          &:hover{
+            background-color: rgb(239, 239, 239);
+          }
+        }
+        
+        .select-icon {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          color: var(--text-light);
+        }
+      }
+    }
+    
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: transparent;
+      border: 2px solid rgb(234, 40, 56);
+      padding: 8px 16px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-light);
+      transition: var(--transition);
+      
+      &:hover {
+        background-color: rgb(234, 40, 56);
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+      }
+      
+      i {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+// Main Content
+main {
+  min-height: calc(100vh - var(--header-height) - 48px - 24px);
+}
+
+// Overview Grid
+.overview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  
+  .grid-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+}
+
+// Stat Cards
+.stat-card {
+  background-color: rgb(239, 239, 239);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgb(57, 57, 57);
+  }
+  
+  &.wide {
+    grid-column: span 2;
+    
+    @media (max-width: 1024px) {
+      grid-column: span 1;
+    }
+  }
+  
+  .stat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    
+    h3 {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-light);
+    }
+    
+    .trend {
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      
+      &.up {
+        background-color: rgba(87, 255, 92, 0.24);
+        color: var(--success-color);
+      }
+      
+      &.down {
+        background-color: rgba(234, 40, 56, 0.352);
+        color: var(--danger-color);
+      }
+    }
+  }
+  
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 8px;
+  }
+  
+  .stat-subtext {
+    font-size: 14px;
+    color: var(--text-light);
+  }
+}
+
+// Occupancy Info
+.occupancy-info {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  min-height: 180px;
+  padding: 16px 0;
+}
+
+.occupancy-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  .circular-progress {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 12px;
+    
+    svg {
+      width: 100%;
+      height: 100%;
+      
+      .circle-bg {
+        fill: none;
+        stroke: rgb(234, 40, 56);
+        stroke-width: 3;
+      }
+      
+      .circle {
+        fill: none;
+        stroke: var(--secondary-color);
+        stroke-width: 3;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        transition: var(--transition);
+      }
+      
+      .percentage {
+        font-size: 9px;
+        text-anchor: middle;
+        fill: var(--text-color);
+        font-weight: 600;
+      }
+    }
+  }
+  
   p {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+}
+
+.highest-room {
+  padding: 16px;
+  border-radius: 10px;
+  background-color: rgb(234, 40, 56);
+  border-left: 4px solid var(--secondary-color);
+  width: 200px;
+  
+  .highest-room-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+  
+  .highest-room-name {
     font-size: 16px;
-    text-align: center;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .highest-room-value {
+    font-size: 14px;
+    color: var(--secondary-color);
+    font-weight: 500;
+  }
+}
+
+// Chart Legend
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-light);
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 6px;
+    }
+  }
+}
+
+// Mini Chart
+.mini-chart-container {
+  height: 180px;
+  position: relative;
+}
+
+// Coming Soon Cards
+.coming-soon-card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow);
+  opacity: 0.8;
+  
+  .coming-soon-icon {
+    width: 64px;
+    height: 64px;
+    background-color: rgb(234, 40, 56);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    
+    i {
+      font-size: 32px;
+      color: var(--secondary-color);
+    }
+  }
+  
+  h3 {
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  p {
+    color: var(--text-light);
+  }
+}
+
+// Data View
+.data-view {
+  background-color: var(--card-bg);
+  border-radius: 25px;
+  min-height: 500px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+// Empty State
+.empty-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+  
+  i {
+    font-size: 64px;
+    color: #ddd;
+    margin-bottom: 16px;
+  }
+  
+  h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: var(--text-color);
+  }
+  
+  p {
+    color: var(--text-light);
   }
 }
 
 // Chart View
 .chart-view {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-
-  .chart-placeholder {
-    height: 350px;
-    position: relative;
-  }
-
-  .chart-grid {
-    display: flex;
-    height: 300px;
-    margin-top: 20px;
-  }
-
-  .y-axis {
-    width: 50px;
-    height: 250px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    margin-right: 10px;
-
-    .y-label {
-      position: relative;
-      font-size: 12px;
-      text-align: right;
-      color: #666;
-      padding-right: 10px;
-      transform: translateY(-50%);
-      height: 1px;
-
-      &::after {
-        content: "";
-        position: absolute;
-        right: -10px;
-        top: 50%;
-        width: 5px;
-        height: 1px;
-        background-color: #ccc;
-      }
-    }
-  }
-
-  .mock-chart {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    height: 250px;
+  padding: 24px;
+  height: 500px;
+  
+  .chart-container {
+    height: 100%;
     width: 100%;
-    position: relative;
-
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: linear-gradient(to top, #a2a2a2 1px, transparent 1px);
-      background-size: 100% 50px;
-      z-index: 0;
-      opacity: 0.5;
-    }
-
-    .chart-bar {
-      width: 40px;
-      background-color: #0066cc;
-      position: relative;
-      min-height: 1px;
-      transition: height 0.3s ease;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .bar-value {
-        position: absolute;
-        top: -25px;
-        font-size: 12px;
-        color: #333;
-        font-weight: bold;
-      }
-
-      .bar-label {
-        position: absolute;
-        bottom: -25px;
-        font-size: 12px;
-        color: #666;
-        white-space: nowrap;
-      }
-
-      &:hover .tooltip {
-        visibility: visible;
-        opacity: 1;
-      }
-
-      .tooltip {
-        visibility: hidden;
-        width: 120px;
-        background-color: #333;
-        color: white;
-        text-align: center;
-        padding: 5px;
-        border-radius: 6px;
-        position: absolute;
-        z-index: 2;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -60px;
-        opacity: 0;
-        transition: opacity 0.3s;
-      }
-    }
   }
 }
 
 // Table View
 .table-view {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-
-  table {
+  padding: 0;
+  overflow: auto;
+  max-height: 500px;
+  border-radius: 25px;
+  
+  .data-table {
     width: 100%;
     border-collapse: collapse;
-
-    th,
-    td {
-      padding: 12px;
+    
+    th, td {
+      padding: 16px 24px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
     }
-
-    th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-
-    tr:hover {
-      background-color: #f5f5f5;
-    }
-  }
-}
-
-// Overview Cards
-.overview-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-
-  .summary-card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 0;
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-header {
-      background-color: #f8f9fa;
-      padding: 15px 20px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      h3 {
-        margin: 0;
-        color: #333;
-        font-size: 18px;
-      }
-
-      .card-icon {
-        font-size: 24px;
+    
+    thead {
+      background-color: rgb(239, 239, 239);
+      position: sticky;
+      top: 0;
+      
+      th {
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+        white-space: nowrap;
       }
     }
-
-    .card-content {
-      padding: 20px;
-
-      .metric {
-        margin-bottom: 15px;
-
-        &:last-child {
-          margin-bottom: 0;
+    
+    tbody {
+      tr {
+        transition: var(--transition);
+        border-bottom: 1px solid #f0f0f0;
+        
+        &:hover {
+          background-color: rgba(234, 40, 56, 0.25);
         }
-
-        .metric-value {
-          display: block;
-          font-size: 32px;
-          font-weight: bold;
-          color: #0066cc;
-          margin-bottom: 5px;
-        }
-
-        .metric-label {
+        
+        td {
           font-size: 14px;
-          color: #666;
+          
+          &:last-child {
+            text-align: right;
+          }
         }
       }
-
-      .coming-soon {
-        color: #888;
-        font-style: italic;
-        text-align: center;
-        padding: 30px 0;
-      }
     }
-
-    &.future-card {
-      opacity: 0.7;
-
-      .card-header {
-        background-color: #f0f0f0;
+    
+    .change-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      font-weight: 500;
+      
+      &.up {
+        color: var(--success-color);
+      }
+      
+      &.down {
+        color: rgb(234, 40, 56);
+      }
+      
+      i {
+        font-size: 14px;
       }
     }
   }
 }
 
-// Responsive Design - for better mobile experience
+// Responsive Design
+@media (max-width: 992px) {
+  .main-nav ul li span {
+    display: none;
+  }
+  
+  .main-nav ul li i {
+    margin-right: 0;
+    font-size: 24px;
+  }
+  
+  .overview-grid .stat-card.wide {
+    grid-column: span 1;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-header {
+    padding: 0 16px;
+    flex-wrap: wrap;
+    height: auto;
+    padding: 12px;
+  }
+  
+  .brand {
+    order: 1;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .main-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 8px;
+    
+    ul {
+      justify-content: flex-start;
+      min-width: max-content;
+    }
+  }
+  
+  .user-profile {
+    order: 2;
+    margin-left: auto;
+  }
+  
+  .content-header {
     flex-direction: column;
     align-items: flex-start;
-
-    .dashboard-actions {
+    
+    .header-actions {
       width: 100%;
-      flex-direction: column;
-      align-items: flex-start;
-
+      flex-wrap: wrap;
+      
       .room-selector {
-        width: 100%;
-
-        select {
+        flex: 1;
+        min-width: 200px;
+        
+        .select-wrapper select {
           width: 100%;
         }
       }
-
-      button {
-        width: 100%;
+      
+      .view-toggle {
+        flex-grow: 1;
+        justify-content: center;
       }
     }
   }
-
-  .tabs {
-    overflow-x: auto;
-
-    button {
-      padding: 10px 15px;
-      font-size: 14px;
-    }
-  }
-
-  .overview-cards {
-    grid-template-columns: 1fr;
+  
+  .dashboard-content {
+    padding: 16px;
   }
 }
