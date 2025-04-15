@@ -79,31 +79,61 @@
     // Styles for user filtering
     .user-filters {
       display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
+      width: 100%;
+      margin-bottom: 15px;
+
+      .filters-container {
+        width: 100%;
+        border: 1px solid #e0e0e0;
+        background-color: #f9f9f9;
+        border-radius: 6px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+        .filter-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 15px;
+          margin-bottom: 10px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
 
       .filter-group {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 5px;
+        flex: 1;
+        min-width: 150px;
 
         label {
-          font-size: 14px;
+          font-size: 13px;
           color: #555;
+          font-weight: 500;
         }
 
         select {
           padding: 8px 12px;
-          border: 1px solid #ccc;
+          border: 1px solid #ddd;
           border-radius: 4px;
           background-color: white;
           font-size: 14px;
-          min-width: 150px;
+          height: 36px;
           cursor: pointer;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 10px center;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
 
           &:focus {
             outline: none;
             border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
           }
         }
       }
@@ -267,10 +297,13 @@
   background-color: white;
   border-radius: 8px;
   padding: 20px;
+  overflow-x: auto;
+  max-width: 100%;
 
   table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 
     th,
     td {
@@ -287,6 +320,24 @@
     tr:hover {
       background-color: #f5f5f5;
     }
+  }
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
   }
 }
 
@@ -390,6 +441,69 @@
   font-style: italic;
 }
 
+// Users Table specific styles
+.users-table {
+  font-size: 14px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  
+  th {
+    background-color: #f0f2f5;
+    color: #333;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 15px;
+    border-bottom: 2px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  
+  td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+  
+  tr:hover {
+    background-color: #e9f3ff;
+  }
+  
+  // User status styling
+  .status-active {
+    color: #28a745;
+    font-weight: 500;
+  }
+  
+  .status-inactive {
+    color: #dc3545;
+    font-weight: 500;
+  }
+  
+  // BMI classification styling
+  .bmi-underweight {
+    color: #ffc107;
+  }
+  
+  .bmi-normal {
+    color: #28a745;
+  }
+  
+  .bmi-overweight {
+    color: #fd7e14;
+  }
+  
+  .bmi-obese {
+    color: #dc3545;
+  }
+}
+
 // Responsive Design - for better mobile experience
 @media (max-width: 768px) {
   .dashboard-header {
@@ -414,19 +528,20 @@
       }
 
       .user-filters {
-        width: 100%;
-        flex-direction: column;
-
+        .filters-container {
+          padding: 10px;
+          
+          .filter-row {
+            flex-direction: column;
+            gap: 10px;
+          }
+        }
+        
         .filter-group {
           width: 100%;
-
-          .filter-buttons {
+          
+          select {
             width: 100%;
-            justify-content: space-between;
-
-            button {
-              flex: 1;
-            }
           }
         }
       }
@@ -444,5 +559,26 @@
 
   .overview-cards {
     grid-template-columns: 1fr;
+  }
+
+  .users-table {
+    th, td {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+  }
+}
+
+// Additional horizontal scrolling indicator for tables on mobile
+@media (max-width: 992px) {
+  .table-view::after {
+    content: "◄ Scroll horizontally ►";
+    display: block;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+    background-color: #f9f9f9;
   }
 }

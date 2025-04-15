@@ -26,6 +26,11 @@ interface User {
   lastUpdated: string;
 }
 
+// Typy pro časové rozsahy a věkové skupiny
+type TimeRange = 'all' | 'week' | 'month' | 'year';
+type AgeGroup = 'all' | '15-18' | '18-26' | '26-30' | '30-40' | '40-50' | '50-65' | '65+';
+type UserRole = 'all' | 'user' | 'trainer';
+
 // Data pro finance
 const FINANCES_DATA: DataItem[] = [
   { date: '2023-01', value: 1250 },
@@ -143,6 +148,10 @@ export class DashboardComponent implements OnInit {
   // User filters
   userStateFilter: 'all' | 'active' | 'inactive' = 'all';
   userSexFilter: 'all' | 'male' | 'female' = 'all';
+  userRoleFilter: UserRole = 'all';
+  userAgeGroupFilter: AgeGroup = 'all';
+  userRegistrationTimeFilter: TimeRange = 'all';
+  userLastUpdatedTimeFilter: TimeRange = 'all';
 
   // Data pro jednotlivé záložky
   overviewData = OVERVIEW_DATA;
@@ -150,6 +159,7 @@ export class DashboardComponent implements OnInit {
   reservationsData = RESERVATIONS_DATA;
   roomsData = ROOMS_DATA;
   usersData: DataItem[] = [];
+  usersTableData: User[] = [];
   trainersData: DataItem[] = [];
   
   // Data from API
@@ -175,33 +185,27 @@ export class DashboardComponent implements OnInit {
         },
         error: (error) => {
           console.error('Chyba při načítání uživatelů:', error);
-          this.usersError = 'Nepodařilo se načíst data z API.';
+          this.usersError = 'Failed to load data from API.';
           this.isUsersLoading = false;
         }
       });
   }
 
-  // Method to process user data based on filters
+  // Method to process user data based on all filters
   processUserData() {
     if (!this.users || this.users.length === 0) {
       this.usersData = [];
+      this.usersTableData = [];
       return;
     }
 
-    // Filtering users based on state
-    let filteredUsers = this.users;
+    // Apply all filters
+    let filteredUsers = this.applyAllUserFilters(this.users);
     
-    if (this.userStateFilter !== 'all') {
-      const stateToFilter = this.userStateFilter === 'active' ? 'active' : 'inactive';
-      filteredUsers = filteredUsers.filter(user => user.state === stateToFilter);
-    }
+    // Update table data
+    this.usersTableData = filteredUsers;
     
-    if (this.userSexFilter !== 'all') {
-      const sexToFilter = this.userSexFilter === 'male' ? 0 : 1;
-      filteredUsers = filteredUsers.filter(user => user.sex === sexToFilter);
-    }
-    
-    // Getting months from createdAt and grouping users by months
+    // Getting months from createdAt and grouping users by months for the chart view
     const usersByMonth = filteredUsers.reduce((acc, user) => {
       const date = new Date(user.createdAt);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -222,28 +226,236 @@ export class DashboardComponent implements OnInit {
     this.updateYAxisValues();
   }
 
-  // Switching user state filter
+  // Apply all user filters at once
+  applyAllUserFilters(users: User[]): User[] {
+    let filteredUsers = [...users];
+    
+    // Filter by role
+    if (this.userRoleFilter !== 'all') {
+      const roleIdToFilter = this.userRoleFilter === 'user' ? 0 : 1;
+      filteredUsers = filteredUsers.filter(user => user.roleId === roleIdToFilter);
+    }
+    
+    // Filter by state
+    if (this.userStateFilter !== 'all') {
+      const stateToFilter = this.userStateFilter === 'active' ? 'active' : 'inactive';
+      filteredUsers = filteredUsers.filter(user => user.state === stateToFilter);
+    }
+    
+    // Filter by sex
+    if (this.userSexFilter !== 'all') {
+      const sexToFilter = this.userSexFilter === 'male' ? 0 : 1;
+      filteredUsers = filteredUsers.filter(user => user.sex === sexToFilter);
+    }
+    
+    // Filter by age group
+    if (this.userAgeGroupFilter !== 'all') {
+      filteredUsers = filteredUsers.filter(user => this.isUserInAgeGroup(user, this.userAgeGroupFilter));
+    }
+    
+    // Filter by registration time
+    if (this.userRegistrationTimeFilter !== 'all') {
+      filteredUsers = filteredUsers.filter(user => 
+        this.isDateInTimeRange(new Date(user.createdAt), this.userRegistrationTimeFilter)
+      );
+    }
+    
+    // Filter by last updated time
+    if (this.userLastUpdatedTimeFilter !== 'all') {
+      filteredUsers = filteredUsers.filter(user => 
+        this.isDateInTimeRange(new Date(user.lastUpdated), this.userLastUpdatedTimeFilter)
+      );
+    }
+    
+    return filteredUsers;
+  }
+
+  // Check if a date is within the specified time range
+  isDateInTimeRange(date: Date, range: TimeRange): boolean {
+    if (range === 'all') return true;
+    
+    const now = new Date();
+    
+    if (range === 'week') {
+      // Within the last 7 days
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(now.getDate() - 7);
+      return date >= oneWeekAgo;
+    }
+    
+    if (range === 'month') {
+      // Within the last 30 days
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setDate(now.getDate() - 30);
+      return date >= oneMonthAgo;
+    }
+    
+    if (range === 'year') {
+      // Within the last 365 days
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(now.getFullYear() - 1);
+      return date >= oneYearAgo;
+    }
+    
+    return false;
+  }
+
+  // Check if a user is in the specified age group
+  isUserInAgeGroup(user: User, ageGroup: AgeGroup): boolean {
+    if (ageGroup === 'all') return true;
+    
+    const birthDate = new Date(user.birthDate);
+    const today = new Date();
+    
+    // Calculate age
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    // Check against age groups
+    switch(ageGroup) {
+      case '15-18': return age >= 15 && age <= 18;
+      case '18-26': return age > 18 && age <= 26;
+      case '26-30': return age > 26 && age <= 30;
+      case '30-40': return age > 30 && age <= 40;
+      case '40-50': return age > 40 && age <= 50;
+      case '50-65': return age > 50 && age <= 65;
+      case '65+': return age > 65;
+      default: return false;
+    }
+  }
+
+  // Calculate BMI for a user
+  calculateBMI(weight: number, height: number): number {
+    // Height should be in meters, so convert from cm
+    const heightInMeters = height / 100;
+    // BMI formula: weight(kg) / height²(m)
+    return weight / (heightInMeters * heightInMeters);
+  }
+
+  // Format BMI value with proper classification
+  formatBMI(bmi: number): string {
+    // Round to 1 decimal place
+    const roundedBMI = Math.round(bmi * 10) / 10;
+    
+    // BMI classification
+    let classification = '';
+    if (bmi < 18.5) classification = '(Underweight)';
+    else if (bmi < 25) classification = '(Normal)';
+    else if (bmi < 30) classification = '(Overweight)';
+    else classification = '(Obese)';
+    
+    return `${roundedBMI} ${classification}`;
+  }
+
+  // Get CSS class for BMI value
+  getBMIClass(bmi: number): string {
+    if (bmi < 18.5) return 'bmi-underweight';
+    else if (bmi < 25) return 'bmi-normal';
+    else if (bmi < 30) return 'bmi-overweight';
+    else return 'bmi-obese';
+  }
+
+  // Calculate age from birth date
+  calculateAge(birthDate: string): number {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
+  }
+
+  // Filter handlers for user data
+  setUserRoleFilter(filter: UserRole) {
+    this.userRoleFilter = filter;
+    this.processUserData();
+  }
+
   setUserStateFilter(filter: 'all' | 'active' | 'inactive') {
     this.userStateFilter = filter;
     this.processUserData();
   }
   
-  // Switching user sex filter
   setUserSexFilter(filter: 'all' | 'male' | 'female') {
     this.userSexFilter = filter;
     this.processUserData();
   }
   
-  // Event handler for state filter change in select
+  setUserAgeGroupFilter(filter: AgeGroup) {
+    this.userAgeGroupFilter = filter;
+    this.processUserData();
+  }
+  
+  setUserRegistrationTimeFilter(filter: TimeRange) {
+    this.userRegistrationTimeFilter = filter;
+    this.processUserData();
+  }
+  
+  setUserLastUpdatedTimeFilter(filter: TimeRange) {
+    this.userLastUpdatedTimeFilter = filter;
+    this.processUserData();
+  }
+  
+  // Event handler for filter changes in select elements
+  onUserRoleFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.setUserRoleFilter(select.value as UserRole);
+  }
+  
   onUserStateFilterChange(event: Event) {
     const select = event.target as HTMLSelectElement;
     this.setUserStateFilter(select.value as 'all' | 'active' | 'inactive');
   }
   
-  // Event handler for sex filter change in select
   onUserSexFilterChange(event: Event) {
     const select = event.target as HTMLSelectElement;
     this.setUserSexFilter(select.value as 'all' | 'male' | 'female');
+  }
+  
+  onUserAgeGroupFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.setUserAgeGroupFilter(select.value as AgeGroup);
+  }
+  
+  onUserRegistrationTimeFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.setUserRegistrationTimeFilter(select.value as TimeRange);
+  }
+  
+  onUserLastUpdatedTimeFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.setUserLastUpdatedTimeFilter(select.value as TimeRange);
+  }
+
+  // Format methods for display
+  formatRole(roleId: number): string {
+    return roleId === 0 ? 'User' : 'Trainer';
+  }
+
+  formatSex(sex: number): string {
+    return sex === 0 ? 'Male' : 'Female';
+  }
+
+  formatState(state: string): string {
+    return state.charAt(0).toUpperCase() + state.slice(1);
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   }
 
   get activeData(): DataItem[] {
@@ -357,6 +569,10 @@ export class DashboardComponent implements OnInit {
     if (tab === 'users') {
       this.userStateFilter = 'all';
       this.userSexFilter = 'all';
+      this.userRoleFilter = 'all';
+      this.userAgeGroupFilter = 'all';
+      this.userRegistrationTimeFilter = 'all';
+      this.userLastUpdatedTimeFilter = 'all';
       this.processUserData();
     }
     this.updateYAxisValues();

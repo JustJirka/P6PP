@@ -31,12 +31,6 @@
     >
       Users
     </button>
-    <button
-      [class.active]="activeTab === 'trainers'"
-      (click)="setActiveTab('trainers')"
-    >
-      Trainers
-    </button>
   </div>
 
   <!-- Dashboard Header -->
@@ -59,22 +53,77 @@
 
       <!-- Filters for Users -->
       <div class="user-filters" *ngIf="activeTab === 'users'">
-        <!-- Filter by state -->
-        <div class="filter-group">
-          <select id="userStateSelect" (change)="onUserStateFilterChange($event)">
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
+        <div class="filters-container">
+          <div class="filter-row">
+            <!-- Filter by role -->
+            <div class="filter-group">
+              <label for="userRoleSelect">Role:</label>
+              <select id="userRoleSelect" (change)="onUserRoleFilterChange($event)">
+                <option value="all">All</option>
+                <option value="user">User</option>
+                <option value="trainer">Trainer</option>
+              </select>
+            </div>
 
-        <!-- Filter by sex -->
-        <div class="filter-group">
-          <select id="userSexSelect" (change)="onUserSexFilterChange($event)">
-            <option value="all">All</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
+            <!-- Filter by state -->
+            <div class="filter-group">
+              <label for="userStateSelect">Status:</label>
+              <select id="userStateSelect" (change)="onUserStateFilterChange($event)">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+            <!-- Filter by sex -->
+            <div class="filter-group">
+              <label for="userSexSelect">Gender:</label>
+              <select id="userSexSelect" (change)="onUserSexFilterChange($event)">
+                <option value="all">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <!-- Filter by age group -->
+            <div class="filter-group">
+              <label for="userAgeGroupSelect">Age Group:</label>
+              <select id="userAgeGroupSelect" (change)="onUserAgeGroupFilterChange($event)">
+                <option value="all">All</option>
+                <option value="15-18">15-18</option>
+                <option value="18-26">18-26</option>
+                <option value="26-30">26-30</option>
+                <option value="30-40">30-40</option>
+                <option value="40-50">40-50</option>
+                <option value="50-65">50-65</option>
+                <option value="65+">65+</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <!-- Filter by registration date -->
+            <div class="filter-group">
+              <label for="userRegistrationTimeSelect">Registration Date:</label>
+              <select id="userRegistrationTimeSelect" (change)="onUserRegistrationTimeFilterChange($event)">
+                <option value="all">All Time</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+
+            <!-- Filter by last updated date -->
+            <div class="filter-group">
+              <label for="userLastUpdatedTimeSelect">Last Updated:</label>
+              <select id="userLastUpdatedTimeSelect" (change)="onUserLastUpdatedTimeFilterChange($event)">
+                <option value="all">All Time</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -254,7 +303,7 @@
       </div>
 
       <!-- Information about empty data for users tab with no error -->
-      <div *ngIf="activeTab === 'users' && !isUsersLoading && !usersError && activeData.length === 0" class="empty-data-message">
+      <div *ngIf="activeTab === 'users' && !isUsersLoading && !usersError && usersTableData.length === 0" class="empty-data-message">
         <p>No data found for the selected filters.</p>
       </div>
 
@@ -263,8 +312,8 @@
         <p>Data for {{ activeTab }} will be implemented soon.</p>
       </div>
 
-      <!-- Table - only shown when there's data -->
-      <table *ngIf="activeData.length > 0">
+      <!-- Standard Table - for non-users tabs -->
+      <table *ngIf="activeTab !== 'users' && activeData.length > 0">
         <thead>
           <tr>
             <th>Date</th>
@@ -275,6 +324,40 @@
           <tr *ngFor="let item of activeData">
             <td>{{ item.date }}</td>
             <td>{{ item.value }}{{ activeTab === "rooms" ? "%" : "" }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Users Detailed Table -->
+      <table *ngIf="activeTab === 'users' && usersTableData.length > 0" class="users-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Gender</th>
+            <th>Weight (kg)</th>
+            <th>Height (cm)</th>
+            <th>BMI</th>
+            <th>Birth Date</th>
+            <th>Age</th>
+            <th>Registered</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of usersTableData">
+            <td>{{ user.id }}</td>
+            <td>{{ formatRole(user.roleId) }}</td>
+            <td [class]="'status-' + user.state">{{ formatState(user.state) }}</td>
+            <td>{{ formatSex(user.sex) }}</td>
+            <td>{{ user.weight }}</td>
+            <td>{{ user.height }}</td>
+            <td [class]="getBMIClass(calculateBMI(user.weight, user.height))">{{ formatBMI(calculateBMI(user.weight, user.height)) }}</td>
+            <td>{{ formatDate(user.birthDate) }}</td>
+            <td>{{ calculateAge(user.birthDate) }}</td>
+            <td>{{ formatDate(user.createdAt) }}</td>
+            <td>{{ formatDate(user.lastUpdated) }}</td>
           </tr>
         </tbody>
       </table>
