@@ -41,7 +41,7 @@ namespace Analytics.Controllers
 
         // POST: api/Bookings
         [HttpPost]
-        public async Task<ActionResult<BookingDto>> CreateUser([FromBody] BookingDto booking)
+        public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] BookingDto booking)
         {
             _logger.LogInformation("Received booking: {@Booking}", booking);
             if (booking == null)
