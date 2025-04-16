@@ -1,217 +1,214 @@
 <div class="dashboard">
-  <!-- Tab Navigation -->
-  <div class="tabs">
-    <button
-      [class.active]="activeTab === 'overview'"
-      (click)="setActiveTab('overview')"
-    >
-      Overview
-    </button>
-    <button
-      [class.active]="activeTab === 'finances'"
-      (click)="setActiveTab('finances')"
-    >
-      Finances
-    </button>
-    <button
-      [class.active]="activeTab === 'reservations'"
-      (click)="setActiveTab('reservations')"
-    >
-      Reservations
-    </button>
-    <button
-      [class.active]="activeTab === 'rooms'"
-      (click)="setActiveTab('rooms')"
-    >
-      Rooms
-    </button>
-    <button
-      [class.active]="activeTab === 'users'"
-      (click)="setActiveTab('users')"
-    >
-      Users
-    </button>
-    <button
-      [class.active]="activeTab === 'trainers'"
-      (click)="setActiveTab('trainers')"
-    >
-      Trainers
-    </button>
-  </div>
-
-  <!-- Dashboard Header -->
-  <div class="dashboard-header">
-    <h2>{{ activeTitle }}</h2>
-    <div class="dashboard-actions">
-      <!-- Room selector - show only for rooms tab -->
-      <div
-        class="room-selector"
-        *ngIf="activeTab === 'rooms' && roomsData.length > 0"
-      >
-        <label for="roomSelect">Select Room:</label>
-        <select id="roomSelect" (change)="selectRoom($event)">
-          <option [value]="''">Average - All Rooms</option>
-          <option *ngFor="let room of roomsData" [value]="room.roomId">
-            {{ room.roomName || "Unknown Room" }}
-          </option>
-        </select>
-      </div>
-
-      <!-- View toggle button - Don't show for overview tab -->
-      <button *ngIf="activeTab !== 'overview'" (click)="toggleView()">
-        Switch to {{ viewMode === "chart" ? "Table" : "Chart" }} View
-      </button>
+  <!-- Top Navigation -->
+  <header class="dashboard-header">
+    <div class="brand">
+      <div class="logo">REZERVACE<span class="plus">+</span></div>
     </div>
-  </div>
+    
+    <nav class="main-nav">
+      <ul>
+        <li [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview')">
+          <i class="material-icons">dashboard</i>
+          <span>Overview</span>
+        </li>
+        <li [class.active]="activeTab === 'finances'" (click)="setActiveTab('finances')">
+          <i class="material-icons">attach_money</i>
+          <span>Finances</span>
+        </li>
+        <li [class.active]="activeTab === 'reservations'" (click)="setActiveTab('reservations')">
+          <i class="material-icons">event</i>
+          <span>Reservations</span>
+        </li>
+        <li [class.active]="activeTab === 'rooms'" (click)="setActiveTab('rooms')">
+          <i class="material-icons">meeting_room</i>
+          <span>Rooms</span>
+        </li>
+        <li [class.active]="activeTab === 'users'" (click)="setActiveTab('users')">
+          <i class="material-icons">people</i>
+          <span>Users</span>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="user-profile">
+      <div class="avatar">AD</div>
+      <div class="user-info">
+        <p class="name">Name</p>
+        <p class="role">Admin</p>
+      </div>
+    </div>
+  </header>
 
-  <!-- Dashboard Content -->
+  <!-- Main Content Area -->
   <div class="dashboard-content">
-    <!-- Overview View - Special Case -->
-    <div *ngIf="activeTab === 'overview'" class="overview-cards">
-      <!-- Financial Summary Card -->
-      <div class="summary-card">
-        <div class="card-header">
-          <h3>Financial Summary</h3>
-          <span class="card-icon">💰</span>
-        </div>
-        <div class="card-content">
-          <div class="metric">
-            <span class="metric-value"
-              >{{ getLatestFinanceValue() | number : "1.0-0" }}$</span
-            >
-            <span class="metric-label">Latest Monthly Revenue</span>
-          </div>
-          <div class="metric">
-            <span class="metric-value"
-              >{{ getTotalFinanceValue() | number : "1.0-0" }}$</span
-            >
-            <span class="metric-label">Total Revenue YTD</span>
+    <!-- Page Title & Actions -->
+    <div class="content-header">
+      <h1>{{ getActiveTitle() }}</h1>
+      
+      <div class="header-actions">
+        <!-- Room selector - show only for rooms tab -->
+        <div class="room-selector" *ngIf="activeTab === 'rooms' && roomsData.length > 0">
+          <div class="select-wrapper">
+            <select id="roomSelect" (change)="selectRoom($event)">
+              <option [value]="''">Average - All Rooms</option>
+              <option *ngFor="let room of roomsData" [value]="room.roomId">
+                {{ room.roomName }}
+              </option>
+            </select>
+            <i class="material-icons select-icon">keyboard_arrow_down</i>
           </div>
         </div>
-      </div>
 
-      <!-- Reservations Summary Card -->
-      <div class="summary-card">
-        <div class="card-header">
-          <h3>Reservations</h3>
-          <span class="card-icon">📅</span>
-        </div>
-        <div class="card-content">
-          <div class="metric">
-            <span class="metric-value">{{ getLatestReservationsValue() }}</span>
-            <span class="metric-label">Latest Monthly Bookings</span>
-          </div>
-          <div class="metric">
-            <span class="metric-value">{{ getTotalReservationsValue() }}</span>
-            <span class="metric-label">Total Bookings YTD</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Room Occupancy Summary Card -->
-      <div class="summary-card">
-        <div class="card-header">
-          <h3>Room Occupancy</h3>
-          <span class="card-icon">🏢</span>
-        </div>
-        <div class="card-content">
-          <div class="metric">
-            <span class="metric-value"
-              >{{ getAverageRoomOccupancyValue() }}%</span
-            >
-            <span class="metric-label">Average Occupancy Rate</span>
-          </div>
-          <div class="metric">
-            <span class="metric-value"
-              >{{ getHighestOccupancyRoom().value }}%</span
-            >
-            <span class="metric-label"
-              >Highest: {{ getHighestOccupancyRoom().name }}</span
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- Future Sections (Currently Empty) -->
-      <div class="summary-card future-card">
-        <div class="card-header">
-          <h3>Users & Trainers</h3>
-          <span class="card-icon">👥</span>
-        </div>
-        <div class="card-content">
-          <p class="coming-soon">Data coming soon</p>
-        </div>
+        <!-- View toggle button - Don't show for overview tab -->
+        <button class="view-toggle" *ngIf="activeTab !== 'overview'" (click)="toggleView()">
+          <i class="material-icons">{{ viewMode === 'chart' ? 'table_chart' : 'insert_chart' }}</i>
+          {{ viewMode === 'chart' ? 'Table View' : 'Chart View' }}
+        </button>
       </div>
     </div>
 
-    <!-- Chart View - For non-overview tabs -->
-    <div
-      *ngIf="viewMode === 'chart' && activeTab !== 'overview'"
-      class="chart-view"
-    >
-      <div class="chart-placeholder">
-        <!-- Information about empty data for future implementation -->
-        <div *ngIf="activeData.length === 0" class="empty-data-message">
-          <p>Data for {{ activeTab }} will be implemented soon.</p>
+    <!-- Dashboard Main Content -->
+    <main>
+      <!-- Overview View - Special Case -->
+      <div *ngIf="activeTab === 'overview'" class="overview-grid">
+        <div class="grid-row">
+          <!-- Financial Summary Card -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3>Monthly Revenue</h3>
+              <span class="trend up">+12%</span>
+            </div>
+            <div class="stat-value">${{ monthlyRevenue }}</div>
+            <div class="stat-subtext">Current month</div>
+          </div>
+          
+          <!-- Total Revenue Card -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3>Total Revenue</h3>
+              <span class="trend up">+8%</span>
+            </div>
+            <div class="stat-value">${{ totalRevenue }}</div>
+            <div class="stat-subtext">Year to date</div>
+          </div>
+          
+          <!-- Reservations Card -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3>Monthly Bookings</h3>
+              <span class="trend up">+15%</span>
+            </div>
+            <div class="stat-value">{{ monthlyBookings }}</div>
+            <div class="stat-subtext">Current month</div>
+          </div>
         </div>
-
-        <!-- Chart Grid - only shown when there's data -->
-        <div class="chart-grid" *ngIf="activeData.length > 0">
-          <!-- Y-osa s hodnotami -->
-          <div class="y-axis">
-            <div class="y-label" *ngFor="let value of yAxisValues">
-              {{ value }}
+        
+        <div class="grid-row">
+          <!-- Room Occupancy Card -->
+          <div class="stat-card wide">
+            <div class="stat-card-header">
+              <h3>Room Occupancy</h3>
+            </div>
+            <div class="occupancy-info">
+              <div class="occupancy-metric">
+                <div class="circular-progress">
+                  <svg viewBox="0 0 36 36">
+                    <path class="circle-bg"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle"
+                      [attr.stroke-dasharray]="averageOccupancy + ', 100'"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <text x="18" y="20.35" class="percentage">{{ averageOccupancy }}%</text>
+                  </svg>
+                </div>
+                <p>Average Occupancy</p>
+              </div>
+              
+              <!-- Highest Room Card -->
+              <div class="highest-room">
+                <div class="highest-room-label">Highest Occupancy</div>
+                <div class="highest-room-name">{{ highestOccupancyRoom.name }}</div>
+                <div class="highest-room-value">{{ highestOccupancyRoom.value }}% average</div>
+              </div>
             </div>
           </div>
-
-          <!-- Graf -->
-          <div class="mock-chart">
-            <div
-              *ngFor="let item of activeData"
-              class="chart-bar"
-              [style.height.px]="getBarHeight(item.value)"
-            >
-              <!-- Hodnota nad sloupcem -->
-              <span class="bar-value">
-                {{ item.value }}{{ activeTab === "rooms" ? "%" : "" }}
-              </span>
-              <span class="tooltip"
-                >{{ item.date }}: {{ item.value
-                }}{{ activeTab === "rooms" ? "%" : "" }}</span
-              >
-              <!-- Popisek pod sloupcem -->
-              <span class="bar-label">{{ item.date }}</span>
+          
+          <!-- Monthly Revenue Chart -->
+          <div class="stat-card wide">
+            <div class="stat-card-header">
+              <h3>Monthly Revenue</h3>
+              <div class="chart-legend">
+                <span class="legend-item">
+                  <span class="legend-color" style="background-color: #ea2839;"></span>
+                  <span>Revenue</span>
+                </span>
+              </div>
+            </div>
+            <div class="mini-chart-container">
+              <canvas id="revenueChart"></canvas>
             </div>
           </div>
         </div>
+        
+        <!-- Coming Soon Cards -->
+        <div class="grid-row">
+          <div class="coming-soon-card">
+            <div class="coming-soon-icon">
+              <i class="material-icons">people</i>
+            </div>
+            <h3>User Analytics</h3>
+            <p>Detailed user statistics coming soon</p>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <!-- Table View - For non-overview tabs -->
-    <div
-      *ngIf="viewMode === 'table' && activeTab !== 'overview'"
-      class="table-view"
-    >
-      <!-- Information about empty data for future implementation -->
-      <div *ngIf="activeData.length === 0" class="empty-data-message">
-        <p>Data for {{ activeTab }} will be implemented soon.</p>
+      
+      <!-- Data View (Chart or Table) - For non-overview tabs -->
+      <div *ngIf="activeTab !== 'overview'" class="data-view">
+        <!-- Empty State for tabs without data -->
+        <div *ngIf="getActiveData().length === 0" class="empty-state">
+          <i class="material-icons">insert_chart</i>
+          <h2>No Data Available</h2>
+          <p>{{ activeTab | titlecase }} data will be implemented soon.</p>
+        </div>
+        
+        <!-- Chart View -->
+        <div *ngIf="viewMode === 'chart' && getActiveData().length > 0" class="chart-view">
+          <div class="chart-container">
+            <canvas id="dataChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Table View -->
+        <div *ngIf="viewMode === 'table' && getActiveData().length > 0" class="table-view">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>{{ getValueLabel() }}</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of getActiveData(); let i = index">
+                <td>{{ item.date }}</td>
+                <td>{{ formatValue(item.value) }}</td>
+                <td>
+                  <span *ngIf="i > 0" 
+                    [class.up]="item.value > getActiveData()[i-1].value"
+                    [class.down]="item.value < getActiveData()[i-1].value"
+                    class="change-indicator">
+                    <i class="material-icons">
+                      {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
+                    </i>
+                    {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
+                  </span>
+                  <span *ngIf="i === 0">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      <!-- Table - only shown when there's data -->
-      <table *ngIf="activeData.length > 0">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>{{ valueLabel }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of activeData">
-            <td>{{ item.date }}</td>
-            <td>{{ item.value }}{{ activeTab === "rooms" ? "%" : "" }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    </main>
   </div>
 </div>
