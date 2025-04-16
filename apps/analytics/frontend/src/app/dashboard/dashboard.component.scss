@@ -277,6 +277,30 @@ main {
     }
   }
   
+  &.clickable {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(234, 40, 56, 0);
+      border-radius: 20px;
+      transition: background-color 0.3s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    &:hover::after {
+      background-color: rgba(234, 40, 56, 0.1);
+    }
+  }
+  
   .stat-card-header {
     display: flex;
     justify-content: space-between;
@@ -344,28 +368,32 @@ main {
     svg {
       width: 100%;
       height: 100%;
+      transform: rotate(-90deg);
       
       .circle-bg {
         fill: none;
-        stroke: rgb(234, 40, 56);
+        stroke: rgba(234, 40, 56, 0.2);
         stroke-width: 3;
       }
       
       .circle {
         fill: none;
-        stroke: var(--secondary-color);
+        stroke: rgb(234, 40, 56);
         stroke-width: 3;
         stroke-linecap: round;
-        transform: rotate(-90deg);
+        stroke-dashoffset: 0;
         transform-origin: 50% 50%;
-        transition: var(--transition);
+        transition: stroke-dasharray 1s ease;
       }
       
       .percentage {
-        font-size: 9px;
-        text-anchor: middle;
         fill: var(--text-color);
         font-weight: 600;
+        font-size: 9px;
+        text-anchor: middle;
+        transform: rotate(90deg);
+        transform-origin: center;
+        dominant-baseline: middle;
       }
     }
   }
@@ -378,27 +406,29 @@ main {
 }
 
 .highest-room {
-  padding: 16px;
+  padding: 20px;
   border-radius: 10px;
   background-color: rgb(234, 40, 56);
   border-left: 4px solid var(--secondary-color);
-  width: 200px;
+  width: 260px;
   
   .highest-room-label {
-    font-size: 12px;
-    color: var(--text-light);
-    margin-bottom: 8px;
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 10px;
+    font-weight: 500;
   }
   
   .highest-room-name {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    color: #ffffff;
   }
   
   .highest-room-value {
-    font-size: 14px;
-    color: var(--secondary-color);
+    font-size: 16px;
+    color: #ffffff;
     font-weight: 500;
   }
 }
@@ -658,5 +688,159 @@ main {
   
   .dashboard-content {
     padding: 16px;
+  }
+}
+
+// Chart Type Selector
+.chart-type-selector {
+  .select-wrapper {
+    position: relative;
+    
+    select {
+      appearance: none;
+      padding: 8px 36px 8px 16px;
+      border: 2px solid rgb(234, 40, 56);
+      border-radius: var(--border-radius);
+      background-color: rgb(255, 255, 255);
+      font-size: 14px;
+      width: 220px;
+      
+      &:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+      }
+
+      &:hover{
+        background-color: rgb(239, 239, 239);
+      }
+    }
+    
+    .select-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-light);
+    }
+  }
+}
+
+// User Filters
+.user-filters {
+  background-color: var(--card-bg);
+  border-radius: 25px;
+  margin-bottom: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  
+  .filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-width: 180px;
+        
+        label {
+          font-size: 12px;
+          color: var(--text-light);
+          font-weight: 500;
+        }
+        
+        .select-wrapper {
+          position: relative;
+          
+          select {
+            appearance: none;
+            width: 100%;
+            padding: 8px 36px 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg);
+            font-size: 14px;
+            transition: var(--transition);
+            
+            &:focus {
+              outline: none;
+              border-color: var(--secondary-color);
+            }
+            
+            &:hover {
+              border-color: var(--secondary-color);
+            }
+          }
+          
+          .select-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-light);
+          }
+        }
+      }
+      
+      .reset-button-container {
+        flex: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        
+        .reset-filters-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background-color: transparent;
+          border: 1px solid var(--text-light);
+          padding: 8px 16px;
+          border-radius: var(--border-radius);
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--text-light);
+          transition: var(--transition);
+          
+          &:hover {
+            background-color: rgba(234, 40, 56, 0.1);
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+          }
+          
+          .reset-icon {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// BMI indication colors in table
+.data-table {
+  .underweight {
+    color: #3498db;
+  }
+
+  .normal {
+    color: #2ecc71;
+  }
+
+  .overweight {
+    color: #f39c12;
+  }
+
+  .obese {
+    color: #e74c3c;
   }
 }

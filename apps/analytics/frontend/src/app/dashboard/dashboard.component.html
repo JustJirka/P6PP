@@ -59,6 +59,21 @@
           </div>
         </div>
 
+        <!-- Chart type selector - show only for users tab -->
+        <div class="chart-type-selector" *ngIf="activeTab === 'users' && viewMode === 'chart'">
+          <div class="select-wrapper">
+            <select id="chartTypeSelect" (change)="onChartTypeChange($event)">
+              <option value="registration">User Registrations</option>
+              <option value="role">Users by Role</option>
+              <option value="status">Users by Status</option>
+              <option value="gender">Users by Gender</option>
+              <option value="bmi">Users by BMI</option>
+              <option value="ageGroup">Users by Age Group</option>
+            </select>
+            <i class="material-icons select-icon">keyboard_arrow_down</i>
+          </div>
+        </div>
+
         <!-- View toggle button - Don't show for overview tab -->
         <button class="view-toggle" *ngIf="activeTab !== 'overview'" (click)="toggleView()">
           <i class="material-icons">{{ viewMode === 'chart' ? 'table_chart' : 'insert_chart' }}</i>
@@ -73,7 +88,7 @@
       <div *ngIf="activeTab === 'overview'" class="overview-grid">
         <div class="grid-row">
           <!-- Financial Summary Card -->
-          <div class="stat-card">
+          <div class="stat-card clickable" (click)="navigateToTab('finances')">
             <div class="stat-card-header">
               <h3>Monthly Revenue</h3>
               <span class="trend up">+12%</span>
@@ -83,7 +98,7 @@
           </div>
           
           <!-- Total Revenue Card -->
-          <div class="stat-card">
+          <div class="stat-card clickable" (click)="navigateToTab('finances')">
             <div class="stat-card-header">
               <h3>Total Revenue</h3>
               <span class="trend up">+8%</span>
@@ -93,7 +108,7 @@
           </div>
           
           <!-- Reservations Card -->
-          <div class="stat-card">
+          <div class="stat-card clickable" (click)="navigateToTab('reservations')">
             <div class="stat-card-header">
               <h3>Monthly Bookings</h3>
               <span class="trend up">+15%</span>
@@ -105,7 +120,7 @@
         
         <div class="grid-row">
           <!-- Room Occupancy Card -->
-          <div class="stat-card wide">
+          <div class="stat-card wide clickable" (click)="navigateToTab('rooms')">
             <div class="stat-card-header">
               <h3>Room Occupancy</h3>
             </div>
@@ -134,7 +149,7 @@
           </div>
           
           <!-- Monthly Revenue Chart -->
-          <div class="stat-card wide">
+          <div class="stat-card wide clickable" (click)="navigateToTab('finances')">
             <div class="stat-card-header">
               <h3>Monthly Revenue</h3>
               <div class="chart-legend">
@@ -150,14 +165,138 @@
           </div>
         </div>
         
-        <!-- Coming Soon Cards -->
+        <!-- Users Card -->
         <div class="grid-row">
-          <div class="coming-soon-card">
-            <div class="coming-soon-icon">
-              <i class="material-icons">people</i>
+          <div class="stat-card wide users-overview clickable" (click)="navigateToTab('users')">
+            <div class="stat-card-header">
+              <h3>Users Overview</h3>
             </div>
-            <h3>User Analytics</h3>
-            <p>Detailed user statistics coming soon</p>
+            <div class="occupancy-info">
+              <div class="occupancy-metric">
+                <div class="circular-progress">
+                  <svg viewBox="0 0 36 36">
+                    <path class="circle-bg"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path class="circle"
+                      [attr.stroke-dasharray]="getActiveUsersPercentage() + ', 100'"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <text x="18" y="20.35" class="percentage">{{ getActiveUsersPercentage() }}%</text>
+                  </svg>
+                </div>
+                <p>Active Users</p>
+              </div>
+              
+              <!-- Users Info Card -->
+              <div class="highest-room">
+                <div class="highest-room-label">User Statistics</div>
+                <div class="highest-room-name">{{ getActiveUsersCount() }} Active Users</div>
+                <div class="highest-room-value">{{ getTotalUsersCount() }} Total Users</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User Filters - For Users tab only -->
+      <div *ngIf="activeTab === 'users'" class="user-filters">
+        <div class="filter-container">
+          <div class="filter-row">
+            <!-- Role Filter -->
+            <div class="filter-group">
+              <label for="userRoleSelect">Role:</label>
+              <div class="select-wrapper">
+                <select id="userRoleSelect" (change)="onUserRoleFilterChange($event)">
+                  <option value="all">All Roles</option>
+                  <option value="0">User</option>
+                  <option value="1">Trainer</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+            
+            <!-- Status Filter -->
+            <div class="filter-group">
+              <label for="userStateSelect">Status:</label>
+              <div class="select-wrapper">
+                <select id="userStateSelect" (change)="onUserStateFilterChange($event)">
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+            
+            <!-- Gender Filter -->
+            <div class="filter-group">
+              <label for="userSexSelect">Gender:</label>
+              <div class="select-wrapper">
+                <select id="userSexSelect" (change)="onUserSexFilterChange($event)">
+                  <option value="all">All Genders</option>
+                  <option value="0">Male</option>
+                  <option value="1">Female</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="filter-row">
+            <!-- BMI Filter -->
+            <div class="filter-group">
+              <label for="userBmiSelect">BMI Category:</label>
+              <div class="select-wrapper">
+                <select id="userBmiSelect" (change)="onUserBmiFilterChange($event)">
+                  <option value="all">All BMI Categories</option>
+                  <option value="underweight">Underweight</option>
+                  <option value="normal">Normal</option>
+                  <option value="overweight">Overweight</option>
+                  <option value="obese">Obese</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+
+            <!-- Age Group Filter -->
+            <div class="filter-group">
+              <label for="userAgeGroupSelect">Age Group:</label>
+              <div class="select-wrapper">
+                <select id="userAgeGroupSelect" (change)="onUserAgeGroupFilterChange($event)">
+                  <option value="all">All Age Groups</option>
+                  <option value="15-18">15-18</option>
+                  <option value="18-26">18-26</option>
+                  <option value="26-35">26-35</option>
+                  <option value="35-45">35-45</option>
+                  <option value="45-55">45-55</option>
+                  <option value="55-65">55-65</option>
+                  <option value="65+">65+</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+            
+            <!-- Registration Date Filter -->
+            <div class="filter-group">
+              <label for="userRegistrationTimeSelect">Registration Date:</label>
+              <div class="select-wrapper">
+                <select id="userRegistrationTimeSelect" (change)="onUserRegistrationTimeFilterChange($event)">
+                  <option value="all">All Time</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Reset filters button -->
+          <div class="filter-row">
+            <div class="filter-group reset-button-container">
+              <button class="reset-filters-button" (click)="resetUserFilters()">
+                <span class="reset-icon">✕</span> Reset Filters
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -180,7 +319,44 @@
         
         <!-- Table View -->
         <div *ngIf="viewMode === 'table' && getActiveData().length > 0" class="table-view">
-          <table class="data-table">
+          <!-- User Table - specific to users tab -->
+          <table *ngIf="activeTab === 'users'" class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Gender</th>
+                <th>Weight (kg)</th>
+                <th>Height (cm)</th>
+                <th>BMI</th>
+                <th>Birth Date</th>
+                <th>Age</th>
+                <th>Registered</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of getFilteredUsers()">
+                <td>{{ user.id }}</td>
+                <td>{{ formatRole(user.roleId) }}</td>
+                <td>{{ formatState(user.state) }}</td>
+                <td>{{ formatSex(user.sex) }}</td>
+                <td>{{ user.weight }}</td>
+                <td>{{ user.height }}</td>
+                <td [class]="getBMIClass(calculateBMI(user.weight, user.height))">
+                  {{ formatBMI(calculateBMI(user.weight, user.height)) }}
+                </td>
+                <td>{{ formatDate(user.birthDate) }}</td>
+                <td>{{ calculateAge(user.birthDate) }}</td>
+                <td>{{ formatDate(user.createdAt) }}</td>
+                <td>{{ formatDate(user.lastUpdated) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <!-- Finances Table -->
+          <table *ngIf="activeTab === 'finances'" class="data-table">
             <thead>
               <tr>
                 <th>Period</th>
@@ -207,6 +383,65 @@
               </tr>
             </tbody>
           </table>
+          
+          <!-- Reservations Table -->
+          <table *ngIf="activeTab === 'reservations'" class="data-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>{{ getValueLabel() }}</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of getActiveData(); let i = index">
+                <td>{{ item.date }}</td>
+                <td>{{ formatValue(item.value) }}</td>
+                <td>
+                  <span *ngIf="i > 0" 
+                    [class.up]="item.value > getActiveData()[i-1].value"
+                    [class.down]="item.value < getActiveData()[i-1].value"
+                    class="change-indicator">
+                    <i class="material-icons">
+                      {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
+                    </i>
+                    {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
+                  </span>
+                  <span *ngIf="i === 0">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <!-- Rooms Table -->
+          <table *ngIf="activeTab === 'rooms'" class="data-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>{{ getValueLabel() }}</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of getActiveData(); let i = index">
+                <td>{{ item.date }}</td>
+                <td>{{ formatValue(item.value) }}</td>
+                <td>
+                  <span *ngIf="i > 0" 
+                    [class.up]="item.value > getActiveData()[i-1].value"
+                    [class.down]="item.value < getActiveData()[i-1].value"
+                    class="change-indicator">
+                    <i class="material-icons">
+                      {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
+                    </i>
+                    {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
+                  </span>
+                  <span *ngIf="i === 0">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
         </div>
       </div>
     </main>
