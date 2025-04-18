@@ -11,7 +11,7 @@ public static class BookingMappingExtensions
         };
 
     public static BookingResponse Map(this Booking input)
-        => new(input.Id, input.ServiceId, input.Status);
+        => new(input.Id, input.ServiceId, input.UserId, input.Status);
 
     public static IList<BookingResponse> Map(this IList<Booking> input)
         => [.. input.Select(Map)];
