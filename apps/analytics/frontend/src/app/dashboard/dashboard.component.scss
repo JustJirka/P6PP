@@ -844,3 +844,133 @@ main {
     color: #e74c3c;
   }
 }
+
+// ============== BOOKING API INTEGRATION STYLES ==============
+
+// Sync button
+.sync-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(234, 40, 56);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 14px;
+  transition: var(--transition);
+  
+  &:hover {
+    background-color: rgb(200, 35, 48);
+  }
+  
+  i {
+    font-size: 18px;
+  }
+}
+
+// Loading state
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(234, 40, 56, 0.1);
+    border-radius: 50%;
+    border-left-color: rgb(234, 40, 56);
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: var(--text-light);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Error state
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  padding: 0 20px;
+  text-align: center;
+  
+  i {
+    font-size: 48px;
+    color: rgb(234, 40, 56);
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: var(--text-light);
+    max-width: 400px;
+  }
+}
+
+// Status badge
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.success {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #2e7d32;
+  }
+  
+  &.warning {
+    background-color: rgba(255, 152, 0, 0.15);
+    color: #ef6c00;
+  }
+  
+  &.danger {
+    background-color: rgba(244, 67, 54, 0.15);
+    color: #d32f2f;
+  }
+}
+
+// Action buttons
+.action-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  
+  i {
+    font-size: 18px;
+  }
+  
+  &.delete-btn {
+    color: #d32f2f;
+    
+    &:hover {
+      background-color: rgba(244, 67, 54, 0.1);
+    }
+  }
+}
+
+// Table styles for reservations
+.table-view {
+  .data-table {
+    th, td {
+      white-space: nowrap; // Prevent text wrapping in the table
+    }
+  }
+}

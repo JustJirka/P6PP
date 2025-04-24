@@ -46,6 +46,12 @@
       <h1>{{ getActiveTitle() }}</h1>
       
       <div class="header-actions">
+        <!-- Add sync button for reservations tab -->
+        <button *ngIf="activeTab === 'reservations'" class="sync-button" (click)="triggerDatabaseSync()">
+          <i class="material-icons">sync</i>
+          Trigger Sync
+        </button>
+        
         <!-- Room selector - show only for rooms tab -->
         <div class="room-selector" *ngIf="activeTab === 'rooms' && roomsData.length > 0">
           <div class="select-wrapper">
@@ -303,145 +309,195 @@
       
       <!-- Data View (Chart or Table) - For non-overview tabs -->
       <div *ngIf="activeTab !== 'overview'" class="data-view">
-        <!-- Empty State for tabs without data -->
-        <div *ngIf="getActiveData().length === 0" class="empty-state">
-          <i class="material-icons">insert_chart</i>
-          <h2>No Data Available</h2>
-          <p>{{ activeTab | titlecase }} data will be implemented soon.</p>
-        </div>
-        
-        <!-- Chart View -->
-        <div *ngIf="viewMode === 'chart' && getActiveData().length > 0" class="chart-view">
-          <div class="chart-container">
-            <canvas id="dataChart"></canvas>
+        <!-- Reservations Tab - Special Handling for API Integration -->
+        <div *ngIf="activeTab === 'reservations'">
+          <!-- Loading State -->
+          <div *ngIf="isLoadingReservations" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading reservations data...</p>
+          </div>
+          
+          <!-- Error State -->
+          <div *ngIf="reservationsError && !isLoadingReservations" class="error-state">
+            <i class="material-icons">error_outline</i>
+            <p>{{ reservationsError }}</p>
+          </div>
+          
+          <!-- Chart View - When in chart mode -->
+          <div *ngIf="!isLoadingReservations && viewMode === 'chart'" class="chart-view">
+            <!-- Empty State for no data -->
+            <div *ngIf="getActiveData().length === 0" class="empty-state">
+              <i class="material-icons">insert_chart</i>
+              <h2>No Reservations Available</h2>
+              <p>There are currently no reservations in the system.</p>
+            </div>
+            
+            <!-- The Chart -->
+            <div *ngIf="getActiveData().length > 0" class="chart-container">
+              <canvas id="dataChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Table View - Show the detailed bookings when in table mode -->
+          <div *ngIf="!isLoadingReservations && viewMode === 'table'" class="table-view">
+            <!-- Detailed Bookings Table -->
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User ID</th>
+                  <th>Room</th>
+                  <th>Start Time</th>
+                  <th>End Time</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let booking of rawBookings">
+                  <td>{{ booking.id }}</td>
+                  <td>{{ booking.userId }}</td>
+                  <td>{{ booking.roomId }}</td>
+                  <td>{{ formatReservationDate(booking.startTime) }}</td>
+                  <td>{{ formatReservationDate(booking.endTime) }}</td>
+                  <td>
+                    <span class="status-badge" [ngClass]="getReservationStatusClass(booking.status)">
+                      {{ booking.status }}
+                    </span>
+                  </td>
+                  <td>{{ formatReservationDate(booking.createdAt) }}</td>
+                  <td>
+                    <button class="action-btn delete-btn" (click)="deleteReservation(booking.id)" 
+                            title="Delete Reservation">
+                      <i class="material-icons">delete</i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <!-- Empty state when no reservations -->
+            <div *ngIf="rawBookings.length === 0" class="empty-state">
+              <i class="material-icons">event_busy</i>
+              <h3>No Reservations Found</h3>
+              <p>There are currently no reservations in the system.</p>
+            </div>
           </div>
         </div>
         
-        <!-- Table View -->
-        <div *ngIf="viewMode === 'table' && getActiveData().length > 0" class="table-view">
-          <!-- User Table - specific to users tab -->
-          <table *ngIf="activeTab === 'users'" class="data-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Gender</th>
-                <th>Weight (kg)</th>
-                <th>Height (cm)</th>
-                <th>BMI</th>
-                <th>Birth Date</th>
-                <th>Age</th>
-                <th>Registered</th>
-                <th>Last Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let user of getFilteredUsers()">
-                <td>{{ user.id }}</td>
-                <td>{{ formatRole(user.roleId) }}</td>
-                <td>{{ formatState(user.state) }}</td>
-                <td>{{ formatSex(user.sex) }}</td>
-                <td>{{ user.weight }}</td>
-                <td>{{ user.height }}</td>
-                <td [class]="getBMIClass(calculateBMI(user.weight, user.height))">
-                  {{ formatBMI(calculateBMI(user.weight, user.height)) }}
-                </td>
-                <td>{{ formatDate(user.birthDate) }}</td>
-                <td>{{ calculateAge(user.birthDate) }}</td>
-                <td>{{ formatDate(user.createdAt) }}</td>
-                <td>{{ formatDate(user.lastUpdated) }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Other Tabs - Standard Handling -->
+        <div *ngIf="activeTab !== 'reservations'">
+          <!-- Empty State for tabs without data -->
+          <div *ngIf="getActiveData().length === 0" class="empty-state">
+            <i class="material-icons">insert_chart</i>
+            <h2>No Data Available</h2>
+            <p>{{ activeTab | titlecase }} data will be implemented soon.</p>
+          </div>
           
-          <!-- Finances Table -->
-          <table *ngIf="activeTab === 'finances'" class="data-table">
-            <thead>
-              <tr>
-                <th>Period</th>
-                <th>{{ getValueLabel() }}</th>
-                <th>Change</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of getActiveData(); let i = index">
-                <td>{{ item.date }}</td>
-                <td>{{ formatValue(item.value) }}</td>
-                <td>
-                  <span *ngIf="i > 0" 
-                    [class.up]="item.value > getActiveData()[i-1].value"
-                    [class.down]="item.value < getActiveData()[i-1].value"
-                    class="change-indicator">
-                    <i class="material-icons">
-                      {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
-                    </i>
-                    {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
-                  </span>
-                  <span *ngIf="i === 0">-</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Chart View -->
+          <div *ngIf="viewMode === 'chart' && getActiveData().length > 0" class="chart-view">
+            <div class="chart-container">
+              <canvas id="dataChart"></canvas>
+            </div>
+          </div>
           
-          <!-- Reservations Table -->
-          <table *ngIf="activeTab === 'reservations'" class="data-table">
-            <thead>
-              <tr>
-                <th>Period</th>
-                <th>{{ getValueLabel() }}</th>
-                <th>Change</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of getActiveData(); let i = index">
-                <td>{{ item.date }}</td>
-                <td>{{ formatValue(item.value) }}</td>
-                <td>
-                  <span *ngIf="i > 0" 
-                    [class.up]="item.value > getActiveData()[i-1].value"
-                    [class.down]="item.value < getActiveData()[i-1].value"
-                    class="change-indicator">
-                    <i class="material-icons">
-                      {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
-                    </i>
-                    {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
-                  </span>
-                  <span *ngIf="i === 0">-</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <!-- Rooms Table -->
-          <table *ngIf="activeTab === 'rooms'" class="data-table">
-            <thead>
-              <tr>
-                <th>Period</th>
-                <th>{{ getValueLabel() }}</th>
-                <th>Change</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of getActiveData(); let i = index">
-                <td>{{ item.date }}</td>
-                <td>{{ formatValue(item.value) }}</td>
-                <td>
-                  <span *ngIf="i > 0" 
-                    [class.up]="item.value > getActiveData()[i-1].value"
-                    [class.down]="item.value < getActiveData()[i-1].value"
-                    class="change-indicator">
-                    <i class="material-icons">
-                      {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
-                    </i>
-                    {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
-                  </span>
-                  <span *ngIf="i === 0">-</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          
+          <!-- Table View -->
+          <div *ngIf="viewMode === 'table' && getActiveData().length > 0" class="table-view">
+            <!-- User Table - specific to users tab -->
+            <table *ngIf="activeTab === 'users'" class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Gender</th>
+                  <th>Weight (kg)</th>
+                  <th>Height (cm)</th>
+                  <th>BMI</th>
+                  <th>Birth Date</th>
+                  <th>Age</th>
+                  <th>Registered</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of getFilteredUsers()">
+                  <td>{{ user.id }}</td>
+                  <td>{{ formatRole(user.roleId) }}</td>
+                  <td>{{ formatState(user.state) }}</td>
+                  <td>{{ formatSex(user.sex) }}</td>
+                  <td>{{ user.weight }}</td>
+                  <td>{{ user.height }}</td>
+                  <td [class]="getBMIClass(calculateBMI(user.weight, user.height))">
+                    {{ formatBMI(calculateBMI(user.weight, user.height)) }}
+                  </td>
+                  <td>{{ formatDate(user.birthDate) }}</td>
+                  <td>{{ calculateAge(user.birthDate) }}</td>
+                  <td>{{ formatDate(user.createdAt) }}</td>
+                  <td>{{ formatDate(user.lastUpdated) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <!-- Finances Table -->
+            <table *ngIf="activeTab === 'finances'" class="data-table">
+              <thead>
+                <tr>
+                  <th>Period</th>
+                  <th>{{ getValueLabel() }}</th>
+                  <th>Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of getActiveData(); let i = index">
+                  <td>{{ item.date }}</td>
+                  <td>{{ formatValue(item.value) }}</td>
+                  <td>
+                    <span *ngIf="i > 0" 
+                      [class.up]="item.value > getActiveData()[i-1].value"
+                      [class.down]="item.value < getActiveData()[i-1].value"
+                      class="change-indicator">
+                      <i class="material-icons">
+                        {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
+                      </i>
+                      {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
+                    </span>
+                    <span *ngIf="i === 0">-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <!-- Rooms Table -->
+            <table *ngIf="activeTab === 'rooms'" class="data-table">
+              <thead>
+                <tr>
+                  <th>Period</th>
+                  <th>{{ getValueLabel() }}</th>
+                  <th>Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of getActiveData(); let i = index">
+                  <td>{{ item.date }}</td>
+                  <td>{{ formatValue(item.value) }}</td>
+                  <td>
+                    <span *ngIf="i > 0" 
+                      [class.up]="item.value > getActiveData()[i-1].value"
+                      [class.down]="item.value < getActiveData()[i-1].value"
+                      class="change-indicator">
+                      <i class="material-icons">
+                        {{ item.value > getActiveData()[i-1].value ? 'arrow_upward' : 'arrow_downward' }}
+                      </i>
+                      {{ getValueDifference(item.value, getActiveData()[i-1].value) }}
+                    </span>
+                    <span *ngIf="i === 0">-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </main>
