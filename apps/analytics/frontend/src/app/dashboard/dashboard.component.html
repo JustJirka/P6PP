@@ -46,12 +46,14 @@
       <h1>{{ getActiveTitle() }}</h1>
       
       <div class="header-actions">
-        <!-- Add sync button for reservations tab -->
+        <!-- TADY JE TLAČÍTKO PRO DATABASE SYNC (MŮŽEME VYUŽÍT) -->
+        <!-- Sync button for reservations tab -->
+        <!--
         <button *ngIf="activeTab === 'reservations'" class="sync-button" (click)="triggerDatabaseSync()">
           <i class="material-icons">sync</i>
           Trigger Sync
         </button>
-        
+        -->
         <!-- Room selector - show only for rooms tab -->
         <div class="room-selector" *ngIf="activeTab === 'rooms' && roomsData.length > 0">
           <div class="select-wrapper">

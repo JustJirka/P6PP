@@ -139,9 +139,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   selectedBooking: BookingDto | null = null;
   showDetailedReservations = false;
   
-  private bookingsApiUrl = 'http://localhost:5000/api/Bookings';
+  private bookingsApiUrl = 'http://localhost:8080/api/Bookings';
   
-  private currentDate = new Date('2025-04-24');
+  private currentDate = new Date();
 
   constructor(private http: HttpClient) {}
 
@@ -248,8 +248,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     ).subscribe();
   }
   
-  // database sync via the API
-  triggerDatabaseSync() {
+  // MŮŽEME VYUŽÍT FUNKCI PRO DATABASE SYNC - V HTML JE PAK TLAČÍTKO
+  /*triggerDatabaseSync() {
     this.http.get<any>(`${this.bookingsApiUrl}/triggerSync`).pipe(
       tap(result => {
         console.log('Database sync triggered successfully:', result);
@@ -262,7 +262,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         return of(null);
       })
     ).subscribe();
-  }
+  }*/
   
   toggleDetailedReservations() {
     this.showDetailedReservations = !this.showDetailedReservations;
