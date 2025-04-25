@@ -1,6 +1,7 @@
 ﻿using BookingService.API.Common.Exceptions;
 using BookingService.API.Common.MediatR.Interfaces;
 using MediatR;
+using ReservationSystem.Shared.Constants;
 using System.Security.Claims;
 
 namespace BookingService.API.Common.MediatR;
@@ -20,7 +21,7 @@ public sealed class UserIdBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
         var identity = _httpContextAccessor.HttpContext?.User.Identity as ClaimsIdentity
             ?? throw new AuthException("Invalid JWT: Claims Identity is null.");
 
-        var userIdClaim = identity.FindFirst(ClaimTypes.NameIdentifier)
+        var userIdClaim = identity.FindFirst(AuthConstants.UserId)
             ?? throw new AuthException("Invalid JWT: UserId claim is missing.");
 
         if (!int.TryParse(userIdClaim.Value, out var userId))

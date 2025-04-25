@@ -1,7 +1,10 @@
+using UserService.API.Abstraction;
 using UserService.API.Extensions;
 using UserService.API.Features;
 using UserService.API.Features.Roles;
 using UserService.API.Persistence;
+using UserService.API.Persistence.Repositories;
+using UserService.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +18,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.RegisterServices(builder.Configuration);
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService.API.Services.UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 var app = builder.Build();
 
@@ -49,6 +56,8 @@ app.UseEndpoints(endpoints =>
     UpdateUserEndpoint.Register(endpoints);
     CreateUserEndpoint.Register(endpoints);
     AssignUserRoleEndpoint.Register(endpoints);
+    DeactivateUserEndpoint.Register(endpoints);
+    ActivateUserEndpoint.Register(endpoints);
     
     
     // ROLE ENDPOINTS

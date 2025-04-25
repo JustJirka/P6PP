@@ -1,4 +1,4 @@
-name: Build and test
+name: 'Build and test'
 
 on:
   push:
@@ -28,4 +28,21 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --results-directory TestOutput --logger "trx;logfilename=${{ matrix.os }}-${{ matrix.dotnet-version }}.trx"
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.dotnet-version }}
+        path: TestOutput/${{ matrix.os }}-${{ matrix.dotnet-version }}.trx
+  report:
+    needs: build_and_test
+    name: Post test results
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dorny/test-reporter@v2
+      with:
+        artifact: /test-results-(.*)/
+        name: Test report on $1
+        path: '*.trx'
+        reporter: dotnet-trx

@@ -1,15 +1,15 @@
 using Microsoft.Extensions.Caching.Memory;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
-using UserService.API.Persistence.Repositories;
 
 namespace UserService.API.Services;
 
-public class RoleService
+public class RoleService : IRoleService
 {
-    private readonly RoleRepository _roleRepository;
+    private readonly IRoleRepository _roleRepository;
     private readonly IMemoryCache _cache;
     
-    public RoleService(RoleRepository roleRepository, IMemoryCache cache)
+    public RoleService(IRoleRepository roleRepository, IMemoryCache cache)
     {
         _roleRepository = roleRepository;
         _cache = cache;

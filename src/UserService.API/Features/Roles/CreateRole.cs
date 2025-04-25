@@ -1,5 +1,6 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 using UserService.API.Services;
 
@@ -18,9 +19,9 @@ public class CreateRoleValidator : AbstractValidator<CreateRoleRequest>
 
 public class CreateRoleHandler
 {
-    private readonly RoleService _roleService;
+    private readonly IRoleService _roleService;
 
-    public CreateRoleHandler(RoleService roleService)
+    public CreateRoleHandler(IRoleService roleService)
     {
         _roleService = roleService;
     }

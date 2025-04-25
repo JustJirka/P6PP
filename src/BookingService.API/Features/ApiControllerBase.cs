@@ -1,6 +1,7 @@
 ﻿using BookingService.API.Common.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ReservationSystem.Shared.Results;
 
 namespace BookingService.API.Features;
 
@@ -18,7 +19,7 @@ public abstract class ApiControllerBase : ControllerBase
         => await HandleRequestAsync(async () =>
         {
             var response = await _mediator.Send(request);
-            return Ok(response);
+            return Ok(new ApiResult<TResponse>(response, true));
         });
 
     protected async Task<IActionResult> ExecuteWithNoContentAsync(IRequest request)
@@ -36,7 +37,7 @@ public abstract class ApiControllerBase : ControllerBase
 
             var routeValues = routeValuesFunc(response);
 
-            return CreatedAtAction(actionName, routeValues, response);
+            return CreatedAtAction(actionName, routeValues, new ApiResult<TResponse>(response, true));
         });
     }
 
@@ -48,20 +49,20 @@ public abstract class ApiControllerBase : ControllerBase
         }
         catch (ValidationException ex)
         {
-            return BadRequest(new { Error = ex.Message });
+            return BadRequest(new ApiResult<object>(null, false, ex.Message));
         }
         catch (NotFoundException ex)
         {
-            return NotFound(new { Error = ex.Message });
+            return NotFound(new ApiResult<object>(null, false, ex.Message));
         }
         catch (AuthException ex)
         {
-            return Unauthorized(new { Error = ex.Message });
+            return Unauthorized(new ApiResult<object>(null, false, ex.Message));
         }
         catch (Exception)
         {
             // TODO: Log exception
-            return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "An unexpected error happened." });
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResult<object>(null, false, "An unexpected error happened."));
         }
     }
 }

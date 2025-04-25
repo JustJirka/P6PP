@@ -6,11 +6,12 @@ using NotificationService.API.Persistence;
 using NotificationService.API.Persistence.Entities.DB;
 using ReservationSystem.Shared;
 using ReservationSystem.Shared.Clients;
+using NotificationService.API.Logging; // <-- Přidáno
 
 namespace NotificationService.API.Features;
 
 public record SendEmailRequest(IList<string> Address, string Subject, string Body);
-public record SendEmailResponse(int? Id=null);
+public record SendEmailResponse(int? Id = null);
 
 public class SendEmailRequestValidator : AbstractValidator<SendEmailRequest>
 {
@@ -27,8 +28,8 @@ public class SendEmailHandler
 {
     private readonly MailAppService _mailAppService;
     private readonly NetworkHttpClient _httpClient;
-    public SendEmailHandler(MailAppService mailAppService,
-        NetworkHttpClient httpClient)
+
+    public SendEmailHandler(MailAppService mailAppService, NetworkHttpClient httpClient)
     {
         _httpClient = httpClient;
         _mailAppService = mailAppService;
@@ -44,13 +45,16 @@ public class SendEmailHandler
             Subject = request.Subject,
             Body = request.Body
         };
+
         try
         {
             await _mailAppService.SendEmailAsync(emailArgs);
+            await FileLogger.LogInfo($"Email sent successfully to: {string.Join(", ", request.Address)} | Subject: {request.Subject}");
             return new ApiResult<SendEmailResponse>(new SendEmailResponse());
         }
-        catch
+        catch (Exception ex)
         {
+            await FileLogger.LogException(ex, $"Failed to send email to: {string.Join(", ", request.Address)}");
             return new ApiResult<SendEmailResponse>(null, false, "Email was not sent");
         }
     }
@@ -67,8 +71,8 @@ public static class SendEmailEndpoint
 
                 if (!validationResult.IsValid)
                 {
-                    Console.WriteLine(validationResult.Errors);
                     var errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
+                    FileLogger.LogError($"Validation failed for SendEmailRequest: {string.Join("; ", errorMessages)}"); // <-- Přidáno
                     return Results.BadRequest(new ApiResult<IEnumerable<string>>(errorMessages, false, "Validation failed"));
                 }
 

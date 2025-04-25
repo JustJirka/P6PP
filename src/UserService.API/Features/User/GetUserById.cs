@@ -1,5 +1,6 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Features;
@@ -19,9 +20,9 @@ public class GetUserByIdValidator : AbstractValidator<GetUserByIdRequest>
 
 public class GetUserByIdHandler
 {
-    private readonly Services.UserService _userService;
+    private readonly IUserService _userService;
     
-    public GetUserByIdHandler(Services.UserService userService)
+    public GetUserByIdHandler(IUserService userService)
     {
         _userService = userService;
     }

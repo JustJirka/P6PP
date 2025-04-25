@@ -1,5 +1,6 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 
 namespace UserService.API.Features;
 
@@ -23,9 +24,9 @@ public class AssignUserRoleValidator : AbstractValidator<AssignUserRoleRequest>
 
 public class AssignUserRoleHandler
 {
-    private readonly Services.UserService _userService;
+    private readonly IUserService _userService;
 
-    public AssignUserRoleHandler(Services.UserService userService)
+    public AssignUserRoleHandler(IUserService userService)
     {
         _userService = userService;
     }

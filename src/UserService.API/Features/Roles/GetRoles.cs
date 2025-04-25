@@ -1,4 +1,5 @@
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 using UserService.API.Services;
 
@@ -6,9 +7,9 @@ namespace UserService.API.Features.Roles;
 
 public class GetRolesHandler
 {
-    private readonly RoleService _roleService;
+    private readonly IRoleService _roleService;
 
-    public GetRolesHandler(RoleService roleService)
+    public GetRolesHandler(IRoleService roleService)
     {
         _roleService = roleService;
     }

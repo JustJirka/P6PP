@@ -1,11 +1,12 @@
 using Dapper;
 using MySqlConnector;
+using UserService.API.Abstraction;
 using UserService.API.Exceptions;
 using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Persistence.Repositories;
 
-public class UserRepository
+public class UserRepository : IUserRepository
 {
     private readonly DapperContext _context;
 
@@ -51,7 +52,6 @@ public class UserRepository
         return await connection.ExecuteScalarAsync<int>(query);
     }
 
-
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -65,7 +65,7 @@ public class UserRepository
 
         return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
     }
-    
+
     public async Task<int?> AddAsync(User user, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -114,5 +114,4 @@ public class UserRepository
 
         return rowsAffected > 0; 
     }
-    
 }

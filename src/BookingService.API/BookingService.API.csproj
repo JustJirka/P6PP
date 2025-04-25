@@ -22,4 +22,8 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\libs\ReservationSystem.Shared\ReservationSystem.Shared.csproj" />
+    </ItemGroup>
+
 </Project>

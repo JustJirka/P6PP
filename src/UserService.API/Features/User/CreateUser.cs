@@ -2,6 +2,7 @@ using FluentValidation;
 using ReservationSystem.Shared;
 using ReservationSystem.Shared.Clients;
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Features;
@@ -27,10 +28,10 @@ public class CreateUserValidator : AbstractValidator<CreateUserRequest>
 
 public class CreateUserHandler
 {
-    private readonly Services.UserService _userService;
+    private readonly IUserService _userService;
     private readonly NetworkHttpClient _httpClient;
 
-    public CreateUserHandler(Services.UserService userService, NetworkHttpClient httpClient)
+    public CreateUserHandler(IUserService userService, NetworkHttpClient httpClient)
     {
         _userService = userService;
         _httpClient = httpClient;

@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using NotificationService.API.Extensions;
 using NotificationService.API.Features;
 using NotificationService.API.Persistence.Entities.DB;
+using static NotificationService.API.Features.SendBookingCancellationEmailHandler;
+using static NotificationService.API.Features.SendBookingConfirmationEmailHandler;
 // This is just an example how you CAN structure your microservice,
 // you can do it differently, but this is lightweight and easy to understand.
 
@@ -70,9 +72,17 @@ app.UseRouting();
 app.UseEndpoints(endpoints =>
 {
     SendEmailEndpoint.SendEmail(endpoints);
+    SendEmailWithAttachmentEndpoint.SendEmailWithAttachment(endpoints);
     SendRegistrationEmailEndpoint.SendRegistrationEmail(endpoints);
     SendVerificationEmailEndpoint.SendVerificationEmail(endpoints);
     SendPasswordResetEmailEndpoint.SendPasswordResetEmail(endpoints);
+    GetAllTemplatesEndpoint.GetAllTemplates(endpoints);
+    EditTemplateEndpoint.EditTemplate(endpoints);
+    SendBookingConfirmationEmailEndpoint.SendBookingConfirmationEmail(endpoints);
+    SendBookingCancellationEmailEndpoint.SendBookingCancellationEmail(endpoints);
+    GetAllNotificationsEndpoint.GetAllNotifications(endpoints);
+    SetNotificationsAsReadEndpoint.SetAllNotificationsAsRead(endpoints);
+    SetNotificationsAsReadEndpoint.SetSomeNotificationsAsRead(endpoints);
 });
 
 app.Run();

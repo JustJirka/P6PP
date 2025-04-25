@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ReservationSystem.Shared.Clients;
 using Microsoft.OpenApi.Models;
+using AuthService.API.Interfaces;
+using AuthService.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,7 +98,9 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddHostedService<AuthService.API.Services.ExpiredTokenCleanupService>();
+builder.Services.AddHostedService<ExpiredTokenCleanupService>();
+
+builder.Services.AddScoped<IUserAuthService, UserAuthService>();
 
 var app = builder.Build();
 

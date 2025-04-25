@@ -10,7 +10,7 @@ public class Template : Entity
     [StringLength(75)]
     public required string Subject { get; set; }
     //Budou vytvoreny zastupne znaky pro vlozeni promennych(jmeno,datum,atd.)
-    [StringLength(1500)]
+    [StringLength(10000)]
     public required string Text { get; set; }
     [StringLength(10)]
     public string Language { get; set; } = "en";

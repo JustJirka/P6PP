@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ReservationSystem.Shared.Clients;
+using UserService.API.Abstraction;
 using UserService.API.Features;
 using UserService.API.Features.Roles;
 using UserService.API.Persistence;
@@ -23,8 +24,8 @@ public static class ServiceExtensions
         services.AddScoped<UserRepository>();
         
         // Register Services
-        services.AddScoped<RoleService>();
-        services.AddScoped<Services.UserService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IUserService, Services.UserService>();
         
         // Register Endpoints injections
         services.AddScoped<GetUserByIdHandler>();
@@ -51,6 +52,12 @@ public static class ServiceExtensions
 
         services.AddScoped<AssignUserRoleHandler>();
         services.AddSingleton<AssignUserRoleValidator>();
+        
+        services.AddScoped<DeactivateUserHandler>();
+        services.AddSingleton<DeactivateUserValidator>();
+        
+        services.AddScoped<ActivateUserHandler>();
+        services.AddSingleton<ActivateUserValidator>();
 
         // HttpClient
         services.AddHttpClient<NetworkHttpClient>();

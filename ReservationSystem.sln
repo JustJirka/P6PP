@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthService.Tests", "tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookingService.Tests", "tests\BookingService.Tests\BookingService.Tests.csproj", "{09391BA8-5FCC-4376-96F1-F40430E4A13C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminSettings.API", "src\AdminSettings.API\AdminSettings.API.csproj", "{886ED3B1-F014-471F-8C3D-42298472714A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

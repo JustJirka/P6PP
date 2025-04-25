@@ -2,17 +2,21 @@ using NotificationService.API.Persistence;
 using NotificationService.API.Services;
 using FluentValidation;
 using ReservationSystem.Shared.Results;
+using src.NotificationService.API.Persistence.Entities.DB.Models;
+using src.NotificationService.API.Services;
+using NotificationService.API.Logging; // <-- Přidáno
+
 namespace NotificationService.API.Features;
 
-public record SendPasswordResetEmail(int Id, string url);
-public record SendPasswordResetEmailResponse(int? Id=null);
+public record SendPasswordResetEmail(int Id, string token);
+public record SendPasswordResetEmailResponse(int? Id = null);
 
 public class SendPasswordResetEmailValidator : AbstractValidator<SendPasswordResetEmail>
 {
     public SendPasswordResetEmailValidator()
     {
         RuleFor(x => x.Id).GreaterThan(0);
-        RuleFor(x => x.url).NotEmpty();
+        RuleFor(x => x.token).NotEmpty();
     }
 }
 
@@ -21,34 +25,42 @@ public class SendPasswordResetEmailHandler
     private readonly MailAppService _mailAppService;
     private readonly TemplateAppService _templateAppService;
     private readonly UserAppService _userAppService;
+    private readonly NotificationLogService _notificationLogService;
 
     public SendPasswordResetEmailHandler(MailAppService mailAppService,
-        TemplateAppService templateAppService, UserAppService userAppService)
+                                         TemplateAppService templateAppService,
+                                         UserAppService userAppService,
+                                         NotificationLogService notificationLogService)
     {
         _mailAppService = mailAppService;
         _templateAppService = templateAppService;
         _userAppService = userAppService;
-        
+        _notificationLogService = notificationLogService;
     }
 
     public async Task<ApiResult<SendPasswordResetEmailResponse>> Handle(SendPasswordResetEmail request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
         var user = await _userAppService.GetUserByIdAsync(request.Id);
-        
+
         if (user == null)
         {
+            FileLogger.LogError($"User with ID {request.Id} not found.");
             return new ApiResult<SendPasswordResetEmailResponse>(null, false, "User not found");
         }
-        if (string.IsNullOrEmpty(user.Email) || (string.IsNullOrEmpty(user.FirstName) || string.IsNullOrEmpty(user.LastName))) 
+
+        if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.FirstName) || string.IsNullOrEmpty(user.LastName))
         {
+            FileLogger.LogError($"User data incomplete (Email or Name) for ID {user.Id}");
             return new ApiResult<SendPasswordResetEmailResponse>(null, false, "User email or name not found");
         }
 
         var template = await _templateAppService.GetTemplateAsync("PasswordReset");
 
-        template.Text = template.Text.Replace("{name}", user.FirstName + " " +  user.LastName);
-        template.Text = template.Text.Replace("{link}", request.url);
+        template.Text = template.Text.Replace("{name}", $"{user.FirstName} {user.LastName}");
+        template.Text = template.Text.Replace("{userId}", user.Id.ToString());
+        template.Text = template.Text.Replace("{token}", request.token);
 
         var emailArgs = new EmailArgs
         {
@@ -60,10 +72,18 @@ public class SendPasswordResetEmailHandler
         try
         {
             await _mailAppService.SendEmailAsync(emailArgs);
+
+            await _notificationLogService.LogNotification(user.Id,
+                                                          NotificationType.EmailPasswordReset,
+                                                          template.Subject,
+                                                          template.Text);
+
+            await FileLogger.LogInfo($"Password reset email successfully sent to user {user.Email}");
             return new ApiResult<SendPasswordResetEmailResponse>(new SendPasswordResetEmailResponse());
         }
-        catch
+        catch (Exception ex)
         {
+            await FileLogger.LogException(ex, $"Failed to send password reset email to: {user.Email}");
             return new ApiResult<SendPasswordResetEmailResponse>(null, false, "Email was not sent");
         }
     }
@@ -81,6 +101,7 @@ public static class SendPasswordResetEmailEndpoint
                 if (!validationResult.IsValid)
                 {
                     var errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
+                    await FileLogger.LogInfo("Validation failed for password reset email request.");
                     return Results.BadRequest(new ApiResult<IEnumerable<string>>(errorMessages, false, "Validation failed"));
                 }
 

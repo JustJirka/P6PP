@@ -29,7 +29,7 @@ public class DatabaseSeeder
             WHERE NOT EXISTS (SELECT 1 FROM Roles WHERE Name = 'User')
             UNION
             SELECT * FROM (SELECT 'Trainer', 'Trainer Role') AS tmp
-            WHERE NOT EXISTS (SELECT 1 FROM Roles WHERE Name = 'Manager');";
+            WHERE NOT EXISTS (SELECT 1 FROM Roles WHERE Name = 'Trainer');";
 
         await connection.ExecuteAsync(insertRolesQuery);
 

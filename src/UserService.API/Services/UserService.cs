@@ -1,18 +1,18 @@
 using Microsoft.Extensions.Caching.Memory;
+using UserService.API.Abstraction;
 using UserService.API.Exceptions;
 using UserService.API.Persistence.Entities;
-using UserService.API.Persistence.Repositories;
 
 namespace UserService.API.Services;
 
-public class UserService
+public class UserService : IUserService
 {
-    private readonly UserRepository _userRepository;
-    private readonly RoleRepository _roleRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
     private readonly IMemoryCache _cache;
     private const string CacheKey = "user";
     
-    public UserService(UserRepository userRepository, IMemoryCache cache, RoleRepository roleRepository)
+    public UserService(IUserRepository userRepository, IMemoryCache cache, IRoleRepository roleRepository)
     {
         _userRepository = userRepository;
         _cache = cache;

@@ -1,9 +1,10 @@
 using Dapper;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Persistence.Repositories;
 
-public class RoleRepository
+public class RoleRepository : IRoleRepository
 {
     private readonly DapperContext _context;
 

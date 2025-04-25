@@ -1,4 +1,5 @@
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Features;
@@ -7,9 +8,9 @@ public record GetUsersResponse(IEnumerable<User> Users, int TotalCount);
 
 public class GetUsersHandler
 {
-    private readonly Services.UserService _userService;
+    private readonly IUserService _userService;
     
-    public GetUsersHandler(Services.UserService userService)
+    public GetUsersHandler(IUserService userService)
     {
         _userService = userService;
     }

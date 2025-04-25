@@ -1,5 +1,6 @@
 using FluentValidation;
 using ReservationSystem.Shared.Results;
+using UserService.API.Abstraction;
 using UserService.API.Persistence.Entities;
 
 namespace UserService.API.Features;
@@ -64,9 +65,9 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
 
 public class UpdateUserHandler
 {
-    private readonly Services.UserService _userService;
+    private readonly IUserService _userService;
 
-    public UpdateUserHandler(Services.UserService userService)
+    public UpdateUserHandler(IUserService userService)
     {
         _userService = userService;
     }
