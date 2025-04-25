@@ -139,7 +139,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   selectedBooking: BookingDto | null = null;
   showDetailedReservations = false;
   
-  private bookingsApiUrl = 'http://localhost:8080/api/Bookings';
+  private bookingsApiUrl = 'http://localhost:5000/api/Bookings';
   
   private currentDate = new Date();
 
@@ -218,7 +218,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
   }
   
-  createReservation(booking: BookingDto) {
+  // RADŠI JSEM UDĚLAL I CREATE A DELETE, KDYBY TO K NĚČEMU BYLO (KLIDNĚ SMAŽ)
+  /*createReservation(booking: BookingDto) {
     this.http.post<BookingDto>(this.bookingsApiUrl, booking).pipe(
       tap(newBooking => {
         console.log('Created new reservation:', newBooking);
@@ -246,7 +247,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         return of(null);
       })
     ).subscribe();
-  }
+  }*/
   
   // MŮŽEME VYUŽÍT FUNKCI PRO DATABASE SYNC - V HTML JE PAK TLAČÍTKO
   /*triggerDatabaseSync() {
