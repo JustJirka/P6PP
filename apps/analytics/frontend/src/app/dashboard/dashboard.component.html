@@ -359,15 +359,22 @@
                 <tr *ngFor="let booking of rawBookings">
                   <td>{{ booking.id }}</td>
                   <td>{{ booking.userId }}</td>
-                  <td>{{ booking.roomId }}</td>
-                  <td>{{ formatReservationDate(booking.startTime) }}</td>
-                  <td>{{ formatReservationDate(booking.endTime) }}</td>
+                  <td>{{ booking.serviceId }}</td> <!-- Changed from roomId to serviceId -->
+                  <td>{{ formatReservationDate(booking.bookingDate) }}</td> <!-- Changed from startTime to bookingDate -->
+                  <td>{{ booking.bookingDate ? formatReservationDate(booking.bookingDate) : 'N/A' }}</td> <!-- Using bookingDate as endTime fallback -->
                   <td>
                     <span class="status-badge" [ngClass]="getReservationStatusClass(booking.status)">
                       {{ booking.status }}
                     </span>
                   </td>
-                  <td>{{ formatReservationDate(booking.createdAt) }}</td>
+                  <td>{{ booking.createdAt ? formatReservationDate(booking.createdAt) : formatReservationDate(booking.bookingDate) }}</td> <!-- Added null check -->
+                  <!-- Action button -->
+                  <td>
+                    <button class="action-btn" (click)="viewReservationDetails(booking)" 
+                            title="View Details">
+                      <i class="material-icons">visibility</i>
+                    </button>
+                  </td>
                   <!-- TLAČÍTKO NA RESERVATION DELETE
                   <td>
                     <button class="action-btn delete-btn" (click)="deleteReservation(booking.id)" 

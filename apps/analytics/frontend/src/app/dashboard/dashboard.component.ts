@@ -30,11 +30,10 @@ interface UserData {
 interface BookingDto {
   id: number;
   userId: number;
-  roomId: string;
-  startTime: string;
-  endTime: string;
+  serviceId: number;
+  bookingDate: string;
   status: string;
-  createdAt: string;
+  createdAt?: string; // optional
 }
 
 type BmiCategory = 'Underweight' | 'Normal' | 'Overweight' | 'Obese';
@@ -139,7 +138,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   selectedBooking: BookingDto | null = null;
   showDetailedReservations = false;
   
-  private bookingsApiUrl = 'http://localhost:8080/api/Bookings';
+  private bookingsApiUrl = 'http://localhost:8006/api/Bookings';
+  private usersApiUrl = 'http://localhost:8006/api/Users';
   
   private currentDate = new Date();
 
@@ -152,8 +152,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.initializeChart();
-    this.initializeRevenueChart();
-    
+    this.initializeRevenueChart();    
     this.updateCircularCharts();
   }
   
@@ -186,7 +185,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
     bookings.forEach(booking => {
-      const date = new Date(booking.createdAt);
+      const dateStr = booking.createdAt || booking.bookingDate;
+      const date = new Date(dateStr);
       const month = months[date.getMonth()];
       
       if (bookingsByMonth[month]) {
@@ -304,7 +304,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   fetchUsers() {
-    this.http.get<UserData[]>('http://localhost:8006/api/Users').subscribe(
+    this.http.get<UserData[]>(this.usersApiUrl).subscribe(
       (data) => {
         this.usersTableData = data;
         this.generateUsersChartData();
