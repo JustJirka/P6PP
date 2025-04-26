@@ -139,7 +139,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   selectedBooking: BookingDto | null = null;
   showDetailedReservations = false;
   
-  private bookingsApiUrl = 'http://localhost:5000/api/Bookings';
+  private bookingsApiUrl = 'http://localhost:8080/api/Bookings';
   
   private currentDate = new Date();
 

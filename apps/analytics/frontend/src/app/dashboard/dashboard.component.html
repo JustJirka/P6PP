@@ -47,7 +47,6 @@
       
       <div class="header-actions">
         <!-- TADY JE TLAČÍTKO PRO DATABASE SYNC (MŮŽEME VYUŽÍT) -->
-        <!-- Sync button for reservations tab -->
         <!--
         <button *ngIf="activeTab === 'reservations'" class="sync-button" (click)="triggerDatabaseSync()">
           <i class="material-icons">sync</i>
@@ -369,12 +368,14 @@
                     </span>
                   </td>
                   <td>{{ formatReservationDate(booking.createdAt) }}</td>
+                  <!-- TLAČÍTKO NA RESERVATION DELETE
                   <td>
                     <button class="action-btn delete-btn" (click)="deleteReservation(booking.id)" 
                             title="Delete Reservation">
                       <i class="material-icons">delete</i>
                     </button>
                   </td>
+                  -->
                 </tr>
               </tbody>
             </table>
