@@ -974,3 +974,168 @@ main {
     }
   }
 }
+
+// Filters
+.user-filters,
+.reservation-filters {
+  background-color: var(--card-bg);
+  border-radius: 25px;
+  margin-bottom: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  
+  .filter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-width: 180px;
+        
+        &.date-range {
+          min-width: 150px;
+        }
+        
+        label {
+          font-size: 12px;
+          color: var(--text-light);
+          font-weight: 500;
+        }
+        
+        .select-wrapper,
+        .input-wrapper {
+          position: relative;
+          width: 100%;
+          
+          select,
+          input {
+            appearance: none;
+            width: 100%;
+            padding: 8px 36px 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg);
+            font-size: 14px;
+            transition: var(--transition);
+            
+            &:focus {
+              outline: none;
+              border-color: var(--secondary-color);
+            }
+            
+            &:hover {
+              border-color: var(--secondary-color);
+            }
+          }
+          
+          input[type="date"],
+          input[type="number"] {
+            padding-right: 12px;
+          }
+          
+          .select-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-light);
+          }
+          
+          .user-id-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            z-index: 10;
+            max-height: 150px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+            .dropdown-item {
+              padding: 8px 12px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+              
+              &:hover {
+                background-color: rgba(234, 40, 56, 0.05);
+              }
+            }
+          }
+        }
+      }
+      
+      .reset-button-container {
+        flex: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        min-width: 120px;
+        
+        .reset-filters-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background-color: transparent;
+          border: 1px solid var(--text-light);
+          padding: 8px 16px;
+          border-radius: var(--border-radius);
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--text-light);
+          transition: var(--transition);
+          
+          &:hover {
+            background-color: rgba(234, 40, 56, 0.1);
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+          }
+          
+          .reset-icon {
+            font-size: 12px;
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Additional responsive adaptations for filters
+@media (max-width: 576px) {
+  .user-filters,
+  .reservation-filters {
+    padding: 16px;
+    
+    .filter-container {
+      gap: 12px;
+      
+      .filter-row {
+        gap: 12px;
+        
+        .filter-group {
+          min-width: 100%;
+        }
+      }
+    }
+  }
+}

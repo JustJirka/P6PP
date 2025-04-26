@@ -98,27 +98,33 @@
           <div class="stat-card clickable" (click)="navigateToTab('finances')">
             <div class="stat-card-header">
               <h3>Monthly Revenue</h3>
-              <span class="trend up">+12%</span>
+              <span class="trend" [class.up]="getMonthlyRevenueChange().isIncrease" [class.down]="!getMonthlyRevenueChange().isIncrease">
+                {{ getMonthlyRevenueChange().isIncrease ? '+' : '-' }}{{ getMonthlyRevenueChange().value }}%
+              </span>
             </div>
             <div class="stat-value">${{ monthlyRevenue }}</div>
             <div class="stat-subtext">Current month</div>
           </div>
-          
+
           <!-- Total Revenue Card -->
           <div class="stat-card clickable" (click)="navigateToTab('finances')">
             <div class="stat-card-header">
               <h3>Total Revenue</h3>
-              <span class="trend up">+8%</span>
+              <span class="trend" [class.up]="getTotalRevenueChange().isIncrease" [class.down]="!getTotalRevenueChange().isIncrease">
+                {{ getTotalRevenueChange().isIncrease ? '+' : '-' }}{{ getTotalRevenueChange().value }}%
+              </span>
             </div>
             <div class="stat-value">${{ totalRevenue }}</div>
             <div class="stat-subtext">Year to date</div>
           </div>
-          
+
           <!-- Reservations Card -->
           <div class="stat-card clickable" (click)="navigateToTab('reservations')">
             <div class="stat-card-header">
               <h3>Monthly Bookings</h3>
-              <span class="trend up">+15%</span>
+              <span class="trend" [class.up]="getMonthlyBookingsChange().isIncrease" [class.down]="!getMonthlyBookingsChange().isIncrease">
+                {{ getMonthlyBookingsChange().isIncrease ? '+' : '-' }}{{ getMonthlyBookingsChange().value }}%
+              </span>
             </div>
             <div class="stat-value">{{ monthlyBookings }}</div>
             <div class="stat-subtext">Current month</div>
@@ -308,6 +314,95 @@
         </div>
       </div>
       
+      <!-- Reservation Filters - For Reservations tab only -->
+      <div *ngIf="activeTab === 'reservations'" class="reservation-filters">
+        <div class="filter-container">
+          <div class="filter-row">
+            <!-- Status Filter -->
+            <div class="filter-group">
+              <label for="bookingStatusSelect">Status:</label>
+              <div class="select-wrapper">
+                <select id="bookingStatusSelect" (change)="onBookingStatusFilterChange($event)">
+                  <option value="all">All Statuses</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="pending">Pending</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+            
+            <!-- Date Filter -->
+            <div class="filter-group">
+              <label for="bookingDateSelect">Date Range:</label>
+              <div class="select-wrapper">
+                <select id="bookingDateSelect" (change)="onBookingDateFilterChange($event)">
+                  <option value="all">All Dates</option>
+                  <option value="today">Today</option>
+                  <option value="this_week">This Week</option>
+                  <option value="this_month">This Month</option>
+                  <option value="this_year">This Year</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+            
+            <!-- Service Filter -->
+            <div class="filter-group">
+              <label for="bookingServiceSelect">Room:</label>
+              <div class="select-wrapper">
+                <select id="bookingServiceSelect" (change)="onBookingServiceFilterChange($event)">
+                  <option value="all">All Rooms</option>
+                  <option *ngFor="let serviceId of uniqueServiceIds" [value]="serviceId">
+                    {{ serviceId === 1 ? 'Fitness Studio A' : 
+                      serviceId === 2 ? 'Yoga Studio' :
+                      serviceId === 3 ? 'Cardio Zone' :
+                      'Room ' + serviceId }}
+                  </option>
+                </select>
+                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Custom Date Range - Only visible when 'Custom Range' is selected -->
+          <div class="filter-row" *ngIf="bookingDateFilter === 'custom'">
+            <div class="filter-group date-range">
+              <label for="startDateInput">From:</label>
+              <div class="input-wrapper">
+                <input type="date" id="startDateInput" (change)="onDateRangeStartChange($event)" [value]="bookingDateRangeStart || ''" />
+              </div>
+            </div>
+            
+            <div class="filter-group date-range">
+              <label for="endDateInput">To:</label>
+              <div class="input-wrapper">
+                <input type="date" id="endDateInput" (change)="onDateRangeEndChange($event)" [value]="bookingDateRangeEnd || ''" />
+              </div>
+            </div>
+          </div>
+          
+          <div class="filter-row">
+            <!-- User ID Filter -->
+            <div class="filter-group">
+              <label for="bookingUserIdInput">User ID:</label>
+              <div class="input-wrapper">
+                <input type="number" id="bookingUserIdInput" placeholder="Filter by user ID" 
+                      (input)="onBookingUserIdFilterChange($event)" [value]="bookingUserIdFilter" />
+              </div>
+            </div>
+            
+            <!-- Reset filters button -->
+            <div class="filter-group reset-button-container">
+              <button class="reset-filters-button" (click)="resetReservationFilters()">
+                <span class="reset-icon">✕</span> Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Data View (Chart or Table) - For non-overview tabs -->
       <div *ngIf="activeTab !== 'overview'" class="data-view">
         <!-- Reservations Tab - Special Handling for API Integration -->
@@ -323,7 +418,7 @@
             <i class="material-icons">error_outline</i>
             <p>{{ reservationsError }}</p>
           </div>
-          
+
           <!-- Chart View - When in chart mode -->
           <div *ngIf="!isLoadingReservations && viewMode === 'chart'" class="chart-view">
             <!-- Empty State for no data -->
@@ -351,47 +446,40 @@
                   <th>Start Time</th>
                   <th>End Time</th>
                   <th>Status</th>
-                  <th>Created</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let booking of rawBookings">
-                  <td>{{ booking.id }}</td>
-                  <td>{{ booking.userId }}</td>
-                  <td>{{ booking.serviceId }}</td> <!-- Changed from roomId to serviceId -->
-                  <td>{{ formatReservationDate(booking.bookingDate) }}</td> <!-- Changed from startTime to bookingDate -->
-                  <td>{{ booking.bookingDate ? formatReservationDate(booking.bookingDate) : 'N/A' }}</td> <!-- Using bookingDate as endTime fallback -->
+                <tr *ngFor="let booking of filteredBookings">
+                  <td>{{ booking?.id || 'N/A' }}</td>
+                  <td>{{ booking?.userId || 'N/A' }}</td>
+                  <td>{{ booking?.serviceId || 'N/A' }}</td>
+                  <td>{{ booking?.bookingDate ? formatReservationDate(booking.bookingDate) : 'N/A' }}</td>
+                  <td>{{ booking?.bookingDate ? formatReservationDate(booking.bookingDate) : 'N/A' }}</td>
                   <td>
-                    <span class="status-badge" [ngClass]="getReservationStatusClass(booking.status)">
-                      {{ booking.status }}
+                    <span class="status-badge" [ngClass]="getReservationStatusClass(booking?.status || '')">
+                      {{ booking?.status || 'Unknown' }}
                     </span>
                   </td>
-                  <td>{{ formatReservationDate(booking.bookingDate) }}</td> <!-- Added null check -->
-                  <!-- Action button -->
+                  <!-- Action buttons -->
                   <td>
-                    <button class="action-btn" (click)="viewReservationDetails(booking)" 
-                            title="View Details">
+                    <button class="action-btn" (click)="viewReservationDetails(booking)" title="View Details">
                       <i class="material-icons">visibility</i>
                     </button>
-                  </td>
-                  <!-- TLAČÍTKO NA RESERVATION DELETE
-                  <td>
                     <button class="action-btn delete-btn" (click)="deleteReservation(booking.id)" 
                             title="Delete Reservation">
                       <i class="material-icons">delete</i>
                     </button>
                   </td>
-                  -->
                 </tr>
               </tbody>
             </table>
-            
+                       
             <!-- Empty state when no reservations -->
-            <div *ngIf="rawBookings.length === 0" class="empty-state">
+            <div *ngIf="filteredBookings.length === 0" class="empty-state">
               <i class="material-icons">event_busy</i>
               <h3>No Reservations Found</h3>
-              <p>There are currently no reservations in the system.</p>
+              <p>No reservations match the current filter criteria.</p>
             </div>
           </div>
         </div>
@@ -449,6 +537,13 @@
                 </tr>
               </tbody>
             </table>
+
+            <!-- Empty state when no users match filters -->
+            <div *ngIf="getFilteredUsers().length === 0" class="empty-state">
+              <i class="material-icons">person_off</i>
+              <h3>No Users Found</h3>
+              <p>No users match the current filter criteria.</p>
+            </div>
             
             <!-- Finances Table -->
             <table *ngIf="activeTab === 'finances'" class="data-table">

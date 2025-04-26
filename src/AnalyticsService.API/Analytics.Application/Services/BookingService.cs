@@ -27,7 +27,7 @@ namespace Analytics.Application.Services
             {
                 Id = booking.id,
                 BookingDate = DateTime.Parse(booking.bookingDate),
-                Status = Enum.Parse<BookingStatus>(booking.status, ignoreCase: true),
+                Status = Enum.Parse<BookingStatus>(booking.status, ignoreCase: true), //Confirmed 0, Pending 1, Cancelled 2
                 UserId = booking.userId,
                 ServiceId = booking.serviceId
             };

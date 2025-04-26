@@ -35,6 +35,12 @@ interface BookingDto {
   status: string;
 }
 
+enum BookingStatus {
+  Confirmed = 0,
+  Pending = 1,
+  Cancelled = 2
+}
+
 type BmiCategory = 'Underweight' | 'Normal' | 'Overweight' | 'Obese';
 
 type UserChartType = 'registration' | 'role' | 'status' | 'gender' | 'bmi'| 'ageGroup' ;
@@ -124,6 +130,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   userRegistrationTimeFilter = 'all';
   userBmiFilter = 'all';
 
+  bookingStatusFilter = 'all';
+  bookingDateFilter = 'all';
+  bookingServiceFilter = 'all';
+  bookingUserIdFilter = '';
+  bookingDateRangeStart: string | null = null;
+  bookingDateRangeEnd: string | null = null;
+  uniqueServiceIds: number[] = [];
+  uniqueUserIds: number[] = [];
+
   totalRevenue = this.getTotalFinanceValue();
   monthlyRevenue = this.getLatestFinanceValue();
   totalBookings = this.getTotalReservationsValue();
@@ -134,6 +149,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   isLoadingReservations = false;
   reservationsError: string | null = null;
   rawBookings: BookingDto[] = []; // raw booking data from API
+  filteredBookings: BookingDto[] = []; // filtered booking data for display
   selectedBooking: BookingDto | null = null;
   showDetailedReservations = false;
   
@@ -142,7 +158,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   
   private currentDate = new Date();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.totalRevenue = this.getTotalFinanceValue();
+    this.monthlyRevenue = this.getLatestFinanceValue();
+    this.averageOccupancy = this.getAverageRoomOccupancyValue();
+    this.highestOccupancyRoom = this.getHighestOccupancyRoom();
+    
+    this.totalBookings = 0;
+    this.monthlyBookings = 0;
+  }
 
   ngOnInit() {
     this.fetchUsers();
@@ -154,12 +178,94 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.initializeRevenueChart();    
     this.updateCircularCharts();
   }
-  
+
+  updateDashboardMetrics() {
+    this.totalBookings = this.getTotalReservationsValue();
+    this.monthlyBookings = this.getLatestReservationsValue();
+    
+    if (this.activeTab === 'overview') {
+      this.updateCircularCharts();
+    }
+  }
+
+  getMonthlyRevenueChange(): { value: number; isIncrease: boolean } {
+    // Check if we have enough data to compare
+    if (this.financesData.length < 2) return { value: 0, isIncrease: true };
+    
+    const currentMonthIndex = new Date().getMonth();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMonth = months[currentMonthIndex];
+    const prevMonthIndex = (currentMonthIndex - 1 + 12) % 12; // Handle January correctly
+    const prevMonth = months[prevMonthIndex];
+    
+    const currentMonthData = this.financesData.find(item => item.date === currentMonth);
+    const prevMonthData = this.financesData.find(item => item.date === prevMonth);
+    
+    if (!currentMonthData || !prevMonthData || prevMonthData.value === 0) {
+      return { value: 0, isIncrease: true };
+    }
+    
+    const change = ((currentMonthData.value - prevMonthData.value) / prevMonthData.value) * 100;
+    return {
+      value: Math.abs(Math.round(change)),
+      isIncrease: change >= 0
+    };
+  }
+
+  getTotalRevenueChange(): { value: number; isIncrease: boolean } {
+    // Calculate year-over-year change if possible, otherwise compare to previous month
+    const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
+    
+    if (this.financesData.length < 2) return { value: 0, isIncrease: true };
+    
+    const firstQuarterData = this.financesData.slice(0, Math.min(3, this.financesData.length));
+    const firstQuarterAvg = firstQuarterData.reduce((sum, item) => sum + item.value, 0) / firstQuarterData.length;
+    
+    const currentTotal = this.getTotalFinanceValue();
+    const averagePerMonth = currentTotal / this.financesData.length;
+    
+    if (firstQuarterAvg === 0) return { value: 0, isIncrease: true };
+    
+    const change = ((averagePerMonth - firstQuarterAvg) / firstQuarterAvg) * 100;
+    return {
+      value: Math.abs(Math.round(change)),
+      isIncrease: change >= 0
+    };
+  }
+
+  getMonthlyBookingsChange(): { value: number; isIncrease: boolean } {
+    const currentMonthIndex = new Date().getMonth();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMonth = months[currentMonthIndex];
+    const prevMonthIndex = (currentMonthIndex - 1 + 12) % 12; // Handle January correctly
+    const prevMonth = months[prevMonthIndex];
+    
+    const currentMonthData = this.reservationsData.find(item => item.date === currentMonth);
+    const prevMonthData = this.reservationsData.find(item => item.date === prevMonth);
+    
+    // Handle cases where data might be missing
+    if (!currentMonthData) {
+      return { value: 0, isIncrease: true };
+    }
+    
+    if (!prevMonthData || prevMonthData.value === 0) {
+      return { value: 100, isIncrease: true };
+    }
+    
+    const change = ((currentMonthData.value - prevMonthData.value) / prevMonthData.value) * 100;
+    return {
+      value: Math.abs(Math.round(change)),
+      isIncrease: change >= 0
+    };
+  }
+
   fetchReservations() {
     this.isLoadingReservations = true;
     this.reservationsError = null;
     
-    this.http.get<BookingDto[]>(this.bookingsApiUrl).pipe(
+    this.http.get<any[]>(this.bookingsApiUrl).pipe(
+      tap(response => console.log('Raw booking response:', response)),
       catchError(error => {
         console.error('Error fetching bookings data:', error);
         this.reservationsError = 'Failed to load reservation data. Using sample data.';
@@ -170,84 +276,100 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       })
     ).subscribe(bookings => {
       if (bookings && bookings.length > 0) {
-        this.rawBookings = bookings;
+        // Normalize the data to ensure all required fields exist
+        this.rawBookings = bookings.map(booking => {
+          let statusValue = booking.status;
+          if (statusValue === undefined && booking.bookingStatus !== undefined) {
+            statusValue = booking.bookingStatus;
+          }
+          
+          let statusText = statusValue;
+          if (typeof statusValue === 'number') {
+            switch(statusValue) {
+              case BookingStatus.Confirmed:
+                statusText = 'Confirmed';
+                break;
+              case BookingStatus.Pending:
+                statusText = 'Pending';
+                break;
+              case BookingStatus.Cancelled:
+                statusText = 'Cancelled';
+                break;
+              default:
+                statusText = 'Unknown';
+            }
+          }
+          
+          return {
+            id: booking.id || 0,
+            userId: booking.userId || 0,
+            serviceId: booking.serviceId || 0,
+            bookingDate: booking.bookingDate || '',
+            status: statusText || 'Unknown'
+          };
+        });
         
-        this.processReservationsData(bookings);
+        console.log('Normalized bookings:', this.rawBookings);
+        this.filteredBookings = [...this.rawBookings];
+        this.initializeFilterOptions();
+        this.processReservationsData(this.filteredBookings);
+        this.updateDashboardMetrics();
       } else {
         console.log('No reservations found, using mock data');
+        this.filteredBookings = [];
       }
     });
   }
   
+  initializeFilterOptions() {
+    this.uniqueServiceIds = Array.from(new Set(this.rawBookings.map(booking => booking.serviceId)))
+      .filter(id => id !== undefined && id !== null)
+      .sort((a, b) => a - b);
+      
+    this.uniqueUserIds = Array.from(new Set(this.rawBookings.map(booking => booking.userId)))
+      .filter(id => id !== undefined && id !== null)
+      .sort((a, b) => a - b);
+  }
+
   processReservationsData(bookings: BookingDto[]) {
     const bookingsByMonth: {[key: string]: number} = {};
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    bookings.forEach(booking => {
-      const dateStr = booking.bookingDate;
-      const date = new Date(dateStr);
-      const month = months[date.getMonth()];
-      
-      if (bookingsByMonth[month]) {
-        bookingsByMonth[month]++;
-      } else {
-        bookingsByMonth[month] = 1;
-      }
+    months.forEach(month => {
+      bookingsByMonth[month] = 0;
     });
     
-    const chartData = Object.keys(bookingsByMonth).map(month => ({
-      date: month,
-      value: bookingsByMonth[month]
-    }));
-    
-    if (chartData.length > 0) {
-      this.reservationsData = chartData.sort((a, b) => {
+    bookings.forEach(booking => {
+      if (booking.bookingDate) {
+        const date = new Date(booking.bookingDate);
+        const month = months[date.getMonth()];
+        bookingsByMonth[month]++;
+      }
+    });
+  
+    const chartData = Object.keys(bookingsByMonth)
+      .filter(month => months.includes(month))
+      .map(month => ({
+        date: month,
+        value: bookingsByMonth[month]
+      }))
+      .sort((a, b) => {
         const monthOrder = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 
-                             'Jun': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 
-                             'Nov': 10, 'Dec': 11 };
+                           'Jun': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 
+                           'Nov': 10, 'Dec': 11 };
         return monthOrder[a.date as keyof typeof monthOrder] - monthOrder[b.date as keyof typeof monthOrder];
       });
-      
-      this.totalBookings = this.getTotalReservationsValue();
-      this.monthlyBookings = this.getLatestReservationsValue();
-      
-      if (this.activeTab === 'reservations' && this.viewMode === 'chart') {
-        setTimeout(() => this.renderChart(), 100);
-      }
+    
+    this.reservationsData = chartData;
+    
+    this.totalBookings = this.getTotalReservationsValue();
+    this.monthlyBookings = this.getLatestReservationsValue();
+    
+    if (this.activeTab === 'reservations' && this.viewMode === 'chart') {
+      setTimeout(() => this.renderChart(), 100);
     }
   }
-  
-  // RADŠI JSEM UDĚLAL I CREATE A DELETE, KDYBY TO K NĚČEMU BYLO (KLIDNĚ SMAŽ)
-  /*createReservation(booking: BookingDto) {
-    this.http.post<BookingDto>(this.bookingsApiUrl, booking).pipe(
-      tap(newBooking => {
-        console.log('Created new reservation:', newBooking);
-        this.rawBookings.push(newBooking);
-        this.fetchReservations();
-      }),
-      catchError(error => {
-        console.error('Error creating reservation:', error);
-        alert('Failed to create reservation');
-        return of(null);
-      })
-    ).subscribe();
-  }
-  
-  deleteReservation(id: number) {
-    this.http.delete<BookingDto>(`${this.bookingsApiUrl}/${id}`).pipe(
-      tap(deletedBooking => {
-        console.log('Deleted reservation:', deletedBooking);
-        this.rawBookings = this.rawBookings.filter(booking => booking.id !== id);
-        this.fetchReservations();
-      }),
-      catchError(error => {
-        console.error('Error deleting reservation:', error);
-        alert('Failed to delete reservation');
-        return of(null);
-      })
-    ).subscribe();
-  }*/
-  
+
   // MŮŽEME VYUŽÍT FUNKCI PRO DATABASE SYNC - V HTML JE PAK TLAČÍTKO
   /*triggerDatabaseSync() {
     this.http.get<any>(`${this.bookingsApiUrl}/triggerSync`).pipe(
@@ -263,6 +385,39 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       })
     ).subscribe();
   }*/
+
+  // RADŠI JSEM UDĚLAL I CREATE, KDYBY TO K NĚČEMU BYLO (KLIDNĚ SMAŽ)
+  /*createReservation(booking: BookingDto) {
+    this.http.post<BookingDto>(this.bookingsApiUrl, booking).pipe(
+      tap(newBooking => {
+        console.log('Created new reservation:', newBooking);
+        this.rawBookings.push(newBooking);
+        this.fetchReservations();
+      }),
+      catchError(error => {
+        console.error('Error creating reservation:', error);
+        alert('Failed to create reservation');
+        return of(null);
+      })
+    ).subscribe();
+  }*/
+  
+  deleteReservation(id: number) {
+    this.http.delete<BookingDto>(`${this.bookingsApiUrl}/${id}`).pipe(
+      tap(deletedBooking => {
+        console.log('Deleted reservation:', deletedBooking);
+        this.rawBookings = this.rawBookings.filter(booking => booking.id !== id);
+        this.filteredBookings = this.filteredBookings.filter(booking => booking.id !== id);
+        
+        this.processReservationsData(this.filteredBookings);
+      }),
+      catchError(error => {
+        console.error('Error deleting reservation:', error);
+        alert('Failed to delete reservation');
+        return of(null);
+      })
+    ).subscribe();
+  }
   
   toggleDetailedReservations() {
     this.showDetailedReservations = !this.showDetailedReservations;
@@ -278,10 +433,22 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   
   getReservationStatusClass(status: string): string {
-    status = status.toLowerCase();
-    if (status === 'confirmed' || status === 'completed') return 'success';
-    if (status === 'pending') return 'warning';
-    if (status === 'cancelled') return 'danger';
+    if (!status) return '';
+    
+    const statusLower = status.toLowerCase();
+    
+    if (statusLower === 'confirmed') {
+      return 'success';
+    }
+    
+    if (statusLower === 'pending') {
+      return 'warning';
+    }
+    
+    if (statusLower === 'cancelled') {
+      return 'danger';
+    }
+    
     return '';
   }
   
@@ -300,6 +467,160 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   getMonthName(dateString: string): string {
     const date = new Date(dateString);
     return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+  }
+
+  onBookingStatusFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.bookingStatusFilter = select.value;
+    this.applyReservationFilters();
+  }
+  
+  onBookingServiceFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.bookingServiceFilter = select.value;
+    this.applyReservationFilters();
+  }
+  
+  onBookingDateFilterChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.bookingDateFilter = select.value;
+    
+    if (this.bookingDateFilter !== 'custom') {
+      this.bookingDateRangeStart = null;
+      this.bookingDateRangeEnd = null;
+    }
+    
+    this.applyReservationFilters();
+  }
+  
+  onBookingUserIdFilterChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.bookingUserIdFilter = input.value;
+    this.applyReservationFilters();
+  }
+  
+  onDateRangeStartChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.bookingDateRangeStart = input.value;
+    this.applyReservationFilters();
+  }
+  
+  onDateRangeEndChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.bookingDateRangeEnd = input.value;
+    this.applyReservationFilters();
+  }
+
+  resetReservationFilters() {
+    this.bookingStatusFilter = 'all';
+    this.bookingDateFilter = 'all';
+    this.bookingServiceFilter = 'all';
+    this.bookingUserIdFilter = '';
+    this.bookingDateRangeStart = null;
+    this.bookingDateRangeEnd = null;
+    
+    const selects = [
+      'bookingStatusSelect',
+      'bookingDateSelect',
+      'bookingServiceSelect'
+    ];
+    
+    selects.forEach(id => {
+      const select = document.getElementById(id) as HTMLSelectElement;
+      if (select) select.value = 'all';
+    });
+    
+    const userIdInput = document.getElementById('bookingUserIdInput') as HTMLInputElement;
+    if (userIdInput) userIdInput.value = '';
+    
+    this.filteredBookings = [...this.rawBookings];
+    this.processReservationsData(this.filteredBookings);
+    
+    if (this.viewMode === 'chart') {
+      setTimeout(() => this.renderChart(), 100);
+    }
+  }
+  
+  applyReservationFilters() {
+    this.filteredBookings = this.rawBookings.filter(booking => {
+      // Status filter
+      if (this.bookingStatusFilter !== 'all') {
+        const bookingStatus = booking.status ? booking.status.toLowerCase() : '';
+        if (bookingStatus !== this.bookingStatusFilter.toLowerCase()) {
+          return false;
+        }
+      }
+      
+      // Service ID filter
+      if (this.bookingServiceFilter !== 'all') {
+        if (booking.serviceId !== parseInt(this.bookingServiceFilter)) {
+          return false;
+        }
+      }
+      
+      // User ID filter
+      if (this.bookingUserIdFilter && this.bookingUserIdFilter.trim() !== '') {
+        if (booking.userId !== parseInt(this.bookingUserIdFilter)) {
+          return false;
+        }
+      }
+      
+      // Date filter
+      if (!booking.bookingDate) return true;
+      
+      const bookingDate = new Date(booking.bookingDate);
+      const now = new Date();
+      
+      if (this.bookingDateFilter === 'custom') {
+        if (this.bookingDateRangeStart) {
+          const startDate = new Date(this.bookingDateRangeStart);
+          if (bookingDate < startDate) {
+            return false;
+          }
+        }
+        
+        if (this.bookingDateRangeEnd) {
+          const endDate = new Date(this.bookingDateRangeEnd);
+          endDate.setHours(23, 59, 59, 999); // End of day
+          if (bookingDate > endDate) {
+            return false;
+          }
+        }
+      } else if (this.bookingDateFilter === 'today') {
+        const today = new Date();
+        if (bookingDate.getDate() !== today.getDate() ||
+            bookingDate.getMonth() !== today.getMonth() ||
+            bookingDate.getFullYear() !== today.getFullYear()) {
+          return false;
+        }
+      } else if (this.bookingDateFilter === 'this_week') {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        
+        if (bookingDate < weekStart || bookingDate > weekEnd) {
+          return false;
+        }
+      } else if (this.bookingDateFilter === 'this_month') {
+        if (bookingDate.getMonth() !== now.getMonth() ||
+            bookingDate.getFullYear() !== now.getFullYear()) {
+          return false;
+        }
+      } else if (this.bookingDateFilter === 'this_year') {
+        if (bookingDate.getFullYear() !== now.getFullYear()) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    this.processReservationsData(this.filteredBookings);
+    this.updateDashboardMetrics();
   }
 
   fetchUsers() {
@@ -755,6 +1076,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
     
     const data = this.getChartData();
+    
+    // If no data to display, don't try to create chart
+    if (data.labels.length === 0) {
+      console.log('No chart data available');
+      return;
+    }
+    
     let chartType: 'line' | 'bar' = 'line';
     let chartOptions = {
       responsive: true,
@@ -882,6 +1210,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     // Reset detailed reservations view when switching tabs
     if (tab === 'reservations') {
       this.showDetailedReservations = false;
+      this.resetReservationFilters();
+    } else if (tab === 'users') {
+      this.resetUserFilters();
     }
   }
 
@@ -1031,7 +1362,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   getLatestReservationsValue(): number {
     if (this.reservationsData.length === 0) return 0;
-    return this.reservationsData[this.reservationsData.length - 1].value;
+    
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMonth = months[new Date().getMonth()];
+    
+    const currentMonthData = this.reservationsData.find(item => item.date === currentMonth);
+    
+    return currentMonthData ? currentMonthData.value : 0;
   }
   
   getTotalReservationsValue(): number {
