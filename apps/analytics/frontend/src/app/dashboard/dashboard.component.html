@@ -367,7 +367,7 @@
                       {{ booking.status }}
                     </span>
                   </td>
-                  <td>{{ booking.createdAt ? formatReservationDate(booking.createdAt) : formatReservationDate(booking.bookingDate) }}</td> <!-- Added null check -->
+                  <td>{{ formatReservationDate(booking.bookingDate) }}</td> <!-- Added null check -->
                   <!-- Action button -->
                   <td>
                     <button class="action-btn" (click)="viewReservationDetails(booking)" 

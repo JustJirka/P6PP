@@ -33,7 +33,6 @@ interface BookingDto {
   serviceId: number;
   bookingDate: string;
   status: string;
-  createdAt?: string; // optional
 }
 
 type BmiCategory = 'Underweight' | 'Normal' | 'Overweight' | 'Obese';
@@ -185,7 +184,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
     bookings.forEach(booking => {
-      const dateStr = booking.createdAt || booking.bookingDate;
+      const dateStr = booking.bookingDate;
       const date = new Date(dateStr);
       const month = months[date.getMonth()];
       
