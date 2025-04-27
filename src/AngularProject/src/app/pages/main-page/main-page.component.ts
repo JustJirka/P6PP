@@ -19,8 +19,10 @@ import { CourseService } from '../../services/course.service';
 })
 export class MainPageComponent {
   @ViewChild('bgVideo') bgVideoRef!: ElementRef<HTMLVideoElement>;
-  isMuted = false;
+  isMuted = true;
   isHidden = false;
+  currentVideoTime = 0;
+
 
   constructor(
     private courseService: CourseService,
@@ -99,7 +101,7 @@ export class MainPageComponent {
       this.courses = courcesResponse.data;
       console.log("course arr: ", this.courses);
     });
-
+    
     //this.courseService.getAllCources().then((coursesList: Course[] = this.courses) => this.courses = coursesList)
   }
 
@@ -113,6 +115,16 @@ export class MainPageComponent {
     }
     window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
   }
+  ngAfterViewInit() {
+    const video = this.bgVideoRef?.nativeElement;
+    if (video) {
+      video.muted = true;
+      video.autoplay = true;
+      video.play().catch(error => {
+        console.error('Autoplay failed:', error);
+      });
+    }
+  }
 
   toggleMute() {
     const video = this.bgVideoRef.nativeElement;
@@ -122,15 +134,34 @@ export class MainPageComponent {
 
   toggleVideo() {
     const video = this.bgVideoRef?.nativeElement;
+  
+    if (video) {
+      if (!this.isHidden) {
+       
+        this.currentVideoTime = video.currentTime; // сохранить позицию
+        video.pause();
+      }
+    }
+  
     this.isHidden = !this.isHidden;
   
-    if (this.isHidden && video) {
-      video.pause();
-    } else if (!this.isHidden && video) {
-      video.play();
-      video.muted = this.isMuted; // сохранить текущий статус звука
-    }
+    setTimeout(() => {
+      const newVideo = this.bgVideoRef?.nativeElement;
+      if (newVideo) {
+        if (!this.isHidden) {
+          newVideo.currentTime = this.currentVideoTime; // восстановить позицию
+          newVideo.muted = this.isMuted;
+          newVideo.autoplay = true;
+          newVideo.play().catch(error => {
+            console.error('Autoplay after show failed:', error);
+          });
+        } else {
+          newVideo.pause();
+        }
+      }
+    }, 0);
   }
+  
   
   onVideoEnded() {
     this.isHidden = true;
