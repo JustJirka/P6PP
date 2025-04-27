@@ -15,7 +15,7 @@ public class EditTemplateValidator : AbstractValidator<EditTemplateRequest>
     {
         RuleFor(x => x.template.Subject).NotEmpty().MaximumLength(75);
         RuleFor(x => x.template.Name).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.template.Text).NotEmpty().MaximumLength(1500);
+        RuleFor(x => x.template.Text).NotEmpty().MaximumLength(15000);
     }
 }
 
