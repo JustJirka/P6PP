@@ -66,6 +66,22 @@ services:
         condition: service_healthy
     networks:
       - backend
+      
+  analytics-service:
+    build:
+      context: .
+      dockerfile: src/AnalyticsService.API/Analytics/Dockerfile
+    container_name: analytics-service
+    ports:
+      - "8006:8006"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=analytics_db;User=root;Password=password123;
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+      
   notification-service:
     build:
       context: .
@@ -114,6 +130,7 @@ services:
       - auth-service
       - user-service
       - notification-service
+      - analytics-service
 
 volumes:
   mysql_data:
