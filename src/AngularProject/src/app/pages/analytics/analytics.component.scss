@@ -647,7 +647,7 @@ main {
           font-size: 14px;
           
           &:last-child {
-            text-align: right;
+            text-align: center;
           }
         }
       }
@@ -812,16 +812,23 @@ main {
         flex: 1;
         min-width: 180px;
         
+        &.date-range {
+          min-width: 150px;
+        }
+        
         label {
           font-size: 12px;
           color: var(--text-light);
           font-weight: 500;
         }
         
-        .select-wrapper {
+        .select-wrapper,
+        .input-wrapper {
           position: relative;
+          width: 100%;
           
-          select {
+          select,
+          input {
             appearance: none;
             width: 100%;
             padding: 8px 36px 8px 12px;
@@ -841,6 +848,11 @@ main {
             }
           }
           
+          input[type="date"],
+          input[type="number"] {
+            padding-right: 12px;
+          }
+          
           .select-icon {
             position: absolute;
             right: 12px;
@@ -848,6 +860,31 @@ main {
             transform: translateY(-50%);
             pointer-events: none;
             color: var(--text-light);
+          }
+          
+          .user-id-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            z-index: 10;
+            max-height: 150px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+            .dropdown-item {
+              padding: 8px 12px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+              
+              &:hover {
+                background-color: rgba(234, 40, 56, 0.05);
+              }
+            }
           }
         }
       }
@@ -1198,4 +1235,45 @@ main {
       }
     }
   }
+}
+
+.daily-analytics-tile {
+  position: relative;
+  background-color: rgb(239, 239, 239);
+  /* Potlač hover efekt */
+  &.stat-card.clickable::after,
+  &.stat-card.clickable:hover::after {
+    background-color: transparent !important;
+  }
+}
+.daily-analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.daily-analytics-arrows {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.arrow-btn {
+  background: #f5f7fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+  color: var(--text-light);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  font-size: 20px;
+  padding: 0;
+}
+.arrow-btn:hover {
+  background: #ececec;
+  border: 1.5px solid #bdbdbd;
+  color: var(--primary-color);
 }

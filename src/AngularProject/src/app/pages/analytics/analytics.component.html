@@ -83,7 +83,7 @@
           <!-- Monthly Users Card -->
           <div class="stat-card clickable" (click)="navigateToTab('users')">
             <div class="stat-card-header">
-              <h3>Monthly Users</h3>
+              <h3>New Users</h3>
               <span class="trend" [class.up]="getMonthlyUsersChange().isIncrease" [class.down]="!getMonthlyUsersChange().isIncrease">
                 {{ getMonthlyUsersChange().isIncrease ? '+' : '-' }}{{ getMonthlyUsersChange().value }}%
               </span>
@@ -94,19 +94,23 @@
         </div>
         
         <div class="grid-row">
-          <!-- Monthly Revenue Chart -->
-          <div class="stat-card wide clickable" (click)="navigateToTab('finances')">
-            <div class="stat-card-header">
-              <h3>Monthly Revenue</h3>
-              <div class="chart-legend">
-                <span class="legend-item">
-                  <span class="legend-color" style="background-color: #ea2839;"></span>
-                  <span>Revenue</span>
-                </span>
+          <!-- Daily Analytics Chart Tile -->
+          <div class="stat-card wide daily-analytics-tile">
+            <div class="stat-card-header daily-analytics-header">
+              <h3>{{ getDailyAnalyticsTitle() }}</h3>
+              <div class="daily-analytics-arrows">
+                <button class="arrow-btn" (click)="switchDailyAnalytics(-1)" title="Previous"><i class="material-icons">chevron_left</i></button>
+                <button class="arrow-btn" (click)="switchDailyAnalytics(1)" title="Next"><i class="material-icons">chevron_right</i></button>
               </div>
             </div>
+            <div class="chart-legend">
+              <span class="legend-item">
+                <span class="legend-color" [ngStyle]="{'background-color': getDailyAnalyticsColor()}"></span>
+                <span>{{ getDailyAnalyticsLegend() }}</span>
+              </span>
+            </div>
             <div class="mini-chart-container">
-              <canvas id="revenueChart"></canvas>
+              <canvas id="dailyAnalyticsChart"></canvas>
             </div>
           </div>
         </div>
@@ -135,8 +139,12 @@
               <!-- Users Info Card -->
               <div class="highest-room">
                 <div class="highest-room-label">User Statistics</div>
-                <div class="highest-room-name">{{ getActiveUsersCount() }} Active Users</div>
-                <div class="highest-room-value">{{ getTotalUsersCount() }} Total Users</div>
+                <div class="highest-room-name">
+                  {{ getMonthlyUsers() }} {{ getMonthlyUsers() === 1 ? 'New User This Month' : 'New Users This Month' }}
+                </div>
+                <div class="highest-room-value">
+                  {{ getTotalUsersCount() }} {{ getTotalUsersCount() === 1 ? 'Total User' : 'Total Users' }}
+                </div>
               </div>
             </div>
           </div>
@@ -203,35 +211,39 @@
               </div>
             </div>
 
-            <!-- Age Group Filter -->
+            <!-- Age Range Filter -->
             <div class="filter-group">
-              <label for="userAgeGroupSelect">Age Group:</label>
-              <div class="select-wrapper">
-                <select id="userAgeGroupSelect" (change)="onUserAgeGroupFilterChange($event)">
-                  <option value="all">All Age Groups</option>
-                  <option value="15-18">15-18</option>
-                  <option value="18-26">18-26</option>
-                  <option value="26-35">26-35</option>
-                  <option value="35-45">35-45</option>
-                  <option value="45-55">45-55</option>
-                  <option value="55-65">55-65</option>
-                  <option value="65+">65+</option>
-                </select>
-                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              <label for="userAgeFromInput">Age From:</label>
+              <div class="input-wrapper">
+                <input type="number" id="userAgeFromInput" [value]="userAgeFrom" 
+                      (input)="onUserAgeFromChange($event)" min="0" [max]="userAgeTo"/>
               </div>
             </div>
             
-            <!-- Registration Date Filter -->
             <div class="filter-group">
-              <label for="userRegistrationTimeSelect">Registration Date:</label>
-              <div class="select-wrapper">
-                <select id="userRegistrationTimeSelect" (change)="onUserRegistrationTimeFilterChange($event)">
-                  <option value="all">All Time</option>
-                  <option value="week">This Week</option>
-                  <option value="month">This Month</option>
-                  <option value="year">This Year</option>
-                </select>
-                <i class="material-icons select-icon">keyboard_arrow_down</i>
+              <label for="userAgeToInput">Age To:</label>
+              <div class="input-wrapper">
+                <input type="number" id="userAgeToInput" [value]="userAgeTo"
+                      (input)="onUserAgeToChange($event)" [min]="userAgeFrom"/>
+              </div>
+            </div>
+          </div>
+          
+          <div class="filter-row">  
+            <!-- Registration Date Range -->
+            <div class="filter-group date-range">
+              <label for="userRegistrationFromInput">Registered From:</label>
+              <div class="input-wrapper">
+                <input type="date" id="userRegistrationFromInput" 
+                      (change)="onUserRegistrationFromChange($event)" [value]="userRegistrationFrom"/>
+              </div>
+            </div>
+            
+            <div class="filter-group date-range">
+              <label for="userRegistrationToInput">Registered To:</label>
+              <div class="input-wrapper">
+                <input type="date" id="userRegistrationToInput"
+                      (change)="onUserRegistrationToChange($event)" [value]="userRegistrationTo"/>
               </div>
             </div>
           </div>
@@ -449,7 +461,7 @@
                   <th>Birth Date</th>
                   <th>Age</th>
                   <th>Registered</th>
-                  <th>Last Updated</th>
+                  <th style="text-align: center;">Last Updated</th>
                 </tr>
               </thead>
               <tbody>
@@ -466,7 +478,7 @@
                   <td>{{ formatDate(user.birthDate) }}</td>
                   <td>{{ calculateAge(user.birthDate) }}</td>
                   <td>{{ formatDate(user.createdAt) }}</td>
-                  <td>{{ formatDate(user.lastUpdated) }}</td>
+                  <td style="text-align: center;">{{ formatDate(user.lastUpdated) }}</td>
                 </tr>
               </tbody>
             </table>

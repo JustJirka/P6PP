@@ -115,6 +115,15 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
   
   private currentDate = new Date();
 
+  userAgeFrom: number = 0;
+  userAgeTo: number = 0;
+  userRegistrationFrom: string = '';  
+  userRegistrationTo: string = '';
+
+  // Přidám stav a typy pro daily analytics
+  dailyAnalyticsType: 'revenue' | 'reservations' | 'newUsers' = 'revenue';
+  private dailyAnalyticsTypes: Array<'revenue' | 'reservations' | 'newUsers'> = ['revenue', 'reservations', 'newUsers'];
+
   constructor(private http: HttpClient) {
     this.totalRevenue = this.getTotalFinanceValue();
     this.monthlyRevenue = this.getLatestFinanceValue();
@@ -130,11 +139,14 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
 
     // Simulované načítání dat
     this.usersTableData = this.getSampleUserData();
+    
+    this.initializeUserFilters();
   }
 
   ngAfterViewInit() {
     if (this.activeTab === 'overview') {
-      this.initializeRevenueChart();
+      this.dailyAnalyticsType = 'revenue';
+      this.initializeDailyAnalyticsChart();
       this.updateCircularCharts();
     } else {
       this.renderChart();
@@ -717,6 +729,16 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  initializeUserFilters() {
+    const users = this.usersTableData;
+    
+    if (users.length > 0) {
+      const ages = users.map(user => this.calculateAge(user.birthDate));
+      this.userAgeFrom = Math.min(...ages);
+      this.userAgeTo = Math.max(...ages);
+    }
+  }
+
   getFilteredUsers(): UserData[] {
     return this.usersTableData.filter(user => {
       if (this.userRoleFilter !== 'all' && user.roleId.toString() !== this.userRoleFilter) {
@@ -742,21 +764,17 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
         }
       }
       
-      if (this.userRegistrationTimeFilter !== 'all') {
-        const registrationDate = new Date(user.createdAt);
-        const now = new Date();
-        
-        if (this.userRegistrationTimeFilter === 'week' && 
-            (now.getTime() - registrationDate.getTime() > 7 * 24 * 60 * 60 * 1000)) {
-          return false;
-        } else if (this.userRegistrationTimeFilter === 'month' && 
-                  (now.getMonth() !== registrationDate.getMonth() || 
-                   now.getFullYear() !== registrationDate.getFullYear())) {
-          return false;
-        } else if (this.userRegistrationTimeFilter === 'year' && 
-                  now.getFullYear() !== registrationDate.getFullYear()) {
-          return false;
-        }
+      const age = this.calculateAge(user.birthDate);
+      if (age < this.userAgeFrom || age > this.userAgeTo) {
+        return false;
+      }
+      
+      const registrationDate = new Date(user.createdAt);
+      if (this.userRegistrationFrom && registrationDate < new Date(this.userRegistrationFrom)) {
+        return false;
+      }
+      if (this.userRegistrationTo && registrationDate > new Date(this.userRegistrationTo)) {
+        return false;
       }
       
       if (this.userBmiFilter !== 'all') {
@@ -919,6 +937,46 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  onUserAgeFromChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.userAgeFrom = parseInt(input.value, 10);
+    this.generateUsersChartData();
+    
+    if (this.viewMode === 'chart') {
+      this.renderChart();
+    }
+  }
+
+  onUserAgeToChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.userAgeTo = parseInt(input.value, 10);
+    this.generateUsersChartData();
+    
+    if (this.viewMode === 'chart') {
+      this.renderChart();
+    }
+  }
+
+  onUserRegistrationFromChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.userRegistrationFrom = input.value;
+    this.generateUsersChartData();
+    
+    if (this.viewMode === 'chart') {
+      this.renderChart();
+    }
+  }
+
+  onUserRegistrationToChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.userRegistrationTo = input.value;
+    this.generateUsersChartData();
+    
+    if (this.viewMode === 'chart') {
+      this.renderChart();
+    }
+  }
+
   resetUserFilters() {
     this.userRoleFilter = 'all';
     this.userStateFilter = 'all';
@@ -940,6 +998,23 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
       const select = document.getElementById(id) as HTMLSelectElement;
       if (select) select.value = 'all';
     });
+    
+    this.userAgeFrom = Math.min(...this.usersTableData.map(user => this.calculateAge(user.birthDate)));
+    this.userAgeTo = Math.max(...this.usersTableData.map(user => this.calculateAge(user.birthDate)));
+    this.userRegistrationFrom = '';
+    this.userRegistrationTo = '';
+    
+    const ageFromInput = document.getElementById('userAgeFromInput') as HTMLInputElement;
+    if (ageFromInput) ageFromInput.value = this.userAgeFrom.toString();
+    
+    const ageToInput = document.getElementById('userAgeToInput') as HTMLInputElement;
+    if (ageToInput) ageToInput.value = this.userAgeTo.toString();
+    
+    const registrationFromInput = document.getElementById('userRegistrationFromInput') as HTMLInputElement;
+    if (registrationFromInput) registrationFromInput.value = this.userRegistrationFrom;
+    
+    const registrationToInput = document.getElementById('userRegistrationToInput') as HTMLInputElement;
+    if (registrationToInput) registrationToInput.value = this.userRegistrationTo;
     
     this.generateUsersChartData();
     
@@ -1242,7 +1317,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
     
     if (tab === 'overview') {
       setTimeout(() => {
-        this.initializeRevenueChart();
+        this.dailyAnalyticsType = 'revenue';
+        this.initializeDailyAnalyticsChart();
         this.updateCircularCharts();
       }, 0);
     } else {
@@ -1373,5 +1449,143 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
   
   getValueDifference(current: number, previous: number): number {
     return Math.abs(current - previous);
+  }
+
+  // Přepínání grafů
+  switchDailyAnalytics(direction: number) {
+    const idx = this.dailyAnalyticsTypes.indexOf(this.dailyAnalyticsType);
+    let newIdx = idx + direction;
+    if (newIdx < 0) newIdx = this.dailyAnalyticsTypes.length - 1;
+    if (newIdx >= this.dailyAnalyticsTypes.length) newIdx = 0;
+    this.dailyAnalyticsType = this.dailyAnalyticsTypes[newIdx];
+    setTimeout(() => this.initializeDailyAnalyticsChart(), 0);
+  }
+
+  // Titulek
+  getDailyAnalyticsTitle(): string {
+    switch (this.dailyAnalyticsType) {
+      case 'revenue': return 'Daily Revenue';
+      case 'reservations': return 'Daily Reservations';
+      case 'newUsers': return 'Daily New Users';
+      default: return '';
+    }
+  }
+  // Legenda
+  getDailyAnalyticsLegend(): string {
+    switch (this.dailyAnalyticsType) {
+      case 'revenue': return 'Revenue';
+      case 'reservations': return 'Reservations';
+      case 'newUsers': return 'New Users';
+      default: return '';
+    }
+  }
+  // Barva
+  getDailyAnalyticsColor(): string {
+    // Všechny grafy budou červené
+    return '#ea2839';
+  }
+
+  // Získání denních dat pro aktuální měsíc
+  getDailyRevenueData(): DataItem[] {
+    const now = new Date();
+    const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    // Pro každý den v měsíci spočítám sumu částek za všechny rezervace toho dne
+    // Pokud není částka v datech, použiji simulovanou hodnotu
+    const bookings = this.rawBookings.filter(b => {
+      const d = new Date(b.bookingDate);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const byDay: { [key: string]: number } = {};
+    for (let i = 1; i <= days; i++) byDay[i] = 0;
+    bookings.forEach(b => {
+      const d = new Date(b.bookingDate);
+      const day = d.getDate();
+      // Pokud existuje b.amount nebo b.price, použij ji, jinak simuluj
+      const amount = (b as any).amount ?? (b as any).price ?? Math.floor(1000 + Math.random() * 1000);
+      byDay[day] += amount;
+    });
+    return Array.from({ length: days }, (_, i) => ({ date: (i + 1).toString(), value: byDay[i + 1] }));
+  }
+  getDailyReservationsData(): DataItem[] {
+    const now = new Date();
+    const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const bookings = this.rawBookings.filter(b => {
+      const d = new Date(b.bookingDate);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const byDay: { [key: string]: number } = {};
+    for (let i = 1; i <= days; i++) byDay[i] = 0;
+    bookings.forEach(b => {
+      const d = new Date(b.bookingDate);
+      const day = d.getDate();
+      byDay[day]++;
+    });
+    return Array.from({ length: days }, (_, i) => ({ date: (i + 1).toString(), value: byDay[i + 1] }));
+  }
+  getDailyNewUsersData(): DataItem[] {
+    const now = new Date();
+    const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const users = this.usersTableData.filter(u => {
+      const d = new Date(u.createdAt);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const byDay: { [key: string]: number } = {};
+    for (let i = 1; i <= days; i++) byDay[i] = 0;
+    users.forEach(u => {
+      const d = new Date(u.createdAt);
+      const day = d.getDate();
+      byDay[day]++;
+    });
+    return Array.from({ length: days }, (_, i) => ({ date: (i + 1).toString(), value: byDay[i + 1] }));
+  }
+
+  // Inicializace grafu
+  dailyAnalyticsChartInstance: Chart | null = null;
+  initializeDailyAnalyticsChart() {
+    setTimeout(() => {
+      const canvas = document.getElementById('dailyAnalyticsChart') as HTMLCanvasElement;
+      if (!canvas) return;
+      if (this.dailyAnalyticsChartInstance) {
+        this.dailyAnalyticsChartInstance.destroy();
+      }
+      let data: DataItem[] = [];
+      switch (this.dailyAnalyticsType) {
+        case 'revenue':
+          data = this.getDailyRevenueData();
+          break;
+        case 'reservations':
+          data = this.getDailyReservationsData();
+          break;
+        case 'newUsers':
+          data = this.getDailyNewUsersData();
+          break;
+      }
+      this.dailyAnalyticsChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: data.map(d => d.date),
+          datasets: [{
+            label: this.getDailyAnalyticsLegend(),
+            data: data.map(d => d.value),
+            backgroundColor: this.getDailyAnalyticsColor() + '55',
+            borderColor: this.getDailyAnalyticsColor(),
+            borderWidth: 2,
+            tension: 0.3,
+            pointBackgroundColor: this.getDailyAnalyticsColor(),
+            pointRadius: 3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false }, title: { display: true, text: 'Day' } }
+          }
+        }
+      });
+    }, 100);
   }
 }
