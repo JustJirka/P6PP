@@ -78,11 +78,97 @@ public class DatabaseInit
             await connection.ExecuteAsync(createBookingsTableQuery);
             _logger.LogInformation("'Bookings' table checked/created successfully.");
 
+            // Create Services table
+            const string createServicesTableQuery = @"
+                CREATE TABLE IF NOT EXISTS Services (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    ServiceName VARCHAR(255) NOT NULL,
+                    Start DATETIME NOT NULL,
+                    End DATETIME NOT NULL,
+                    Price DECIMAL(10,2) NOT NULL DEFAULT 0,
+                    IsCancelled BOOLEAN NOT NULL DEFAULT FALSE,
+                    TrainerId INT NOT NULL,
+                    RoomId INT NOT NULL
+                );";
+
+            await connection.ExecuteAsync(createServicesTableQuery);
+            _logger.LogInformation("'Services' table checked/created successfully.");
+
+            // Create Rooms table  
+            const string createRoomsTableQuery = @"
+                CREATE TABLE IF NOT EXISTS Rooms (
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    Name VARCHAR(255) NOT NULL,
+                    Capacity INT NOT NULL DEFAULT 0,
+                    Status VARCHAR(50) NOT NULL DEFAULT 'Available'
+                );";
+
+            await connection.ExecuteAsync(createRoomsTableQuery);
+            _logger.LogInformation("'Rooms' table checked/created successfully.");
+
+            // Create ServiceUsers table (many-to-many relationship)
+            const string createServiceUsersTableQuery = @"
+                CREATE TABLE IF NOT EXISTS ServiceUsers (
+                    ServiceId INT NOT NULL,
+                    UserId INT NOT NULL,
+                    PRIMARY KEY (ServiceId, UserId),
+                    FOREIGN KEY (ServiceId) REFERENCES Services(Id) ON DELETE CASCADE
+                );";
+
+            await connection.ExecuteAsync(createServiceUsersTableQuery);
+            _logger.LogInformation("'ServiceUsers' table checked/created successfully.");
+
+            // Add sample data if the tables are empty
+            await SeedInitialData(connection);
         }
         catch (Exception ex)
         {
             _logger.LogError("Error initializing database: {Message}", ex.Message);
             throw;
+        }
+    }
+
+    private async Task SeedInitialData(MySqlConnection connection)
+    {
+        // Check if Rooms table is empty
+        var roomCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Rooms;");
+        if (roomCount == 0)
+        {
+            _logger.LogInformation("Seeding rooms data...");
+            await connection.ExecuteAsync(@"
+                INSERT INTO Rooms (Id, Name, Capacity, Status)
+                VALUES 
+                (1, 'Fitness Studio A', 20, 'Available'),
+                (2, 'Yoga Studio', 15, 'Available'),
+                (3, 'Cardio Zone', 30, 'Available');
+            ");
+        }
+
+        // Check if Bookings table has entries but Services doesn't
+        var bookingCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Bookings;");
+        var serviceCount = await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Services;");
+        
+        if (bookingCount > 0 && serviceCount == 0)
+        {
+            _logger.LogInformation("Creating services for existing bookings...");
+            await connection.ExecuteAsync(@"
+                INSERT INTO Services (Id, ServiceName, Start, End, Price, IsCancelled, TrainerId, RoomId)
+                SELECT 
+                    b.ServiceId,
+                    CONCAT('Service ', b.ServiceId),
+                    DATE_ADD(b.BookingDate, INTERVAL -1 HOUR),
+                    b.BookingDate,
+                    100.00,
+                    0,
+                    1, -- Default trainer ID
+                    CASE 
+                        WHEN b.ServiceId % 3 = 0 THEN 3
+                        WHEN b.ServiceId % 3 = 1 THEN 1
+                        ELSE 2
+                    END -- Assign rooms based on ServiceId
+                FROM Bookings b
+                WHERE NOT EXISTS (SELECT 1 FROM Services s WHERE s.Id = b.ServiceId);
+            ");
         }
     }
 }

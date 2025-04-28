@@ -132,7 +132,7 @@ namespace Analytics.Infrastructure.Data.Repositories
             const string query = @"
                 INSERT INTO Bookings (BookingDate, Status, UserId, ServiceId)
                 VALUES (@BookingDate, @Status, @UserId, @ServiceId);
-                SELECT CAST(SCOPE_IDENTITY() as int);";
+                SELECT LAST_INSERT_ID();";
 
             var id = await connection.ExecuteScalarAsync<int>(query, new
             {
