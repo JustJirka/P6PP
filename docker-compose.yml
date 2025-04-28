@@ -130,6 +130,22 @@ services:
       - user-service
       - notification-service
 
+  admin-dashboard:
+    build:
+      context: ./src/fitness-admin-dashboard
+      dockerfile: Dockerfile
+    container_name: admin-dashboard
+    ports:
+      - "8081:80"
+    networks:
+      - backend
+    depends_on:
+      - auth-service
+      - user-service
+      - booking-service
+      - admin-settings
+      - notification-service
+
 volumes:
   mysql_data:
 
