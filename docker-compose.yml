@@ -96,21 +96,6 @@ services:
     networks:
       - backend
 
-  vite:
-    build:
-      context: ./src/fitness-admin-dashboard
-      dockerfile: Dockerfile.dev
-    container_name: admin-dashboard-dev
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./src/fitness-admin-dashboard:/app
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    networks:
-      - backend
-
 
   mysql:
     image: mysql:latest
@@ -130,6 +115,36 @@ services:
       interval: 10s
       retries: 5
       timeout: 5s
+
+  angular-frontend:
+    build: 
+      context: ./src/AngularProject
+      dockerfile: Dockerfile
+    container_name: angular-frontend
+    ports:
+      - "4201:8011"
+    networks:
+      - backend
+    depends_on:
+      - auth-service
+      - user-service
+      - notification-service
+
+  admin-dashboard:
+    build:
+      context: ./src/fitness-admin-dashboard
+      dockerfile: Dockerfile
+    container_name: admin-dashboard
+    ports:
+      - "8081:80"
+    networks:
+      - backend
+    depends_on:
+      - auth-service
+      - user-service
+      - booking-service
+      - admin-settings
+      - notification-service
 
 volumes:
   mysql_data:
