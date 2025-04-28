@@ -3,19 +3,29 @@ using Analytics.Domain.Entities;
 using Analytics.Domain.Interface;
 using Analytics.Application.DTOs;
 using Analytics.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Analytics.Application.Services
 {
-    public class BookingService(IBookingRepository bookingRepository) : IBookingService
+    public class BookingService : IBookingService
     {
-        public async Task<List<Booking>> GetAllBookings()
+        private readonly IBookingRepository _bookingRepository;
+
+        public BookingService(IBookingRepository bookingRepository)
         {
-            return await bookingRepository.GetAll();
+            _bookingRepository = bookingRepository;
         }
 
-        public async Task<Booking> GetBookingById(int id)
+        public async Task<List<Booking>> GetAllBookings()
         {
-            return await bookingRepository.GetById(id);
+            return await _bookingRepository.GetAll();
+        }
+
+        public async Task<Booking?> GetBookingById(int id)
+        {
+            return await _bookingRepository.GetById(id);
         }
 
         public async Task<Booking> CreateBooking(BookingDto booking)
@@ -27,18 +37,19 @@ namespace Analytics.Application.Services
             {
                 Id = booking.id,
                 BookingDate = DateTime.Parse(booking.bookingDate),
-                Status = Enum.Parse<BookingStatus>(booking.status, ignoreCase: true), //Confirmed 0, Pending 1, Cancelled 2
+                Status = Enum.Parse<BookingStatus>(booking.status, ignoreCase: true),
                 UserId = booking.userId,
                 ServiceId = booking.serviceId
+                // Service property will be populated by repository
             };
 
-            await bookingRepository.Create(newBooking);
+            await _bookingRepository.Create(newBooking);
             return newBooking;
         }
 
-        public async Task<Booking> DeleteBooking(int id)
+        public async Task<Booking?> DeleteBooking(int id)
         {
-            return await bookingRepository.Delete(id);
+            return await _bookingRepository.Delete(id);
         }
     }
 }

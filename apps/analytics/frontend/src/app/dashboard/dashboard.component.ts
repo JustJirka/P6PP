@@ -33,6 +33,18 @@ interface BookingDto {
   serviceId: number;
   bookingDate: string;
   status: string;
+  service?: {
+    trainerId: number;
+    serviceName: string;
+    start: string; 
+    end: string;
+    roomId: number;
+    room?: {
+      name: string;
+      capacity: number;
+    };
+    users: number[];
+  };
 }
 
 enum BookingStatus {
@@ -305,7 +317,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             userId: booking.userId || 0,
             serviceId: booking.serviceId || 0,
             bookingDate: booking.bookingDate || '',
-            status: statusText || 'Unknown'
+            status: statusText || 'Unknown',
+            service: booking.service ? {
+              trainerId: booking.service.trainerId || 0,
+              serviceName: booking.service.serviceName || '',
+              start: booking.service.start || '',
+              end: booking.service.end || '',
+              roomId: booking.service.roomId || 0,
+              room: booking.service.room ? {
+                name: booking.service.room.name || '',
+                capacity: booking.service.room.capacity || 0
+              } : undefined,
+              users: booking.service.users || []
+            } : undefined
           };
         });
         
@@ -368,68 +392,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (this.activeTab === 'reservations' && this.viewMode === 'chart') {
       setTimeout(() => this.renderChart(), 100);
     }
-  }
-
-  // MŮŽEME VYUŽÍT FUNKCI PRO DATABASE SYNC - V HTML JE PAK TLAČÍTKO
-  /*triggerDatabaseSync() {
-    this.http.get<any>(`${this.bookingsApiUrl}/triggerSync`).pipe(
-      tap(result => {
-        console.log('Database sync triggered successfully:', result);
-        alert('Database sync triggered successfully');
-        this.fetchReservations();
-      }),
-      catchError(error => {
-        console.error('Error triggering database sync:', error);
-        alert('Error triggering database sync');
-        return of(null);
-      })
-    ).subscribe();
-  }*/
-
-  // RADŠI JSEM UDĚLAL I CREATE, KDYBY TO K NĚČEMU BYLO (KLIDNĚ SMAŽ)
-  /*createReservation(booking: BookingDto) {
-    this.http.post<BookingDto>(this.bookingsApiUrl, booking).pipe(
-      tap(newBooking => {
-        console.log('Created new reservation:', newBooking);
-        this.rawBookings.push(newBooking);
-        this.fetchReservations();
-      }),
-      catchError(error => {
-        console.error('Error creating reservation:', error);
-        alert('Failed to create reservation');
-        return of(null);
-      })
-    ).subscribe();
-  }*/
-  
-  deleteReservation(id: number) {
-    this.http.delete<BookingDto>(`${this.bookingsApiUrl}/${id}`).pipe(
-      tap(deletedBooking => {
-        console.log('Deleted reservation:', deletedBooking);
-        this.rawBookings = this.rawBookings.filter(booking => booking.id !== id);
-        this.filteredBookings = this.filteredBookings.filter(booking => booking.id !== id);
-        
-        this.processReservationsData(this.filteredBookings);
-      }),
-      catchError(error => {
-        console.error('Error deleting reservation:', error);
-        alert('Failed to delete reservation');
-        return of(null);
-      })
-    ).subscribe();
-  }
-  
-  toggleDetailedReservations() {
-    this.showDetailedReservations = !this.showDetailedReservations;
-    this.selectedBooking = null;
-  }
-  
-  viewReservationDetails(booking: BookingDto) {
-    this.selectedBooking = booking;
-  }
-  
-  closeReservationDetails() {
-    this.selectedBooking = null;
   }
   
   getReservationStatusClass(status: string): string {
