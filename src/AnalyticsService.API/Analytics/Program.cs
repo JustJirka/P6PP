@@ -32,6 +32,10 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IPaymentsRepository, PaymentsRepository>();
+builder.Services.AddScoped<IPaymentsService, PaymentsService>();
+builder.Services.AddScoped<IUserCreditRepository, UserCreditRepository>();
+builder.Services.AddScoped<IUserCreditService, UserCreditService>();
 
 // Register Quartz.NET
 builder.Services.AddQuartz(q =>
