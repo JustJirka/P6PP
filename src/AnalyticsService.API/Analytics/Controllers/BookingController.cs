@@ -1,10 +1,6 @@
 using Analytics.Application.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Analytics.Application.DTOs;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Analytics.Controllers
 {

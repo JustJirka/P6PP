@@ -118,6 +118,32 @@ public class DatabaseInit
             await connection.ExecuteAsync(createServiceUsersTableQuery);
             _logger.LogInformation("'ServiceUsers' table checked/created successfully.");
 
+            const string createPaymentsTableQuery = @"
+                CREATE TABLE IF NOT EXISTS Payments (
+                    PaymentID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    UserId    BIGINT        NOT NULL,
+                    RoleId    BIGINT        NOT NULL,
+                    Price     BIGINT        NOT NULL,
+                    CreditAmount BIGINT     NOT NULL,
+                    Status    VARCHAR(20)   NOT NULL,
+                    TransactionType VARCHAR(20) NOT NULL,
+                    CreatedAt DATETIME      DEFAULT CURRENT_TIMESTAMP
+                );";
+
+            await connection.ExecuteAsync(createPaymentsTableQuery);
+            _logger.LogInformation("'Payments' table checked/created successfully.");
+
+            const string createUserCreditsTableQuery = @"
+                CREATE TABLE IF NOT EXISTS UserCredits (
+                    UserId        BIGINT   NOT NULL,
+                    RoleId        BIGINT   NOT NULL,
+                    CreditBalance BIGINT   NOT NULL,
+                    PRIMARY KEY (UserId)
+                );";
+
+            await connection.ExecuteAsync(createUserCreditsTableQuery);
+            _logger.LogInformation("'UserCredits' table checked/created successfully.");
+
             // Add sample data if the tables are empty
             await SeedInitialData(connection);
         }
