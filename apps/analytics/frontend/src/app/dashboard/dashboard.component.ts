@@ -413,6 +413,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     
     return '';
   }
+
+  usersAttending(users: number[]): number {
+    return users.length;
+  }
+
+  capacityStatus(capacity: number, users: number[]): string {
+    const freeSpots = capacity - this.usersAttending(users);
+    return freeSpots + '/' + capacity;
+  }
   
   formatReservationDate(dateString: string): string {
     const date = new Date(dateString);

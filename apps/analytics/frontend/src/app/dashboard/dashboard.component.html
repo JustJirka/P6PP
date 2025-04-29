@@ -436,8 +436,11 @@
                   <th>User ID</th>
                   <th>Trainer ID</th>
                   <th>Service</th>
+                  <th>Service Start</th>
+                  <th>Service End</th>
                   <th>Room</th>
-                  <th>Room Capacity</th>
+                  <th>Capacity</th>
+                  <th>Users</th>
                   <th>Booking Created</th>
                   <th>Status</th>
                 </tr>
@@ -447,9 +450,12 @@
                   <td>{{ booking?.id || 'N/A' }}</td>
                   <td>{{ booking?.userId || 'N/A' }}</td>
                   <td>{{ booking?.service?.trainerId || 'N/A' }}</td>
-                  <td>{{ booking?.serviceId || 'N/A' }}</td>
+                  <td>{{ booking?.service?.serviceName || booking?.serviceId || 'N/A' }}</td>
+                  <td>{{ booking?.service?.start ? formatReservationDate(booking.service!.start) : 'N/A'}}</td>
+                  <td>{{ booking?.service?.end ? formatReservationDate(booking.service!.end) : 'N/A'}}</td>
                   <td>{{ booking?.service?.room?.name || 'N/A' }}</td>
-                  <td>{{ booking?.service?.room?.capacity || 'N/A' }}</td>
+                  <td>{{ booking?.service?.room?.capacity && booking?.service?.users ? capacityStatus(booking.service!.room!.capacity, booking.service!.users) : 'N/A' }}</td>
+                  <td>{{ booking?.service?.users ? usersAttending(booking.service!.users) : 'N/A' }}</td>
                   <td>{{ booking?.bookingDate ? formatReservationDate(booking.bookingDate) : 'N/A' }}</td>
                   <td>
                     <span class="status-badge" [ngClass]="getReservationStatusClass(booking?.status || '')">
