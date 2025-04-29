@@ -15,17 +15,13 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(8006);
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"🔍 Connection string used: {connectionString}");
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyCorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "http://localhost:4201")
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 
@@ -34,6 +30,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDatabaseSyncService, DatabaseSyncService>();  
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 
 // Register Quartz.NET
 builder.Services.AddQuartz(q =>
@@ -64,20 +62,12 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    try
-    {
-        var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInit>();
-        await initializer.InitializeDatabase();
-        Console.WriteLine("✅ Database Initialization Completed Successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ Error initializing database: {ex.Message}");
-    }
+    var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInit>();
+    await initializer.InitializeDatabase();
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || true) // Vždy zobrazit Swagger
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
