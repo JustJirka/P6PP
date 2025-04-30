@@ -13,6 +13,7 @@ import { AuthGuard } from './services/auth.guard';
 import { ResetPassComponent } from './pages/reset-pass/reset-pass.component';
 import { CoursePageComponent } from './pages/course-page/course-page.component';
 import { VerificationComponent } from './pages/verification/verification.component';
+import { AnalyticsComponent } from './pages/analytics/analytics.component';
 
 
 const routeConfig: Routes = [
@@ -68,6 +69,11 @@ const routeConfig: Routes = [
         path: 'course/:id',
         component: CoursePageComponent,
         title: 'Cource'
+    },
+    {
+        path: 'analytics',
+        component: AnalyticsComponent,
+        title: 'Analytics'
     }
 ];
 
