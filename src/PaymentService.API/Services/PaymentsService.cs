@@ -161,7 +161,7 @@ public class PaymentService
 
         return newPayment;
     }
-    public async Task<string> CreateBillAsync(int id, CancellationToken cancellationToken)
+    public async Task<Payment> CreateBillAsync(int id, CancellationToken cancellationToken)
     {
         if (!_cache.TryGetValue($"payment:{id}", out Payment? payment))
         {
@@ -174,40 +174,28 @@ public class PaymentService
         }
 
         string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        string invoiceFilePath = Path.Combine(folderPath, $"Bill_{id}.txt");
 
-        string invoiceFilePath = Path.Combine(folderPath, $"Bill_{id}.pdf");
-
-        using (FileStream fs = new FileStream(invoiceFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+        using (StreamWriter writer = new StreamWriter(invoiceFilePath, false))
         {
-            Document document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.GetInstance(document, fs);
+            // Add title
+            writer.WriteLine("Bill");
+            writer.WriteLine();
 
-            document.Open();
-
-            // Add title  
-            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
-            document.Add(new Paragraph("Bill", titleFont));
-            document.Add(new Paragraph("\n"));
-
-            // Add payment details  
-            var textFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
-            document.Add(new Paragraph($"UserID: {payment.UserId}", textFont));
-            document.Add(new Paragraph($"PaymentID: {payment.PaymentID}", textFont));
+            // Add payment details
+            writer.WriteLine($"UserID: {payment.UserId}");
+            writer.WriteLine($"PaymentID: {payment.PaymentID}");
             if (payment.TransactionType == "reservation")
             {
-                document.Add(new Paragraph($"Price: {payment.Price} CZK", textFont));
+                writer.WriteLine($"Price: {payment.Price} CZK");
             }
             else
             {
-                document.Add(new Paragraph($"Credit Amount: {payment.CreditAmount} credits", textFont));
+                writer.WriteLine($"Credit Amount: {payment.CreditAmount} credits");
             }
-            document.Add(new Paragraph($"Price: {payment.Price} CZK", textFont));
-            document.Add(new Paragraph($"Date: {payment.CreatedAt:dd-MM-yyyy}", textFont));
-
-            document.Close();
-            writer.Close();
+            writer.WriteLine($"Date: {payment.CreatedAt:dd-MM-yyyy}");
         }
 
-        return "Success";
+        return payment;
     }
 }
