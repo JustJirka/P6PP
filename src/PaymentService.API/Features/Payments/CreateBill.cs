@@ -31,9 +31,10 @@ public class CreateBillHandler
 
 		var payment = await _PaymentService.CreateBillAsync(request.Id, cancellationToken);
 
-		return payment != "Success"
-			? new ApiResult<Payment>(null, false, "Payments not found")
-			: new ApiResult<Payment>(payment);
+
+        return payment is null
+           ? new ApiResult<Payment>(null, false, "Payments not found")
+           : new ApiResult<Payment>(payment, true, null);
 	}
 }
 

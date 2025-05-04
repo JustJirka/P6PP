@@ -161,11 +161,14 @@ public class PaymentService
 
         return newPayment;
     }
-    public async Task<string> CreateBillAsync(int id, CancellationToken cancellationToken)
+    public async Task<Payment> CreateBillAsync(int id, CancellationToken cancellationToken)
     {
-        if (!_cache.TryGetValue($"payment:{id}", out Payment? payment))
+        string cacheKey = $"payment:{id}";
+
+        if (!_cache.TryGetValue(cacheKey, out Payment? payment))
         {
             payment = await _paymentRepository.GetByIdAsync(id, cancellationToken);
+
         }
 
         if (payment == null)
@@ -208,6 +211,6 @@ public class PaymentService
             writer.Close();
         }
 
-        return "Success";
+        return payment;
     }
 }
