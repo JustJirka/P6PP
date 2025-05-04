@@ -76,10 +76,11 @@ public static class ServiceEndpoints
     {
         private const string BaseUrl = "http://payment-service:5185";
         public static string CreatePayment => $"{BaseUrl}/api/createpayment";
-        public static string GetPaymentById(int id) => $"{BaseUrl}/api//{id}";
+        public static string GetPaymentById(int id) => $"{BaseUrl}/api/{id}";
         public static string UpdatePayment => $"{BaseUrl}/api/updatepayment";
         public static string CreateBalance => $"{BaseUrl}/api/createbalance";
         public static string GetBalanceById(int id) => $"{BaseUrl}/api/getbalance/{id}";
+        public static string CreateBill(int id) => $"{BaseUrl}/api/updatebalance/createbill/{id}";
     }
 
 }

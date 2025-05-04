@@ -73,7 +73,7 @@ namespace PaymentService.API.Persistence.Repositories
 
             using var connection = await _context.CreateConnectionAsync();
             const string query = @"
-        SELECT PaymentID, UserId,RoleId,Price,CreditAmount,Status,TransactionType
+        SELECT PaymentID, UserId,RoleId,Price,CreditAmount,Status,TransactionType, CreatedAt
         FROM Payment
         WHERE PaymentId = @Id;";
 

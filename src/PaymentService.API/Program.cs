@@ -57,6 +57,7 @@ app.UseEndpoints(endpoints =>
     UpdatePaymentEndpoint.Register(endpoints);
     GetBalanceByIdEndpoint.Register(endpoints);
     CreateBalanceEndpoint.Register(endpoints);
+    CreateBillEndpoint.Register(endpoints);
 
 });
 
