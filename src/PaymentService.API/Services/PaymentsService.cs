@@ -163,9 +163,12 @@ public class PaymentService
     }
     public async Task<Payment> CreateBillAsync(int id, CancellationToken cancellationToken)
     {
-        if (!_cache.TryGetValue($"payment:{id}", out Payment? payment))
+        string cacheKey = $"payment:{id}";
+
+        if (!_cache.TryGetValue(cacheKey, out Payment? payment))
         {
             payment = await _paymentRepository.GetByIdAsync(id, cancellationToken);
+
         }
 
         if (payment == null)
