@@ -161,8 +161,6 @@ public class PaymentService
 
         return newPayment;
     }
-
-
     public async Task<string> CreateBillAsync(int id, CancellationToken cancellationToken)
     {
         if (!_cache.TryGetValue($"payment:{id}", out Payment? payment))
@@ -175,12 +173,11 @@ public class PaymentService
             throw new Exception("Payment not found.");
         }
 
-        // Ask user for the folder to save the file
         string folderPath = string.Empty;
         using (var folderDialog = new FolderBrowserDialog())
         {
             folderDialog.Description = "Select the folder to save the bill";
-            if (folderDialog.ShowDialog() == DialogResult.OK)
+            if (folderDialog.ShowDialog() == DialogResult)
             {
                 folderPath = folderDialog.SelectedPath;
             }
