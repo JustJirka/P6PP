@@ -173,19 +173,7 @@ public class PaymentService
             throw new Exception("Payment not found.");
         }
 
-        string folderPath = string.Empty;
-        using (var folderDialog = new FolderBrowserDialog())
-        {
-            folderDialog.Description = "Select the folder to save the bill";
-            if (folderDialog.ShowDialog() == DialogResult)
-            {
-                folderPath = folderDialog.SelectedPath;
-            }
-            else
-            {
-                throw new Exception("No folder selected.");
-            }
-        }
+        string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         string invoiceFilePath = Path.Combine(folderPath, $"Bill_{id}.pdf");
 
@@ -196,12 +184,12 @@ public class PaymentService
 
             document.Open();
 
-            // Add title
+            // Add title  
             var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
             document.Add(new Paragraph("Bill", titleFont));
             document.Add(new Paragraph("\n"));
 
-            // Add payment details
+            // Add payment details  
             var textFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
             document.Add(new Paragraph($"UserID: {payment.UserId}", textFont));
             document.Add(new Paragraph($"PaymentID: {payment.PaymentID}", textFont));
