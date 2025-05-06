@@ -42,7 +42,7 @@ public static class CreateBillEndpoint
 {
 	public static void Register(IEndpointRouteBuilder app)
 	{
-		app.MapGet("/api/createbill/{id:int}",
+		app.MapPost("/api/createbill/{id:int}",
 			async (int id,
 				CreateBillHandler handler,
 				CreateBillValidator validator,

@@ -43,6 +43,8 @@ public static class ServiceExtensions
         services.AddScoped<CreatePaymentHandler>();
         services.AddSingleton<CreatePaymentValidator>();
 
+        services.AddScoped<CreateBillHandler>();
+        services.AddScoped<CreateBillValidator>();
         // HttpClient
         services.AddHttpClient<NetworkHttpClient>();
         
