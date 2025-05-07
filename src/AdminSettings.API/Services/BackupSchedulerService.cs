@@ -15,11 +15,23 @@ namespace AdminSettings.Services
     {
         private readonly ILogger<BackupSchedulerService> _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguration _configuration;
 
-        public BackupSchedulerService(ILogger<BackupSchedulerService> logger, IServiceProvider serviceProvider)
+        private readonly int _loopDelayMinutes;
+        private readonly int _postBackupDelayMinutes;
+        private readonly int _errorDelayMinutes;
+        private readonly int _timeCheckWindowMinutes;
+
+        public BackupSchedulerService(ILogger<BackupSchedulerService> logger, IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _configuration = configuration;
+
+            _loopDelayMinutes = _configuration.GetValue<int>("BackupScheduler:LoopDelayMinutes");
+            _postBackupDelayMinutes = _configuration.GetValue<int>("BackupScheduler:PostBackupDelayMinutes");
+            _errorDelayMinutes = _configuration.GetValue<int>("BackupScheduler:ErrorDelayMinutes");
+            _timeCheckWindowMinutes = _configuration.GetValue<int>("BackupScheduler:TimeCheckWindowMinutes");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,17 +55,17 @@ namespace AdminSettings.Services
                             {
                                 _logger.LogInformation("Running a scheduled database backup.");
                                 await backupService.BackupAllAsync();
-                                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                                await Task.Delay(TimeSpan.FromMinutes(_postBackupDelayMinutes), stoppingToken);
                             }
                         }
                     }
 
-                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(_loopDelayMinutes), stoppingToken);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "An error occurred while scheduling backups.");
-                    await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(_errorDelayMinutes), stoppingToken);
                 }
             }
         }
@@ -63,7 +75,7 @@ namespace AdminSettings.Services
             DateTime now = DateTime.Now;
             TimeOnly currentTime = TimeOnly.FromDateTime(now);
 
-            bool isTimeToBackup = Math.Abs((currentTime.ToTimeSpan() - settings.BackupTime.ToTimeSpan()).TotalMinutes) < 1;
+            bool isTimeToBackup = Math.Abs((currentTime.ToTimeSpan() - settings.BackupTime.ToTimeSpan()).TotalMinutes) < _timeCheckWindowMinutes;
 
             if (!isTimeToBackup)
                 return false;

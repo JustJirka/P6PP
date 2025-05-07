@@ -34,9 +34,16 @@ builder.Services.AddDbContext<AdminSettingsDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 25)))); 
 
+
+
 builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>(client =>
 {
-    client.BaseAddress = new Uri("http://user-service:5189");
+    var userServiceBaseAddress = builder.Configuration["BaseAddresses:UserService"];
+    if (string.IsNullOrEmpty(userServiceBaseAddress))
+    {
+        throw new InvalidOperationException("Base address for UserService is not configured.");
+    }
+    client.BaseAddress = new Uri(userServiceBaseAddress);
 });
 
 builder.Services.AddHostedService<BackupSchedulerService>();
@@ -83,9 +90,6 @@ app.UseHttpsRedirection();
 
 //app.UseMiddleware<AuthMiddleware>();
 
-
 app.MapControllers();
 
-
 app.Run();
-

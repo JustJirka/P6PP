@@ -6,10 +6,13 @@ using System.Diagnostics;
 public class DatabaseBackupService
 {
     private readonly SystemSettingsService _systemSettingsService;
+    private readonly IConfiguration _configuration;
 
-    public DatabaseBackupService(SystemSettingsService systemSettingsService)
+
+    public DatabaseBackupService(SystemSettingsService systemSettingsService, IConfiguration configuration)
     {
         _systemSettingsService = systemSettingsService;
+        _configuration = configuration;
     }
 
     public async Task<bool> BackupDatabaseAsync(string dbName, string user, string password)
@@ -41,6 +44,7 @@ public class DatabaseBackupService
                 // 💾 Zapsání výstupu do souboru
                 await File.WriteAllTextAsync(backupFilePath, output);
                 Console.WriteLine($"✅ Backup {dbName} saved to {backupFilePath}");
+                
                 return true;
             }
             else
@@ -72,14 +76,13 @@ public class DatabaseBackupService
             return false;
         }
 
-        var databases = new List<(string DbName, string User, string Password)>
+        var databases = _configuration.GetSection("DatabaseBackup:Databases").Get<List<DatabaseCredential>>();
+
+        if (databases == null || databases.Count == 0)
         {
-            ("admin_db", "root", "password123"),
-            ("auth_db", "root", "password123"),
-            ("userdb", "root", "password123"),
-            ("booking_db", "root", "password123"),
-            ("notification_db", "root", "password123")
-        };
+            Console.WriteLine("❌ No databases configured for backup.");
+            return false;
+        }
 
         foreach (var db in databases)
         {
@@ -92,5 +95,12 @@ public class DatabaseBackupService
     public async Task<SystemSetting?> GetSystemSettingsAsync()
     {
         return await _systemSettingsService.GetSystemSettingsAsync();
+    }
+
+    public class DatabaseCredential
+    {
+        public required string DbName { get; set; }
+        public required string User { get; set; }
+        public required string Password { get; set; }
     }
 }
