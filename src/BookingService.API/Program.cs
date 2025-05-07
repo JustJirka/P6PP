@@ -1,5 +1,6 @@
 using BookingService.API;
 using ReservationSystem.Shared.Clients;
+using ReservationSystem.Shared.Cors;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,19 +15,20 @@ builder.Services.AddControllers()
     .AddEndpointValidation();
 
 builder.Services.AddHttpClient<NetworkHttpClient>();
-
+var corsSettingsSection = builder.Configuration.GetSection("Cors");
+builder.Services.Configure<CorsSettings>(corsSettingsSection);
+var corsSettings = corsSettingsSection.Get<CorsSettings>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDevClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4201")
+        policy.WithOrigins(corsSettings.AllowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
-
-// Ng serve Angular
+/*// Ng serve Angular
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularNgClient", policy =>
@@ -37,13 +39,13 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
+*/
 
 var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseCors("AllowAngularDevClient");
 app.ApplyMigrations();
 
 app.UseHttpsRedirection();
