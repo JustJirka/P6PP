@@ -21,7 +21,17 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// TODO: Fix server version hardcode
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDevClient",
+        builder => builder
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
+
 ServerVersion serverVersion = new MySqlServerVersion("8.0.35");
 
 String connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
@@ -29,13 +39,12 @@ Console.WriteLine("Connection string TEST Notification: " + connectionString);
 builder.Services.AddDbContext<NotificationDbContext>(
     optionsBuilder => optionsBuilder.UseMySql(connectionString, serverVersion)
 );
-
-
-
 // Register services
 builder.Services.RegisterServices(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseCors("AllowAngularDevClient");
 
 // Create DB, tables, etc.
 // Also, you can use your own ORM or database library, this is just an example where i use Dapper (ULTRA FAST)
