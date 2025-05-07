@@ -15,10 +15,12 @@ builder.Services.AddControllers()
     .AddEndpointValidation();
 
 builder.Services.AddHttpClient<NetworkHttpClient>();
-
+var corsSettingsSection = builder.Configuration.GetSection("Cors");
+builder.Services.Configure<CorsSettings>(corsSettingsSection);
+var corsSettings = corsSettingsSection.Get<CorsSettings>();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("corsSettings.AllowedOrigins", policy =>
+    options.AddPolicy("AllowAngularDevClient", policy =>
     {
         policy.WithOrigins(corsSettings.AllowedOrigins)
               .AllowAnyHeader()
@@ -26,7 +28,7 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
+app.UseCors("AllowAngularDevClient");
 /*// Ng serve Angular
 builder.Services.AddCors(options =>
 {
