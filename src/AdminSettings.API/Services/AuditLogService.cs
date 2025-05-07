@@ -57,7 +57,7 @@ public class AuditLogService
         _memoryCache.Remove(_cacheKey);
         _memoryCache.Set("auditlog:" + id, log, new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_cacheExpirationMinutes)
         });
 
         return id;
@@ -73,7 +73,7 @@ public class AuditLogService
 
             _memoryCache.Set(cacheKey, logs, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_cacheExpirationMinutes)
             });
         }
 
