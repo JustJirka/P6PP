@@ -28,7 +28,6 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-app.UseCors("AllowAngularDevClient");
 /*// Ng serve Angular
 builder.Services.AddCors(options =>
 {
@@ -46,7 +45,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseCors("AllowAngularDevClient");
 app.ApplyMigrations();
 
 app.UseHttpsRedirection();
