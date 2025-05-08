@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Form, Button, Card, Container, Alert } from 'react-bootstrap';
 import FormInput from './FormInput';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -28,17 +27,15 @@ const LoginForm = () => {
       });
 
       if (!loginResponse.ok) {
-        throw new Error('Login failed');
+        const errText = await loginResponse.text();
+        throw new Error(`Login failed: ${errText}`);
       }
 
       const loginData = await loginResponse.json();
-      const token = loginData.data;
+      const token = loginData.data.token;
+      const userId = loginData.data.userId;
 
-      // 2. Dekódování tokenu
-      const decodedToken = jwtDecode(token);
-      const userId = decodedToken.userid;
-
-      // 3. Načíst uživatele - fetch GET
+      // 2. Načíst uživatele - fetch GET
       const userResponse = await fetch(`/api/user/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -46,13 +43,14 @@ const LoginForm = () => {
       });
 
       if (!userResponse.ok) {
-        throw new Error('Failed to fetch user info');
+        const errText = await userResponse.text();
+        throw new Error(`Failed to fetch user info: ${errText}`);
       }
 
       const userData = await userResponse.json();
       const user = userData.data.user;
 
-      // 4. Kontrola role
+      // 3. Kontrola role
       if (user.role.id === 1) {
         localStorage.setItem('token', token);
         navigate('/admin');
@@ -92,7 +90,6 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-
           <Button variant="danger" type="submit" className="w-100 mb-3 py-2 shadow-sm">
             Log in
           </Button>
