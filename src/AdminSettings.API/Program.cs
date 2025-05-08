@@ -5,6 +5,7 @@ using AdminSettings.Persistence.Repository;
 using AdminSettings.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using ReservationSystem.Shared.Cors;
 //using ReservationSystem.Shared.Middlewares;
 
 
@@ -44,6 +45,21 @@ builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>(client =>
         throw new InvalidOperationException("Base address for UserService is not configured.");
     }
     client.BaseAddress = new Uri(userServiceBaseAddress);
+});
+
+var corsSettingsSection = builder.Configuration.GetSection("Cors");
+builder.Services.Configure<CorsSettings>(corsSettingsSection);
+var corsSettings = corsSettingsSection.Get<CorsSettings>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDevClient", policy =>
+    {
+        policy.WithOrigins(corsSettings.AllowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 builder.Services.AddHostedService<BackupSchedulerService>();
@@ -87,6 +103,7 @@ using (var scope = app.Services.CreateScope())
 
 //update
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularDevClient");
 
 //app.UseMiddleware<AuthMiddleware>();
 
