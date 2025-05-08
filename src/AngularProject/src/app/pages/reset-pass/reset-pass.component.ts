@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../enviroments/enviroment';
 
 @Component({
   selector: 'app-reset-pass',
@@ -16,7 +17,7 @@ export class ResetPassComponent {
   hidePassword = true;
   hideRepeatPassword = true;
   tryToLogin: boolean = false;
-
+  private authUrl = environment.api.auth;
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -50,7 +51,7 @@ export class ResetPassComponent {
         };
         console.log("reset password payload", payload)
 
-        this.http.post('http://localhost:8005/api/auth/reset-password', payload)
+        this.http.post(`${this.authUrl}` + '/reset-password', payload)
         .subscribe({
           next: () => {alert('Your password has been changed'),
             this.tryToLogin = true;

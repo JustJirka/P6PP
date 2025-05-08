@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, finalize, of, tap } from 'rxjs';
 import { NavigationComponent } from '../../components/navigation/navigation.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { environment } from '../../../enviroments/enviroment';
 
 interface DataItem {
   date: string;
@@ -167,9 +168,9 @@ export class AnalyticsComponent implements OnInit, AfterViewInit {
   monthlyPaymentsCount = 0;
   monthlyPaymentsAmount = 0;
   
-  private bookingsApiUrl = 'http://localhost:8006/api/Bookings';
-  private usersApiUrl = 'http://localhost:8006/api/Users';
-  private paymentsApiUrl = 'http://localhost:8006/api/Payments';
+  private bookingsApiUrl = environment.api.analytics + '/Bookings';
+  private usersApiUrl = environment.api.analytics + '/Users';
+  private paymentsApiUrl = environment.api.analytics + '/Payments';
   
   private currentDate = new Date();
 

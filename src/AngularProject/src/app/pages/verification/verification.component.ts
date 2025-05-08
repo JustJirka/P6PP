@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../enviroments/enviroment';
 
 @Component({
   selector: 'app-verification',
@@ -14,6 +15,7 @@ export class VerificationComponent {
   btn: boolean = true;
   bad: boolean = false;
   error: string = "";
+  private authUrl = environment.api.auth;
   
   constructor(
     private route: ActivatedRoute,
@@ -34,8 +36,7 @@ export class VerificationComponent {
         const token = params['token'];
         console.log(params);
 
-        const baseUrl = 'http://localhost:8005/api/auth/verify-email';
-        const url = `${baseUrl}/${encodeURIComponent(userId)}/${encodeURIComponent(token)}`;
+        const url = `${this.authUrl}/verify-email/${encodeURIComponent(userId)}/${encodeURIComponent(token)}`;
         console.log("link: ", url);
 
         this.http.post(url, null).subscribe({
