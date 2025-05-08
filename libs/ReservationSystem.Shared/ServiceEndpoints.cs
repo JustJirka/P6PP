@@ -83,4 +83,29 @@ public static class ServiceEndpoints
         public static string GetBalanceById(int id) => $"{BaseUrl}/api/getbalance/{id}";
     }
 
+        public static class bookingService
+    {
+        private const string BaseUrl = "http://booking-service:8080";
+        // Services endpoints
+        public static string ListServices => $"{BaseUrl}/api/services";
+        public static string GetServicesByTrainer(int trainerId) => $"{BaseUrl}/api/services/trainer/{trainerId}";
+        public static string GetServiceById(int serviceId) => $"{BaseUrl}/api/services/{serviceId}";
+        public static string CreateService => $"{BaseUrl}/api/services";
+        public static string UpdateService => $"{BaseUrl}/api/services";
+        public static string DeleteService(int serviceId) => $"{BaseUrl}/api/services/{serviceId}";
+
+        // Bookings endpoints
+        public static string ListBookings => $"{BaseUrl}/api/bookings";
+        public static string GetBookingById(int bookingId) => $"{BaseUrl}/api/bookings/{bookingId}";
+        public static string CreateBooking => $"{BaseUrl}/api/bookings";
+        public static string DeleteBooking(int bookingId) => $"{BaseUrl}/api/bookings/{bookingId}";
+
+        // Rooms endpoints
+        public static string ListRooms => $"{BaseUrl}/api/rooms";
+        public static string GetRoomById(int roomId) => $"{BaseUrl}/api/rooms/{roomId}";
+        public static string CreateRoom => $"{BaseUrl}/api/rooms";
+        public static string UpdateRoom(int roomId) => $"{BaseUrl}/api/rooms/{roomId}";
+        public static string DeleteRoom(int roomId) => $"{BaseUrl}/api/rooms/{roomId}";
+    }
+
 }
