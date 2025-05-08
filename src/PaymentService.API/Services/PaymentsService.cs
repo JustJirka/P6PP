@@ -3,8 +3,6 @@ using PaymentService.API.Persistence.Entities.DB.Models;
 using PaymentService.API.Persistence.Repositories;
 using System.Text.RegularExpressions;
 using System.IO;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
 
 namespace PaymentService.API.Services;
 
@@ -176,10 +174,10 @@ public class PaymentService
             throw new Exception("Payment not found.");
         }
 
-        string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        string folderPath = Path.GetTempPath();
         string invoiceFilePath = Path.Combine(folderPath, $"Bill_{id}.txt");
 
-        using (StreamWriter writer = new StreamWriter(invoiceFilePath, false))
+        using (StreamWriter writer = new StreamWriter(invoiceFilePath, true))
         {
             // Add title
             writer.WriteLine("Bill");
@@ -196,9 +194,10 @@ public class PaymentService
             {
                 writer.WriteLine($"Credit Amount: {payment.CreditAmount} credits");
             }
+            writer.WriteLine($"Status: {payment.Status}");
             writer.WriteLine($"Date: {payment.CreatedAt:dd-MM-yyyy}");
         }
-
+        
         return payment;
     }
 }
