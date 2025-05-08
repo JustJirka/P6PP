@@ -7,6 +7,7 @@ using Analytics.Infrastructure.Data.Repositories;
 using Quartz;
 using Quartz.Impl;
 using Analytics.Application.Jobs;
+using ReservationSystem.Shared.Cors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,13 +16,18 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(8006);
 });
 
+var corsSettingsSection = builder.Configuration.GetSection("Cors");
+builder.Services.Configure<CorsSettings>(corsSettingsSection);
+var corsSettings = corsSettingsSection.Get<CorsSettings>();
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("MyCorsPolicy", policy =>
+    options.AddPolicy("AllowAngularDevClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(corsSettings.AllowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -77,7 +83,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("MyCorsPolicy");
+app.UseCors("AllowAngularDevClient");
 
 app.UseHttpsRedirection();
 
