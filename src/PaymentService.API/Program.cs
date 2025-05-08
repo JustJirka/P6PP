@@ -7,7 +7,20 @@ using PaymentService.API.Persistence;
 // Ensure the correct namespace is used for the DatabaseInitializer and DatabaseSeeder
 
 var builder = WebApplication.CreateBuilder(args);
+var corsSettingsSection = builder.Configuration.GetSection("Cors");
+builder.Services.Configure<CorsSettings>(corsSettingsSection);
+var corsSettings = corsSettingsSection.Get<CorsSettings>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDevClient", policy =>
+    {
+        policy.WithOrigins(corsSettings.AllowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5185);
@@ -42,6 +55,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("AllowAngularDevClient");
 }
 
 app.UseHttpsRedirection();
