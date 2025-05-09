@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Analytics.Application.DTOs;
 using Analytics.Application.Services.Interface;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace Analytics.Application.Services
 {
@@ -13,14 +14,17 @@ namespace Analytics.Application.Services
         private readonly ILogger<DatabaseSyncService> _logger;
         private readonly HttpClient _httpClient;
         private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
         public DatabaseSyncService(ILogger<DatabaseSyncService> logger,
                                    HttpClient httpClient,
-                                   IUserService userService)
+                                   IUserService userService,
+                                   IConfiguration configuration)
         {
             _logger = logger;
             _httpClient = httpClient;
             _userService = userService;
+            _configuration = configuration;
         }
 
         public async Task SyncDatabase()
@@ -29,13 +33,13 @@ namespace Analytics.Application.Services
             {
                 _logger.LogInformation("Starting database synchronization at {Time}", DateTime.UtcNow);
 
-                // Build the external API URL.
-                string API_BASE_URL = "http://localhost:";
-                string USER_API_PORT = "5189";
-                string USERS_ENDPOINT = "/api/users";
+                // Načtení hodnot z konfigurace
+                string baseUrl = _configuration["ExternalServices:UserService:BaseUrl"];
+                string port = _configuration["ExternalServices:UserService:Port"];
+                string usersEndpoint = _configuration["ExternalServices:UserService:UsersEndpoint"];
 
                 // Construct the URL.
-                string requestUrl = $"{API_BASE_URL}{USER_API_PORT}{USERS_ENDPOINT}";
+                string requestUrl = $"{baseUrl}:{port}{usersEndpoint}";
 
                 // Make the GET call to the external API.
                 HttpResponseMessage response = await _httpClient.GetAsync(requestUrl);
