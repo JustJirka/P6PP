@@ -3,17 +3,18 @@ using NotificationService.API.Persistence.Entities;
 using ReservationSystem.Shared.Clients;
 using ReservationSystem.Shared;
 using ReservationSystem.Shared.Results;
+using ReservationSystem.Shared.Abstraction;
 using NotificationService.API.Logging;
 
 namespace NotificationService.API.Services
 {
-    public class UserAppService
+    public class UserAppService : IUserAppService
     {
         public record GetUserRespond(User User);
 
-        private readonly NetworkHttpClient _httpClient;
+        private readonly INetworkHttpClient _httpClient;
 
-        public UserAppService(NetworkHttpClient httpClient)
+        public UserAppService(INetworkHttpClient httpClient)
         {
             _httpClient = httpClient;
         }

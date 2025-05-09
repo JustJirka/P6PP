@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using NotificationService.API.Persistence.Entities.DB.Models;
 using NotificationService.API.Persistence.Entities.DB.Seeding;
 using src.NotificationService.API.Persistence.Entities.DB.Models;
+using NotificationService.API.Abstraction;
 
 namespace NotificationService.API.Persistence.Entities.DB;
 
-public class NotificationDbContext : DbContext
+public class NotificationDbContext : DbContext, INotificationDbContext
 {
     public DbSet<Template> Templates { get; set; }
     public DbSet<NotificationLog> NotificationLogs { get; set; }

@@ -1,0 +1,6 @@
+SMTP_HOST=smtp.seznam.cz
+SMTP_PORT=25
+SMTP_ENABLESSL=false
+SMTP_USERNAME=gym@polisenskydaniel.cz
+SMTP_PASSWORD=2~Q-Ya5A7@vEk2B
+SMTP_FROM=gym@polisenskydaniel.cz

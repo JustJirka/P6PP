@@ -7,21 +7,23 @@ using NotificationService.API.Persistence.Entities.DB.Models;
 using NotificationService.API.Logging; // <-- Přidáno pro FileLogger
 using ReservationSystem.Shared.Clients;
 using ReservationSystem.Shared.Results;
+using NotificationService.API.Abstraction;
+using ReservationSystem.Shared.Abstraction;
 
 namespace NotificationService.API.Services
 {
     public class BookingAppService
     {
-        private readonly NetworkHttpClient _httpClient;
-        private readonly NotificationDbContext _notificationDbContext;
-        private readonly UserAppService _userAppService;
-        private readonly TemplateAppService _templateAppService;
-        private readonly MailAppService _mailAppService;
+        private readonly INetworkHttpClient _httpClient;
+        private readonly INotificationDbContext _notificationDbContext;
+        private readonly IUserAppService _userAppService;
+        private readonly ITemplateAppService _templateAppService;
+        private readonly IMailAppService _mailAppService;
         private readonly IConfiguration _configuration;
 
-        public BookingAppService(NetworkHttpClient httpClient, NotificationDbContext notificationDbContext,
-                                 UserAppService userAppService,
-                                 TemplateAppService templateAppService, MailAppService mailAppService,
+        public BookingAppService(INetworkHttpClient httpClient, INotificationDbContext notificationDbContext,
+                                 IUserAppService userAppService,
+                                 ITemplateAppService templateAppService, IMailAppService mailAppService,
                                  IConfiguration configuration)
         {
             _httpClient = httpClient;

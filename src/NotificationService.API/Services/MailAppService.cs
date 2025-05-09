@@ -5,7 +5,7 @@ using NotificationService.API.Persistence;
 
 namespace NotificationService.API.Services
 {
-    public class MailAppService
+    public class MailAppService : IMailAppService
     {
         public class SmtpSettings
         {
