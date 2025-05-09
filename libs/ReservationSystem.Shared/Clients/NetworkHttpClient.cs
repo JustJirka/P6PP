@@ -1,10 +1,11 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using ReservationSystem.Shared.Abstraction;
 using ReservationSystem.Shared.Results;
 
 namespace ReservationSystem.Shared.Clients;
 
-public class NetworkHttpClient
+public class NetworkHttpClient : INetworkHttpClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<NetworkHttpClient> _logger;

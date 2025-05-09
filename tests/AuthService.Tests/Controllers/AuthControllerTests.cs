@@ -71,7 +71,7 @@ public class AuthControllerTests
         Assert.Equal(1, ((dynamic)apiResult.Data).Id);
     }
 
-    
+
     /// <summary>
     /// Tests that the Register method returns a BadRequest result when a user with the same username already exists.
     /// </summary>
@@ -248,7 +248,7 @@ public class AuthControllerTests
         Assert.False(apiResult.Success);
         Assert.Equal("Invalid model", apiResult.Message);
     }
-    /*
+
     /// <summary>
     /// Tests that the Login method returns an Ok result with a token when the user credentials are valid.
     /// </summary>
@@ -257,10 +257,14 @@ public class AuthControllerTests
     {
         // Arrange
         var mockAuthService = new Mock<IUserAuthService>();
-        var expectedToken = "generated-jwt-token";
+        var expectedResponse = new LoginResponse
+        {
+            Token = "generated-jwt-token",
+            UserId = 1
+        };
 
         mockAuthService.Setup(x => x.LoginAsync(It.IsAny<LoginModel>()))
-            .ReturnsAsync(new ApiResult<string>(expectedToken));
+            .ReturnsAsync(new ApiResult<LoginResponse>(expectedResponse));
 
         var controller = new AuthController(mockAuthService.Object);
         var model = new LoginModel
@@ -274,10 +278,11 @@ public class AuthControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var apiResult = Assert.IsType<ApiResult<string>>(okResult.Value);
+        var apiResult = Assert.IsType<ApiResult<LoginResponse>>(okResult.Value);
 
         Assert.True(apiResult.Success);
-        Assert.Equal(expectedToken, apiResult.Data);
+        Assert.Equal(expectedResponse.Token, apiResult.Data.Token);
+        Assert.Equal(expectedResponse.UserId, apiResult.Data.UserId);
         mockAuthService.Verify(x => x.LoginAsync(It.IsAny<LoginModel>()), Times.Once);
     }
 
@@ -292,7 +297,7 @@ public class AuthControllerTests
 
         // Mock the service to return failure response for non-existent user
         mockAuthService.Setup(x => x.LoginAsync(It.IsAny<LoginModel>()))
-            .ReturnsAsync(new ApiResult<string>(null, false, "Some error message"));
+            .ReturnsAsync(new ApiResult<LoginResponse>(null, false, "User not found"));
 
         var controller = new AuthController(mockAuthService.Object);
 
@@ -307,10 +312,11 @@ public class AuthControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        var apiResult = Assert.IsType<ApiResult<string>>(badRequestResult.Value);
+        var apiResult = Assert.IsType<ApiResult<LoginResponse>>(badRequestResult.Value);
 
         Assert.False(apiResult.Success);
-        Assert.NotNull(apiResult.Message);
+        Assert.Equal("User not found", apiResult.Message);
+        Assert.Null(apiResult.Data);
 
         // Verify the service was called with the correct model
         mockAuthService.Verify(x => x.LoginAsync(
@@ -331,7 +337,7 @@ public class AuthControllerTests
 
         // Mock the service to return failure response for invalid password
         mockAuthService.Setup(x => x.LoginAsync(It.IsAny<LoginModel>()))
-            .ReturnsAsync(new ApiResult<string>(null, false, "Invalid credentials"));
+            .ReturnsAsync(new ApiResult<LoginResponse>(null, false, "Invalid credentials"));
 
         var controller = new AuthController(mockAuthService.Object);
 
@@ -346,10 +352,11 @@ public class AuthControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        var apiResult = Assert.IsType<ApiResult<string>>(badRequestResult.Value);
+        var apiResult = Assert.IsType<ApiResult<LoginResponse>>(badRequestResult.Value);
 
         Assert.False(apiResult.Success);
-        Assert.NotNull(apiResult.Message);
+        Assert.Equal("Invalid credentials", apiResult.Message);
+        Assert.Null(apiResult.Data);
 
         // Verify the service was called with correct parameters
         mockAuthService.Verify(x => x.LoginAsync(
@@ -389,8 +396,6 @@ public class AuthControllerTests
         // Verify the service was NOT called (validation failed before reaching service)
         mockAuthService.Verify(x => x.LoginAsync(It.IsAny<LoginModel>()), Times.Never);
     }
-    
-    */
 
     /// <summary>
     /// Tests that the ResetPassword method returns Ok when the password is successfully reset.
@@ -691,39 +696,39 @@ public class AuthControllerTests
         mockAuthService.Verify(x => x.IsVerifiedAsync(userId), Times.Once);
     }
 
-            /// <summary>
-        /// Tests that the IsVerified method returns false when the user email is not confirmed.
-        /// </summary>
-        [Fact]
-        public async Task IsVerified_UserEmailNotConfirmed_ReturnsUnverified()
-        {
-            // Arrange
-            var mockAuthService = new Mock<IUserAuthService>();
-    
-            // Mock unverified email response
-            mockAuthService.Setup(x => x.IsVerifiedAsync(It.IsAny<int>()))
-                .ReturnsAsync(new ApiResult<object>(
-                    new { verified = false }, 
-                    false, 
-                    "Some error message"));
+    /// <summary>
+    /// Tests that the IsVerified method returns false when the user email is not confirmed.
+    /// </summary>
+    [Fact]
+    public async Task IsVerified_UserEmailNotConfirmed_ReturnsUnverified()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
 
-            var controller = new AuthController(mockAuthService.Object);
-            var userId = 7;
+        // Mock unverified email response
+        mockAuthService.Setup(x => x.IsVerifiedAsync(It.IsAny<int>()))
+            .ReturnsAsync(new ApiResult<object>(
+                new { verified = false },
+                false,
+                "Some error message"));
 
-            // Act
-            var result = await controller.IsVerified(userId);
+        var controller = new AuthController(mockAuthService.Object);
+        var userId = 7;
 
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var apiResult = Assert.IsType<ApiResult<object>>(badRequestResult.Value);
-    
-            Assert.False(apiResult.Success);
-            Assert.NotNull(apiResult.Message);
-            Assert.NotNull(apiResult.Data);
-    
-            // Verify the service was called with correct parameter
-            mockAuthService.Verify(x => x.IsVerifiedAsync(userId), Times.Once);
-        }
+        // Act
+        var result = await controller.IsVerified(userId);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(badRequestResult.Value);
+
+        Assert.False(apiResult.Success);
+        Assert.NotNull(apiResult.Message);
+        Assert.NotNull(apiResult.Data);
+
+        // Verify the service was called with correct parameter
+        mockAuthService.Verify(x => x.IsVerifiedAsync(userId), Times.Once);
+    }
 
     /// <summary>
     /// Tests that the logout succeeds when a valid token is provided.
@@ -768,7 +773,6 @@ public class AuthControllerTests
         var context = new DefaultHttpContext();
         context.Request.Headers["Authorization"] = $"Bearer {token}";
 
-        // Simulujate empty claims
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
         context.User = claimsPrincipal;
 
@@ -823,5 +827,319 @@ public class AuthControllerTests
         Assert.Equal(expectedResult.Data, unauthorizedResult.Value);
     }
 
+    /// <summary>
+    /// Tests that ChangePassword returns Ok when the password is successfully changed.
+    /// </summary>
+    [Fact]
+    public async Task ChangePassword_ValidRequest_ReturnsOk()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+        new Claim("userid", "123"),
+        }, "mock"));
+
+        controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
+
+        // Mock successful password change
+        mockAuthService.Setup(x => x.ChangePasswordAsync(It.IsAny<HttpContext>(), It.IsAny<ChangePasswordModel>()))
+            .ReturnsAsync(new ApiResult<object>(
+                new { UserId = 123, Email = "test@example.com" },
+                true,
+                "Password changed successfully."));
+
+        var model = new ChangePasswordModel
+        {
+            NewPassword = "NewPassword123!",
+            RepeatPassword = "NewPassword123!"
+        };
+
+        // Act
+        var result = await controller.ChangePassword(model);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(okResult.Value);
+
+        Assert.True(apiResult.Success);
+        Assert.Equal("Password changed successfully.", apiResult.Message);
+        mockAuthService.Verify(
+            x => x.ChangePasswordAsync(It.IsAny<HttpContext>(), It.IsAny<ChangePasswordModel>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that ChangePassword returns BadRequest when the model is invalid.
+    /// </summary>
+    [Fact]
+    public async Task ChangePassword_InvalidModel_ReturnsBadRequest()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+        new Claim("userid", "123"),
+        }, "mock"));
+
+        controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
+
+        var invalidModel = new ChangePasswordModel
+        {
+            NewPassword = "NewPassword123!",
+            RepeatPassword = "DifferentPassword123!" // Passwords don't match
+        };
+
+        controller.ModelState.Clear();
+        controller.ModelState.AddModelError("RepeatPassword", "Passwords do not match.");
+
+        // Act
+        var result = await controller.ChangePassword(invalidModel);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+
+        Assert.IsType<SerializableError>(badRequestResult.Value);
+
+        // Verify the service was NOT called
+        mockAuthService.Verify(
+            x => x.ChangePasswordAsync(It.IsAny<HttpContext>(), It.IsAny<ChangePasswordModel>()),
+            Times.Never);
+    }
+
+
+    /// <summary>
+    /// Tests that ChangePassword returns Ok when called by authenticated user with valid request.
+    /// </summary>
+    [Fact]
+    public async Task ChangePassword_AuthenticatedUser_ReturnsOk()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        // Setup authenticated user context
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+        {
+        new Claim("userid", "123"),
+        }, "mock"));
+
+        controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
+        };
+
+        var model = new ChangePasswordModel
+        {
+            NewPassword = "NewPassword123!",
+            RepeatPassword = "NewPassword123!"
+        };
+
+        mockAuthService.Setup(x => x.ChangePasswordAsync(It.IsAny<HttpContext>(), model))
+            .ReturnsAsync(new ApiResult<object>(
+                new { UserId = 123 },
+                true,
+                "Password changed successfully."));
+
+        // Act
+        var result = await controller.ChangePassword(model);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(okResult.Value);
+        Assert.True(apiResult.Success);
+        Assert.Equal("Password changed successfully.", apiResult.Message);
+    }
+
+    /// <summary>
+    /// Tests that ChangePassword returns BadRequest for unauthenticated user.
+    /// </summary>
+    [Fact]
+    public async Task ChangePassword_UnauthenticatedUser_ReturnsBadRequest()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        // Setup unauthenticated context
+        controller.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = new ClaimsPrincipal() }
+        };
+
+        var model = new ChangePasswordModel
+        {
+            NewPassword = "NewPassword123!",
+            RepeatPassword = "NewPassword123!"
+        };
+
+        // Mock the service to return failure for unauthenticated user
+        mockAuthService.Setup(x => x.ChangePasswordAsync(It.IsAny<HttpContext>(), It.IsAny<ChangePasswordModel>()))
+            .ReturnsAsync(new ApiResult<object>(
+                null,
+                false,
+                "Some error message."));
+
+        // Act
+        var result = await controller.ChangePassword(model);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(badRequestResult.Value);
+
+        Assert.False(apiResult.Success);
+        Assert.NotNull(apiResult.Message);
+
+        // Verify the service was called
+        mockAuthService.Verify(
+            x => x.ChangePasswordAsync(It.IsAny<HttpContext>(), It.IsAny<ChangePasswordModel>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that RequestPasswordReset returns Ok for valid email.
+    /// </summary>
+    [Fact]
+    public async Task RequestPasswordReset_ValidEmail_ReturnsOk()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        mockAuthService.Setup(x => x.RequestPasswordResetAsync("valid@email.com"))
+            .ReturnsAsync(new ApiResult<object>(null, true, "Reset email sent"));
+
+        // Act
+        var result = await controller.RequestPasswordReset("valid@email.com");
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(okResult.Value);
+        Assert.True(apiResult.Success);
+    }
+
+    /// <summary>
+    /// Tests that RequestPasswordReset returns BadRequest for invalid email format.
+    /// </summary>
+    [Fact]
+    public async Task RequestPasswordReset_InvalidEmail_ReturnsBadRequest()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        mockAuthService.Setup(x => x.RequestPasswordResetAsync("invalid"))
+            .ReturnsAsync(new ApiResult<object>(null, false, "Invalid email"));
+
+        // Act
+        var result = await controller.RequestPasswordReset("invalid");
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(badRequestResult.Value);
+        Assert.False(apiResult.Success);
+    }
+
+    /// <summary>
+    /// Tests that RequestPasswordReset returns BadRequest when user doesn't exist.
+    /// </summary>
+    [Fact]
+    public async Task RequestPasswordReset_UserNotFound_ReturnsBadRequest()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        mockAuthService.Setup(x => x.RequestPasswordResetAsync("nonexistent@email.com"))
+            .ReturnsAsync(new ApiResult<object>(null, false, "User not found"));
+
+        // Act
+        var result = await controller.RequestPasswordReset("nonexistent@email.com");
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<object>>(badRequestResult.Value);
+        Assert.False(apiResult.Success);
+    }
+
+    /// <summary>
+    /// Tests that DeleteUser returns Ok for valid user ID.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUser_ValidId_ReturnsOk()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        mockAuthService.Setup(x => x.DeleteUserAsync(1))
+            .ReturnsAsync(new ApiResult<bool>(true, true, "User deleted"));
+
+        // Act
+        var result = await controller.DeleteUser(1);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<bool>>(okResult.Value);
+        Assert.True(apiResult.Success);
+        Assert.True(apiResult.Data);
+    }
+
+    /// <summary>
+    /// Tests that DeleteUser returns BadRequest when user doesn't exist.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUser_UserNotFound_ReturnsBadRequest()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        mockAuthService.Setup(x => x.DeleteUserAsync(999))
+            .ReturnsAsync(new ApiResult<bool>(false, false, "User not found"));
+
+        // Act
+        var result = await controller.DeleteUser(999);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<bool>>(badRequestResult.Value);
+        Assert.False(apiResult.Success);
+        Assert.False(apiResult.Data);
+    }
+
+    /// <summary>
+    /// Tests that DeleteUser returns BadRequest when deletion fails.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUser_DeleteFails_ReturnsBadRequest()
+    {
+        // Arrange
+        var mockAuthService = new Mock<IUserAuthService>();
+        var controller = new AuthController(mockAuthService.Object);
+
+        var errors = new List<IdentityError> { new IdentityError { Description = "Delete failed" } };
+        mockAuthService.Setup(x => x.DeleteUserAsync(2))
+            .ReturnsAsync(new ApiResult<bool>(false, false, "Delete failed"));
+
+        // Act
+        var result = await controller.DeleteUser(2);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var apiResult = Assert.IsType<ApiResult<bool>>(badRequestResult.Value);
+        Assert.False(apiResult.Success);
+        Assert.False(apiResult.Data);
+    }
 
 }

@@ -1,10 +1,11 @@
 ﻿using NotificationService.API.Persistence.Entities.DB;
 using NotificationService.API.Persistence.Entities.DB.Models;
 using Microsoft.EntityFrameworkCore;
+using NotificationService.API.Abstraction;
 
 namespace NotificationService.API.Services
 {
-    public class TemplateAppService
+    public class TemplateAppService : ITemplateAppService
     {
         private readonly NotificationDbContext _notificationDbContext;
 
