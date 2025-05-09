@@ -77,23 +77,15 @@ namespace UserService.Tests.Features.Roles
         /// Tests that if the role repository fails to add the role (returns null),
         /// the handler returns a failed result with the correct error message.
         /// </summary>
-        /*[Fact]
+        [Fact]
         public async Task CreateRole_AddRoleReturnsNull_ReturnsFailure()
         {
-            // Arrange: Setup RoleService with mocked repo that returns null
-            var mockRepo = new Mock<IRoleService>(MockBehavior.Strict);
-            mockRepo.Setup(r => r.AddAsync(It.IsAny<Role>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((int?)null);
+            // Arrange: Setup IRoleService to return null
+            var mockRepo = new Mock<IRoleService>();
+            mockRepo.Setup(r => r.AddRoleAsync(It.IsAny<Role>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync((int?)null);
 
-            var mockCache = new Mock<IMemoryCache>();
-            object dummy;
-            mockCache.Setup(c => c.TryGetValue(It.IsAny<object>(), out dummy)).Returns(false);
-            mockCache.Setup(c => c.CreateEntry(It.IsAny<object>()))
-                     .Returns(Mock.Of<ICacheEntry>);
-
-            //var roleService = new RoleService(mockRepo.Object, mockCache.Object);
             var handler = new CreateRoleHandler(mockRepo.Object);
-
             var request = new CreateRoleRequest("Fail", "Should fail");
 
             // Act
@@ -103,6 +95,6 @@ namespace UserService.Tests.Features.Roles
             Assert.False(result.Success);
             Assert.Equal(0, result.Data);
             Assert.Equal("Role not created", result.Message);
-        }*/
+        }
     }
 }
