@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentService.Tests", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotificationService.Tests", "tests\NotificationService.Tests\NotificationService.Tests.csproj", "{D3209588-A072-45FA-A455-97E8E72A99F2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminSettings.Tests", "tests\AdminSettings.Tests\AdminSettings.Tests.csproj", "{281E8F9D-14CB-4CA9-8415-2A18BD663237}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{D3209588-A072-45FA-A455-97E8E72A99F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3209588-A072-45FA-A455-97E8E72A99F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3209588-A072-45FA-A455-97E8E72A99F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{281E8F9D-14CB-4CA9-8415-2A18BD663237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{281E8F9D-14CB-4CA9-8415-2A18BD663237}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{281E8F9D-14CB-4CA9-8415-2A18BD663237}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{281E8F9D-14CB-4CA9-8415-2A18BD663237}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +116,7 @@ Global
 		{B0848710-83E2-417B-BF4C-6AC4FB1D27EA} = {E4B02A74-09EF-44B9-ACAD-C05E6F9A0949}
 		{2453BB65-99DB-4E43-B84F-6A9CA8709E74} = {8F9C1CD9-AA50-4806-93CA-F99CB086D16C}
 		{D3209588-A072-45FA-A455-97E8E72A99F2} = {8F9C1CD9-AA50-4806-93CA-F99CB086D16C}
+		{281E8F9D-14CB-4CA9-8415-2A18BD663237} = {8F9C1CD9-AA50-4806-93CA-F99CB086D16C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D0C7B076-600E-4BDC-B0B6-B437FAFA27F4}
