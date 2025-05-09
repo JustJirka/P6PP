@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using PaymentService.API.Persistence.Entities.DB.Models;
-using PaymentService.API.Persistence.Repositories;
+using PaymentService.API.Abstraction;
 using System.Text.RegularExpressions;
 using System.IO;
 
@@ -8,10 +8,10 @@ namespace PaymentService.API.Services;
 
 public class PaymentService
 {
-    private readonly PaymentRepository _paymentRepository;
+    private readonly IPaymentRepository _paymentRepository;
     private readonly IMemoryCache _cache;
     
-    public PaymentService(PaymentRepository paymentRepository, IMemoryCache cache)
+    public PaymentService(IPaymentRepository paymentRepository, IMemoryCache cache)
     {
         _paymentRepository = paymentRepository;
         _cache = cache;

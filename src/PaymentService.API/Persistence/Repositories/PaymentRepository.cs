@@ -2,18 +2,18 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using PaymentService.API.Persistence.Entities.DB.Models;
-using PaymentService.API.Persistence;
+using PaymentService.API.Abstraction;
 
 namespace PaymentService.API.Persistence.Repositories
 {
-    public class PaymentRepository
+    public class PaymentRepository : IPaymentRepository // přidán interface pro umožnění tvorby testů
     {
         private readonly DapperContext _context;
         public PaymentRepository(DapperContext context)
         {
             _context = context;
         }
-        internal async Task<int?> AddAsync(Payment payment, CancellationToken cancellationToken)
+        public async Task<int?> AddAsync(Payment payment, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _context.CreateConnectionAsync();
@@ -32,7 +32,7 @@ namespace PaymentService.API.Persistence.Repositories
             });
         }
 
-        internal async Task<int?> AddAsyncCredits(Payment payment, CancellationToken cancellationToken)
+        public async Task<int?> AddAsyncCredits(Payment payment, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _context.CreateConnectionAsync();
@@ -51,7 +51,7 @@ namespace PaymentService.API.Persistence.Repositories
             });
         }
 
-        internal async Task<int?> ChangeStatus(Payment payment, CancellationToken cancellationToken)
+        public async Task<int?> ChangeStatus(Payment payment, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _context.CreateConnectionAsync();
@@ -67,7 +67,7 @@ namespace PaymentService.API.Persistence.Repositories
             });
         }
 
-        internal async Task<Payment?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<Payment?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -80,7 +80,7 @@ namespace PaymentService.API.Persistence.Repositories
             return await connection.QueryFirstOrDefaultAsync<Payment>(query, new { Id = id });
         }
 
-        internal async Task<UserCredit?> GetBalanceByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<UserCredit?> GetBalanceByIdAsync(int id, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -93,7 +93,7 @@ namespace PaymentService.API.Persistence.Repositories
             return await connection.QueryFirstOrDefaultAsync<UserCredit>(query, new { Id = id });
         }
 
-        internal async Task UpdateCredits(UserCredit userCredit, CancellationToken cancellationToken)
+        public async Task UpdateCredits(UserCredit userCredit, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             using var connection = await _context.CreateConnectionAsync();
@@ -109,7 +109,7 @@ namespace PaymentService.API.Persistence.Repositories
             });
         }
 
-        internal async Task<int?> AddBalanceAsync(UserCredit balance, CancellationToken cancellationToken)
+        public async Task<int?> AddBalanceAsync(UserCredit balance, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             
