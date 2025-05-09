@@ -20,6 +20,15 @@ body {
     height: 100vh;
     object-fit: cover;
   }
+.section-with-footer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.footer-fixed-bottom {
+  margin-top: auto;
+}
 
   .controls {
     position: absolute;

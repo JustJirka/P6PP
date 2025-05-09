@@ -6,7 +6,7 @@ import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { Course } from '../../services/interfaces/course';
 import { ToastrService } from 'ngx-toastr'; 
-
+import { PaymentService } from '../../services/payment.service';
 @Component({
   selector: 'app-course-page',
   standalone: true,
@@ -18,7 +18,8 @@ export class CoursePageComponent {
   constructor(
     private courseService: CourseService,
     private userService: UserService,
-    private toastr: ToastrService 
+    private toastr: ToastrService,
+    private paymentService: PaymentService
   ) {}
 
   course!: Course;
@@ -54,36 +55,83 @@ export class CoursePageComponent {
     });
   }
 
-  enrollOrCancel() {
-    setTimeout(() => {
-      this.isLoading = true;
-      if (this.bookingId) {
-        this.courseService.cancelBooking(this.bookingId).subscribe({
-          next: () => {
+ enrollOrCancel(): void {
+  setTimeout(() => {
+    this.isLoading = true;
+
+    const userIdString = localStorage.getItem('userId');
+    if (!userIdString || isNaN(Number(userIdString))) {
+      this.isLoading = false;
+      this.toastr.error('Invalid user ID in local storage.', 'Error');
+      return;
+    }
+
+    const userId = Number(userIdString);
+
+    if (this.bookingId) {
+      
+      this.courseService.cancelBooking(this.bookingId).subscribe({
+        next: () => {
+        
+          this.isLoading = false;
+          this.toastr.success('Booking cancelled successfully!', 'Success');
+          this.bookingId = null;
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.toastr.error(err.error?.message || 'Failed to cancel booking.', 'Error');
+        }
+      });
+    } else {
+ 
+      this.userService.getUserById(userId).subscribe({
+        next: user => {
+          if (!user) {
             this.isLoading = false;
-            this.toastr.success('Booking cancelled successfully!', 'Success');
-            this.bookingId = null;
-          },
-          error: (err) => {
-            this.isLoading = false;
-            this.toastr.error(err.error?.message || 'Failed to cancel booking.', 'Error');
+            this.toastr.error('User not found.', 'Error');
+            return;
           }
-        });
-      } else {
-        this.courseService.bookService(this.course.id).subscribe({
-          next: (response) => {
-            this.isLoading = false;
-            this.toastr.success('Enrolled successfully!', 'Success');
-            this.checkIfBooked(this.course.id);
-          },
-          error: (err) => {
-            this.isLoading = false;
-            this.toastr.error(err.error?.message || 'Failed to enroll.', 'Error');
-          }
-        });
-      }
-    }, 500);
-  }
+
+    
+          this.courseService.bookService(this.course.id).subscribe({
+            next: bookingResponse => {
+              const bookingId = bookingResponse?.id;
+              this.bookingId = bookingId;
+
+         
+              this.paymentService.createPayment({
+                userId: userId,
+                roleId: user.roleId,
+                transactionType: 'reservation',
+                amount: this.course.price
+              }).subscribe({
+                next: response => {
+             
+                  this.paymentService.updatePaymentStatus({ Id: response.data, Status: 'confirm' }).subscribe();
+                  this.isLoading = false;
+                  this.toastr.success('Enrolled and payment processed successfully!', 'Success');
+                  this.checkIfBooked(this.course.id);
+                },
+                error: err => {
+                  this.isLoading = false;
+                  this.toastr.error('Failed to create payment.', 'Error');
+                }
+              });
+            },
+            error: err => {
+              this.isLoading = false;
+              this.toastr.error(err.error?.message || 'Failed to enroll.', 'Error');
+            }
+          });
+        },
+        error: err => {
+          this.isLoading = false;
+          this.toastr.error('Error retrieving user info.', 'Error');
+        }
+      });
+    }
+  }, 500);
+}
 
   // Example image array
   imageUrls: string[] = [

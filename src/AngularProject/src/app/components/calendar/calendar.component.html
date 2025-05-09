@@ -35,17 +35,17 @@
       </div>
   </main>
 
-  <div class="calendar-sidebar">
+  <div *ngIf="eventsToday.length != 0 || eventsTomorrow.length != 0" class="calendar-sidebar">
       <h3>Up-Coming Events</h3>
       <div class="event-list">
-          <h4>Today</h4>
+          <h4 *ngIf="eventsToday.length != 0">Today</h4>
           <div *ngFor="let event of eventsToday" class="event-item">
               <span class="dot" [style.backgroundColor]="event.color"></span>
               <span>{{ event.title }}</span>
               <span class="time">{{ event.time }}</span>
           </div>
 
-          <h4>Tomorrow</h4>
+          <h4 *ngIf="eventsTomorrow.length != 0">Tomorrow</h4>
           <div *ngFor="let event of eventsTomorrow" class="event-item">
               <span class="dot" [style.backgroundColor]="event.color"></span>
               <span>{{ event.title }}</span>

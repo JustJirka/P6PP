@@ -5,6 +5,7 @@ import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { RouterModule } from '@angular/router';
+import { PaymentService } from '../../services/payment.service';
 
 
 @Component({
@@ -24,7 +25,8 @@ export class CourseComponent implements OnInit {
   constructor(
     private courseService: CourseService,
     private userService: UserService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private paymentService: PaymentService
   ) {}
 
   ngOnInit(): void {
@@ -61,44 +63,85 @@ export class CourseComponent implements OnInit {
   }
 
   toggleReservation(): void {
-    
-    setTimeout(() => {
-      this.isLoading = true;
-      if (this.isBooked && this.bookingId) {
-        this.courseService.cancelBooking(this.bookingId).subscribe({
-          next: () => {
-            this.isLoading = false;
-            this.toastr.info('Reservation cancelled.', 'Cancelled');
-            this.isBooked = false;
-            this.bookingId = null;
-            this.courseService.notifyRefreshBookings();
-          },
-          error: () => {
-            this.isLoading = false;
-            this.toastr.error('Failed to cancel reservation.', 'Error');
-          }
-        });
-      } else {
-        this.courseService.bookService(this.course.id).subscribe({
-          next: () => {
-            this.isLoading = false;
-            this.toastr.success('Course reserved successfully!', 'Success');
-            this.checkIfBooked(this.course.id);
-            this.courseService.notifyRefreshBookings();
-          },
-          error: (err: any) => {
-            this.isLoading = false;
-            const errorMessage = err.error?.message || 'An error occurred while booking the course.';
+  setTimeout(() => {
+    this.isLoading = true;
 
-            console.log(errorMessage)
-            if(errorMessage == "Invalid JWT: UserId claim is missing."){
-              this.toastr.error("You should be logged in to make a reservation.", 'Error');
-            }else{
-              this.toastr.error(errorMessage, 'Error');
+    const userIdString = localStorage.getItem('userId');
+    if (!userIdString || isNaN(Number(userIdString))) {
+      this.isLoading = false;
+      this.toastr.error('Invalid user ID. Please log in.', 'Error');
+      return;
+    }
+
+    const userId = Number(userIdString);
+
+    if (this.isBooked && this.bookingId) {
+ 
+      this.courseService.cancelBooking(this.bookingId).subscribe({
+        next: () => {
+     
+          this.checkIfBooked(this.course.id);
+          this.bookingId = null;
+          this.toastr.info('Reservation cancelled.', 'Cancelled');
+          this.courseService.notifyRefreshBookings();
+          this.isLoading = false;
+        },
+        error: () => {
+          this.toastr.error('Failed to cancel reservation.', 'Error');
+          this.isLoading = false;
+        }
+      });
+    } else {
+     
+      this.userService.getUserById(userId).subscribe({
+        next: user => {
+          this.courseService.bookService(this.course.id).subscribe({
+            next: (bookingResponse) => {
+              const bookingId = bookingResponse?.id;
+              this.bookingId = bookingId;
+              this.isBooked = true;
+              this.checkIfBooked(this.course.id);
+          
+              this.paymentService.createPayment({
+                userId: userId,
+                roleId: user.roleId,
+                transactionType: 'reservation',
+                amount: this.course.price
+              }).subscribe({
+                next: response => {
+                  
+                  this.paymentService.updatePaymentStatus({ Id: response.data, Status: 'confirm' }).subscribe({
+                    next: () => {
+                      console.log('Payment status set to confirm');
+                    },
+                    error: err => {
+                      console.error('Failed to update payment status to confirm', err);
+                    }
+                  });
+                  
+                  this.toastr.success('Course reserved and payment processed!', 'Success');
+                  this.courseService.notifyRefreshBookings();
+                  this.isLoading = false;
+                },
+                error: err => {
+                  this.toastr.error('Payment failed.', 'Error');
+                  this.isLoading = false;
+                }
+              });
+            },
+            error: err => {
+              this.toastr.error('Failed to reserve course.', 'Error');
+              this.isLoading = false;
             }
-          }
-        });
-      }
-    }, 500)
-  }
+          });
+        },
+        error: err => {
+          this.toastr.error('Failed to load user data.', 'Error');
+          this.isLoading = false;
+        }
+      });
+    }
+  }, 500);
+}
+
 }
