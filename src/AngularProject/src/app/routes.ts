@@ -73,7 +73,8 @@ const routeConfig: Routes = [
     {
         path: 'analytics',
         component: AnalyticsComponent,
-        title: 'Analytics'
+        title: 'Analytics',
+        canActivate: [AuthGuard]
     }
 ];
 
