@@ -20,23 +20,23 @@ export class NotificationService {
 
   public loadNotifications(): void {
     const userId = this.userService.getStoredUserId();
-    
+  
     if (userId === null) {
       this.notificationsSubject.next([]);
       return;
     }
-
+  
     const url = `${this.apiUrl}/logs/getallnotifications/${userId}`;
-
+  
     const params = new HttpParams()
       .set('unreadOnly', 'true')
       .set('perPage', '10')
       .set('page', '1');
-
-    this.http.get<any[]>(url, { params })
-      .subscribe(notifications => {
-        this.notificationsSubject.next(notifications);
+  
+    this.http.get<any>(url, { params })
+      .subscribe(response => {
+        const logs = response?.data?.notificationLogs ?? [];
+        this.notificationsSubject.next(logs);
       });
   }
-
 }

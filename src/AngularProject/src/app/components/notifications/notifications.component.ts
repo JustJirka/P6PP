@@ -14,18 +14,15 @@ export class NotificationsComponent implements OnInit {
   constructor(private notificationService: NotificationService) {
   }
 
-  public ngOnInit(): void {
-    this.notificationService.notifications$.subscribe(data => {
-      console.log(data);
-      this.notifications = data;
-    })
+  public notifications: any[] = [];
 
-    console.log(this.notifications);
-  }
+  ngOnInit(): void {
+    this.notificationService.notifications$.subscribe(logs => {
+      this.notifications = logs;
+    });
+  }  
 
   @Output() closed = new EventEmitter<void>();
-
-  public notifications: any;
 
   closeNotifications() {
     this.closed.emit();
