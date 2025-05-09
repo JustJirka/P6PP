@@ -61,12 +61,16 @@ export class PaymentComponent {
   
         const roleId = user.roleId;
   
-        this.paymentService.createPayment({
+        const payload = {
           userId: userId,
           roleId: roleId,
           transactionType: 'credit',
           amount: this.numericAmount
-        }).subscribe({
+        }
+
+        // console.log("Payload: ", payload)
+
+        this.paymentService.createPayment(payload).subscribe({
           next: response => {
             console.log('Payment successfully created:', response);
           },

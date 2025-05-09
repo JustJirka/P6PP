@@ -28,7 +28,7 @@ export class PaymentService {
       return throwError(() => new Error('User ID not found in localStorage'));
     }
 
-    const reqUrl = this.getBalanceUrl + id;
+    const reqUrl = `${this.getBalanceUrl}/${id}`;
 
     return this.http.get<any>(reqUrl).pipe(
       map(response => response.data.creditBalance),
