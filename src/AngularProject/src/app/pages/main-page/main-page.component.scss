@@ -92,3 +92,13 @@ app-cource{
   width: 305px;
   height: 305px;
 }
+
+.gap{
+  margin-top: 5vh
+}
+
+@media (min-height: 920px) {
+  .gap{
+    margin-top: 15vh;
+  }
+}
