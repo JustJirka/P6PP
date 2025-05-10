@@ -5,6 +5,7 @@ using AdminSettings.Persistence.Repository;
 using AdminSettings.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using ReservationSystem.Shared.Cors;
 //using ReservationSystem.Shared.Middlewares;
 
 
@@ -34,9 +35,31 @@ builder.Services.AddDbContext<AdminSettingsDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 25)))); 
 
+
+
 builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>(client =>
 {
-    client.BaseAddress = new Uri("http://user-service:5189");
+    var userServiceBaseAddress = builder.Configuration["BaseAddresses:UserService"];
+    if (string.IsNullOrEmpty(userServiceBaseAddress))
+    {
+        throw new InvalidOperationException("Base address for UserService is not configured.");
+    }
+    client.BaseAddress = new Uri(userServiceBaseAddress);
+});
+
+var corsSettingsSection = builder.Configuration.GetSection("Cors");
+builder.Services.Configure<CorsSettings>(corsSettingsSection);
+var corsSettings = corsSettingsSection.Get<CorsSettings>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDevClient", policy =>
+    {
+        policy.WithOrigins(corsSettings.AllowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 builder.Services.AddHostedService<BackupSchedulerService>();
@@ -80,12 +103,10 @@ using (var scope = app.Services.CreateScope())
 
 //update
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularDevClient");
 
 //app.UseMiddleware<AuthMiddleware>();
 
-
 app.MapControllers();
 
-
 app.Run();
-
