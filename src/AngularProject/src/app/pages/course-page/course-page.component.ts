@@ -78,7 +78,8 @@ export class CoursePageComponent {
           },
           error: (err) => {
             this.isLoading = false;
-            this.toastr.error(err.error?.message || 'Failed to enroll.', 'Error');
+            if(err.error?.message == "Invalid JWT: UserId claim is missing.") this.toastr.error("You should be logged in to make a reservation.", 'Error');
+            else this.toastr.error(err.error?.message || 'Failed to enroll.', 'Error');
           }
         });
       }
