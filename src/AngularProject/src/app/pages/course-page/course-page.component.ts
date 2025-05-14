@@ -69,36 +69,79 @@ export class CoursePageComponent {
     const userId = Number(userIdString);
 
     if (this.bookingId) {
-      
-      this.courseService.cancelBooking(this.bookingId).subscribe({
-        next: () => {
-        
-          this.isLoading = false;
-          this.toastr.success('Booking cancelled successfully!', 'Success');
-          this.bookingId = null;
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.toastr.error(err.error?.message || 'Failed to cancel booking.', 'Error');
-        }
-      });
-    } else {
- 
       this.userService.getUserById(userId).subscribe({
         next: user => {
           if (!user) {
+            console.error('User object is null or undefined');
             this.isLoading = false;
             this.toastr.error('User not found.', 'Error');
             return;
           }
 
-    
+          this.courseService.cancelBooking(this.bookingId!).subscribe({
+            next: () => {
+              this.bookingId = null;
+              this.checkIfBooked(this.course.id);
+
+              this.paymentService.createPayment({
+                userId: userId,
+                roleId: user.roleId,
+                transactionType: 'credit',
+                amount: this.course.price
+              }).subscribe({
+                next: response => {
+                  this.paymentService.updatePaymentStatus({
+                    Id: response.data,
+                    Status: 'confirm'
+                  }).subscribe({
+                    next: () => {
+                      console.log('Credit payment status confirmed');
+                    },
+                    error: err => {
+                      console.error('Failed to confirm credit payment status', err);
+                    }
+                  });
+
+                  this.toastr.info('Reservation cancelled and credit issued.', 'Cancelled');
+                  this.courseService.notifyRefreshBookings();
+                  this.isLoading = false;
+                },
+                error: err => {
+                  console.error("Failed to issue credit:", err);
+                  this.toastr.error('Cancellation succeeded, but credit failed.', 'Partial Success');
+                  this.courseService.notifyRefreshBookings();
+                  this.isLoading = false;
+                }
+              });
+            },
+            error: err => {
+              console.error("Failed to cancel reservation:", err);
+              this.toastr.error('Failed to cancel reservation.', 'Error');
+              this.isLoading = false;
+            }
+          });
+        },
+        error: err => {
+          console.error('Error retrieving user info:', err);
+          this.isLoading = false;
+          this.toastr.error('Error retrieving user info.', 'Error');
+        }
+      });
+    } else {
+      this.userService.getUserById(userId).subscribe({
+        next: user => {
+          if (!user) {
+            console.error('User object is null or undefined');
+            this.isLoading = false;
+            this.toastr.error('User not found.', 'Error');
+            return;
+          }
+
           this.courseService.bookService(this.course.id).subscribe({
             next: bookingResponse => {
               const bookingId = bookingResponse?.id;
               this.bookingId = bookingId;
 
-         
               this.paymentService.createPayment({
                 userId: userId,
                 roleId: user.roleId,
@@ -106,25 +149,38 @@ export class CoursePageComponent {
                 amount: this.course.price
               }).subscribe({
                 next: response => {
-             
-                  this.paymentService.updatePaymentStatus({ Id: response.data, Status: 'confirm' }).subscribe();
+                  this.paymentService.updatePaymentStatus({
+                    Id: response.data,
+                    Status: 'confirm'
+                  }).subscribe({
+                    next: () => {
+                      console.log('Payment status set to confirm');
+                    },
+                    error: err => {
+                      console.error('Failed to confirm payment status', err);
+                    }
+                  });
+
                   this.isLoading = false;
                   this.toastr.success('Enrolled and payment processed successfully!', 'Success');
                   this.checkIfBooked(this.course.id);
                 },
                 error: err => {
+                  console.error("Failed to create payment:", err);
                   this.isLoading = false;
                   this.toastr.error('Failed to create payment.', 'Error');
                 }
               });
             },
             error: err => {
+              console.error("Failed to enroll:", err);
               this.isLoading = false;
               this.toastr.error(err.error?.message || 'Failed to enroll.', 'Error');
             }
           });
         },
         error: err => {
+          console.error('Error retrieving user info:', err);
           this.isLoading = false;
           this.toastr.error('Error retrieving user info.', 'Error');
         }
