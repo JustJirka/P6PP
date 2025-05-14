@@ -103,7 +103,8 @@ export class MainPageComponent {
     });
 
     this.courseService.getAllCourses().subscribe(courcesResponse => {
-      this.courses = this.courseService.filterCources(courcesResponse.data)
+      console.log("Course responce: ", courcesResponse.data);
+      this.courses = this.courseService.getActualCourses(courcesResponse.data)
       console.log("Sorted course arr: ", this.courses);
     });
   }

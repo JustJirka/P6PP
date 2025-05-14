@@ -46,9 +46,11 @@ export class ProfilePage implements OnInit {
     });
 
     this.courseService.getUserBookings().subscribe((bookingResponse) => {
-      console.log("Booking response: ", bookingResponse);
-      this.bookings = this.courseService.getUserCourses(bookingResponse)
-      console.log("Got bookings: ", this.bookings)
+      this.courseService.getUserCourses(bookingResponse).subscribe((courses: Course[]) => {
+        this.bookings = courses.filter(course =>
+          new Date(course.end).getTime() > Date.now() && !course.isCancelled
+        );
+      });
     });
   }
 

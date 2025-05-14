@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { lastValueFrom, Observable, of,BehaviorSubject, Subject} from 'rxjs';
+import { lastValueFrom, Observable, of,BehaviorSubject, Subject, forkJoin, map} from 'rxjs';
 import { Course } from './interfaces/course';
 import { BookingResponse } from './interfaces/booking';
 import { Booking } from './interfaces/booking';
@@ -18,6 +18,16 @@ export class CourseService {
   getAllCourses(): Observable<any> {
     return this.http.get<Course[]>(this.requestAllURL);
   }
+
+  getActualCourses(coursesArr: Course[]): Course[] {
+    const now = new Date();
+
+    return coursesArr.filter(course => {
+      const endDate = new Date(course.end);
+      return endDate > now && !course.isCancelled;
+    });
+  }
+
 
   getOneCourse(id: any): Observable<any>{
     const reqUrl = this.requestSingleURL + id.toString();
@@ -46,17 +56,27 @@ export class CourseService {
     return this.http.get(this.bookingURL);
   }
 
-  getUserCourses(booking: BookingResponse) {
-    const res: Course[] = [];
+  // getUserCourses(booking: BookingResponse) {
+  //   const res: Course[] = [];
 
-    for (const book of booking.data){
-      this.getOneCourse(book.serviceId.toString()).subscribe(response => {
-        res.push(response.data)
-      })
-    }
+  //   for (const book of booking.data){
+  //     this.getOneCourse(book.serviceId.toString()).subscribe(response => {
+  //       res.push(response.data)
+  //     });
+  //   }
 
-    res.sort((a, b) => b.start.getTime() - a.start.getTime());
-    return res;
+  //   res.sort((a, b) => b.start.getTime() - a.start.getTime());
+  //   return res;
+  // }
+
+  getUserCourses(booking: BookingResponse): Observable<Course[]> {
+    const courseObservables = booking.data.map(book =>
+      this.getOneCourse(book.serviceId.toString()).pipe(
+        map(response => response.data)
+      )
+    );
+
+    return forkJoin(courseObservables);
   }
   
   cancelBooking(bookingId: number): Observable<any> {
