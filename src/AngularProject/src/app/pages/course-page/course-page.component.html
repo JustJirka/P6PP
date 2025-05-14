@@ -49,7 +49,7 @@
             [ngClass]="{
               'buy': !bookingId,
               'cancel': bookingId,
-              'disabled': isLoading
+              'disabled': isLoading || (this.balance != null && course.price > this.balance || course.totalCapacity - course.currentCapacity === 0)
             }"
             (click)="enrollOrCancel()"
             [disabled]="isLoading"
@@ -64,7 +64,15 @@
             </ng-container>
           
             <ng-template #label>
-              {{ bookingId ? 'Cancel Booking' : 'Enroll' }}
+              {{
+                bookingId
+                  ? 'Cancel'
+                  : (course.totalCapacity - course.currentCapacity === 0
+                      ? 'Fully booked'
+                      : (balance != null && course.price > balance
+                          ? 'Not enough credit'
+                          : 'Reserve'))
+              }}
             </ng-template>
           </button>
           

@@ -22,7 +22,7 @@
         <p class="mb-2" [ngClass]="{'full': course.totalCapacity - course.currentCapacity == 0}">
           <strong>Free slots:</strong> {{ course.totalCapacity - course.currentCapacity }}
         </p>
-        <p class="mb-2"><strong>Price:</strong> {{ course.price }} Kč</p>
+        <p class="mb-2" [ngClass]="{'full': this.balance != null && course.price > this.balance}"><strong>Price:</strong> {{ course.price }} Kč</p>
       </div>
 
       <div class="d-flex justify-content-between">
@@ -33,7 +33,7 @@
             [ngClass]="{
               'buy': !isBooked && course.totalCapacity - course.currentCapacity != 0,
               'cancel': isBooked,
-              'disabled': course.totalCapacity - course.currentCapacity == 0 && !isBooked
+              'disabled': course.totalCapacity - course.currentCapacity == 0 && !isBooked || (this.balance != null && course.price > this.balance)
             }"
             (click)="toggleReservation()"
             [disabled]="isLoading"
@@ -48,8 +48,19 @@
             </ng-container>
       
             <ng-template #label>
-              {{ isBooked ? 'Cancel' : 'Reserve' }}
+              {{
+                isBooked
+                  ? 'Cancel'
+                  : (course.totalCapacity - course.currentCapacity === 0
+                      ? 'Fully booked'
+                      : (balance != null && course.price > balance
+                          ? 'Not enough credit'
+                          : 'Reserve'))
+              }}
             </ng-template>
+
+
+
           </button>
         </div>
       

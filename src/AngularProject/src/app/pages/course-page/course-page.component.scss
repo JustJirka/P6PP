@@ -143,3 +143,22 @@ div{
 .enroll:hover{
   background-color: #b71c1c;
 }
+
+.cancel{
+    background-color: #46505A;
+    color: #ffffff;
+    font-size: 14pt;
+}
+
+.cancel:hover, .cancel:focus{
+    background-color: rgb(70, 69, 69);
+    font-size: 14pt;
+}
+
+.cancel:focus{
+    background-color: #40464d;
+}
+
+.disabled{
+  border: transparent;
+}

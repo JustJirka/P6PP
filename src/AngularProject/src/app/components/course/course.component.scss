@@ -54,6 +54,11 @@
     background-color: #b71c1c;
 }
 
+button.disabled{
+    background-color: transparent;
+    color: #40464d;
+}
+
 .info{
     background-color: #11889b;
     color: white;

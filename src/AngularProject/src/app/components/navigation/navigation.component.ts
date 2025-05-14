@@ -25,24 +25,19 @@ export class NavigationComponent {
     private paymentService: PaymentService
   ) {}
 
-  ngOnInit() {
+    ngOnInit() {
     this.authService.isLoggedIn$.subscribe(status => {
       this.isLoggedIn = status;
+      this.userId = this.authService.getUserId();
+    });
 
-      this.userId = this.authService.getUserId()
-
-      if(this.userId != null || this.userId != 0){
-        
+    this.paymentService.balance$.subscribe({
+      next: (newBalance) => {
+        this.balance = newBalance;
       }
     });
-    this.paymentService.getUserBalance().subscribe({
-      next: (balance) => {
-        this.balance = balance;
-      },
-      error: (err) => {
-        console.error('Failed to get a balance:', err);
-      }
-    });
+
+    this.paymentService.getUserBalance().subscribe();
   }
 
   logout() {
